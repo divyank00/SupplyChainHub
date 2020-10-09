@@ -1,7 +1,7 @@
 pragma solidity ^0.4.25;
 pragma experimental ABIEncoderV2;
 
-contract SuppyChain{
+contract SupplyChain{
     
     address contractOwner;
     mapping(string => factory) factories;   //mapping of factoryId with struct of factory
@@ -11,6 +11,7 @@ contract SuppyChain{
     mapping(address => bool) isUser;        // checks if he is part of supplychain
 
     enum State{
+        Unbuilt,
         Made,
         Packed,
         ForSale,
@@ -20,7 +21,7 @@ contract SuppyChain{
         Purchased
     }
     
-    State constant defaultState = State.Made;
+    State constant defaultState = State.Unbuilt;
     string brandName;
     
     struct user{
@@ -46,9 +47,9 @@ contract SuppyChain{
         address currentOwner;
         string[] productIds;
         State productState;
-        mapping(uint => address) trackUser;             //Roles mapped with userId [0->Owner, 1-> Manufacturer, 2-> Distributer, 3-> Retailer]
-        mapping(address => uint) buyingPrices;          //above userId mapped to buyingPrices
-        mapping(address => uint) sellingPrices;         //above userId mapped to sellingPrices
+        mapping(uint => address) trackUser;         //Roles mapped with userId [0->Owner, 1-> Manufacturer, 2-> Distributer, 3-> Retailer]
+        mapping(address => uint) buyingPrices;      //above userId mapped to buyingPrices
+        mapping(address => uint) sellingPrices;     //above userId mapped to sellingPrices
     }
     
     
@@ -287,13 +288,13 @@ contract SuppyChain{
         });
         
         lots[_lotId] = lotDetails;
+        lots[_lotId].trackUser[0] = contractOwner;
+        lots[_lotId].trackUser[1] = msg.sender;
         emit LotMade(_lotId);
     }
     
     function packedLot(string memory _lotId) public onlyManufacturer made(_lotId){
         
-        lots[_lotId].trackUser[0] = contractOwner;
-        lots[_lotId].trackUser[1] = msg.sender;
         lots[_lotId].productState = State.Packed;
         emit Packed();
     }
@@ -309,11 +310,32 @@ contract SuppyChain{
     
     function sellLot(string[] memory _lotId, address distributorId, uint _price) public onlyManufacturer forSale(_lotId){
         
+        require(distributorId!=msg.sender);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices[msg.sender] = _price;
             lots[_lotId[i]].trackUser[2] = distributorId;
             lots[_lotId[i]].productState = State.Sold;
         }
         emit Sold();
+    }
+
+    function getProductDetails(string memory _productId) public view returns(product memory){
+
+        return products[_productId];
+    }
+
+    function trackProductByProductId(string memory _productId) public view returns(address[] memory){
+        
+        string storage _lotId = products[_productId].lotId;
+        return trackProductByLotId(_lotId);
+    }
+    
+    function trackProductByLotId(string memory _lotId) public view returns(address[] memory){
+        
+        address[] memory ret = new address[](4);
+        for (uint i = 0; i <= users[lots[_lotId].currentOwner].role; i++) {
+            ret[i]=lots[_lotId].trackUser[i];
+        }
+        return ret;
     }
 }
