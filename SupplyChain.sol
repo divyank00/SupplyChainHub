@@ -4,14 +4,13 @@ pragma experimental ABIEncoderV2;
 contract SuppyChain{
     
     address contractOwner;
-    mapping(string => factory) factories;         //mapping of factoryId with struct of factory
-    mapping(string => lot) lots;                //mapping of lotId with struct of lot
-    mapping(string => product) products;      //mapping of productId with struct of product
+    mapping(string => factory) factories;   //mapping of factoryId with struct of factory
+    mapping(string => lot) lots;            //mapping of lotId with struct of lot
+    mapping(string => product) products;    //mapping of productId with struct of product
     mapping(address => user) users;         //mapping of userAddress with struct of user
-    mapping(address => bool) isUser;           // checks if he is part of supplychain
+    mapping(address => bool) isUser;        // checks if he is part of supplychain
 
-    enum State
-    {
+    enum State{
         Made,
         Packed,
         ForSale,
@@ -34,15 +33,14 @@ contract SuppyChain{
     
     struct factory{
         string factoryId;
-        string  originFactoryName; // Manufacturer Name
-        string  originFactoryInformation;  // Manufacturer Information
-        string  originFactoryLatitude; // Factory Latitude
-        string  originFactoryLongitude; // Factory Latitude
+        string  originFactoryName;          // Manufacturer Name
+        string  originFactoryInformation;   // Manufacturer Information
+        string  originFactoryLatitude;      // Factory Latitude
+        string  originFactoryLongitude;     // Factory Latitude
         
     }
     
-    struct lot{
-        
+    struct lot{ 
         string lotId;
         string factoryId;
         address currentOwner;
@@ -55,13 +53,11 @@ contract SuppyChain{
     
     
     struct product{
-        
         string productId;       //Barcode
         string lotId;
         uint finalBuyingPrice;
         uint finalSellingPrice;
     }
-    
     
     event Made(string lotId);
     event Packed();
@@ -82,9 +78,17 @@ contract SuppyChain{
     event LotMade(string lotId);
     
     constructor() public {
-        
+    
         contractOwner = msg.sender;
+        address[] memory tempChildIds;
+        user memory owner = user({
+            role: 0,
+            userId : msg.sender,
+            parentId : address(0),
+            childIds : tempChildIds
+        });
         
+        users[msg.sender] = owner;
     }
     
     modifier onlyContractOwner{
@@ -100,62 +104,73 @@ contract SuppyChain{
     }
     
     modifier onlyDistributor{
+       
        require(users[msg.sender].role == 2);
        _;
     }
     
-        // Define a modifier that checks if an medicine.state of a upc is Made
+    // Define a modifier that checks if the state of a lot is Made
     modifier made(string memory _lotId) {
+        
         require(lots[_lotId].productState == State.Made);
         _;
     }
   
-    // Define a modifier that checks if an medicine.state of a upc is Packed
+    // Define a modifier that checks if the state of multiple lots is Packed
     modifier packed(string[] memory _lotId) {
+        
         for(uint i =0; i<_lotId.length;i++)
             require(lots[_lotId[i]].productState == State.Packed);
         _;
     }
 
-    // Define a modifier that checks if an medicine.state of a upc is ForSale
+    // Define a modifier that checks if the state of multiple lots is ForSale
     modifier forSale(string[] memory _lotId) {
+
         for(uint i =0; i<_lotId.length;i++)
             require(lots[_lotId[i]].productState == State.ForSale);
         _;
     }
 
-    // Define a modifier that checks if an medicine.state of a upc is Sold
+    // Define a modifier that checks if the state of multiple lots is Sold
     modifier sold(string memory _lotId) {
+
         require(lots[_lotId].productState == State.Sold);
 
         _;
     }
   
-    // Define a modifier that checks if an medicine.state of a upc is Shipped
+    // Define a modifier that checks if the state of multiple lots is Shipped
     modifier shipped(string memory _lotId) {
+
         require(lots[_lotId].productState == State.Shipped);
         _;
     }
 
-    // Define a modifier that checks if an medicine.state of a upc is Received
+    // Define a modifier that checks if the state of multiple lots is Received
     modifier received(string memory _lotId) {
+
         require(lots[_lotId].productState == State.Received);
         _;
     }
-
-    // Define a modifier that checks if an medicine.state of a upc is Purchased
-    modifier purchased(string memory _lotId) {
-        require(lots[_lotId].productState == State.Purchased);
-        _;
-    }
-    
-    
     
     function checkIsUser(address account) internal view returns(bool){
+        
         return isUser[account];
     }
     
+    function getRole(address account) public view returns(int){
+
+        if(account==contractOwner)
+            return 0;
+        if(checkIsUser(account))
+            return int(users[account].role);
+        else
+            return -1;
+    }
+    
     function setUser(address account) internal{
+        
         isUser[account]=true;
     }
     
@@ -173,13 +188,14 @@ contract SuppyChain{
         users[account] = manufacturer;
         setUser(account);
         emit ManufacturerAdded(account);
-
     }
+    
     
     function removeManufacturer(address account) public onlyContractOwner{
         
         require(isUser[account]);
         require(users[account].role == 1);
+        isUser[account]=false;
         delete users[account];
         emit ManufacturerRemoved(account);
     }
@@ -194,17 +210,16 @@ contract SuppyChain{
             parentId : msg.sender,
             childIds : tempChildIds
         });
-        
         users[account] = distributor;
         setUser(account);
         emit DistributorAdded(account);
-
     }
     
     function removeDistributor(address account) public onlyManufacturer{
         
         require(isUser[account]);
         require(users[account].role == 2);
+        isUser[account]=false;
         delete users[account];
         emit DistributorRemoved(account);
     }
@@ -223,13 +238,13 @@ contract SuppyChain{
         users[account] = retailer;
         setUser(account);
         emit RetailerAdded(account);
-
     }
     
     function removeRetailer(address account) public onlyDistributor{
         
         require(isUser[account]);
         require(users[account].role == 3);
+        isUser[account]=false;
         delete users[account];
         emit RetailerRemoved(account);
     }
@@ -239,20 +254,19 @@ contract SuppyChain{
         
         factory memory factoryDetails = factory({
            
-        factoryId : _factoryId,
-        originFactoryName : _originFactoryName, // Manufacturer Name
-        originFactoryInformation :  _originFactoryInformation,// Manufacturer Information
-        originFactoryLatitude : _originFactoryLatitude, // Factory Latitude
-        originFactoryLongitude : _originFactoryLongitude // Factory Latitude
-            
+            factoryId : _factoryId,
+            originFactoryName : _originFactoryName,                 // Manufacturer Name
+            originFactoryInformation :  _originFactoryInformation,  // Manufacturer Information
+            originFactoryLatitude : _originFactoryLatitude,         // Factory Latitude
+            originFactoryLongitude : _originFactoryLongitude        // Factory Latitude
         });
         
         factories[_factoryId] = factoryDetails;
         emit FactoryAdded(_factoryId);
-
     }
     
     function makeLot(string memory _factoryId,string memory _lotId, string[] memory _productIds) public onlyManufacturer{
+        
         for(uint i = 0;i<_productIds.length;i++){
             product memory productDetails = product({
                 productId : _productIds[i],
@@ -276,6 +290,7 @@ contract SuppyChain{
     }
     
     function packedLot(string memory _lotId) public onlyManufacturer made(_lotId){
+        
         lots[_lotId].trackUser[0] = contractOwner;
         lots[_lotId].trackUser[1] = msg.sender;
         lots[_lotId].productState = State.Packed;
@@ -283,6 +298,7 @@ contract SuppyChain{
     }
     
     function forSaleLot(string[] memory _lotId, uint _price) public onlyManufacturer packed(_lotId){
+        
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices[msg.sender] = _price;
             lots[_lotId[i]].productState = State.ForSale;
@@ -291,6 +307,7 @@ contract SuppyChain{
     }
     
     function sellLot(string[] memory _lotId, address distributorId, uint _price) public onlyManufacturer forSale(_lotId){
+        
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices[msg.sender] = _price;
             lots[_lotId[i]].trackUser[2] = distributorId;
