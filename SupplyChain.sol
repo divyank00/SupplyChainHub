@@ -27,7 +27,7 @@ contract SuppyChain{
         uint role;
         address userId;
         address parentId;     //stores the address of parent i.e. distributer will have manufacturer as his parent
-        address[] childIds;   // mapping of current user to its children addresses
+        mapping(address=>bool) childIds;   // mapping of current user to its children addresses
     
     }
     
@@ -80,12 +80,10 @@ contract SuppyChain{
     constructor() public {
     
         contractOwner = msg.sender;
-        address[] memory tempChildIds;
         user memory owner = user({
             role: 0,
             userId : msg.sender,
-            parentId : address(0),
-            childIds : tempChildIds
+            parentId : address(0)
         });
         
         users[msg.sender] = owner;
@@ -173,19 +171,24 @@ contract SuppyChain{
         
         isUser[account]=true;
     }
+
+    function removeUser(address account) internal{
+
+        users[users[account].parentId].childIds[account]=false;
+        isUser[account]=false;
+    }
     
     function addManufacturer(address account) public onlyContractOwner{
         
         require(!checkIsUser(account));
-        address[] memory tempChildIds;
         user memory manufacturer = user({
             role: 1,
             userId : account,
-            parentId : msg.sender,
-            childIds : tempChildIds
+            parentId : msg.sender
         });
         
         users[account] = manufacturer;
+        users[msg.sender].childIds[account] = true;
         setUser(account);
         emit ManufacturerAdded(account);
     }
@@ -195,7 +198,7 @@ contract SuppyChain{
         
         require(isUser[account]);
         require(users[account].role == 1);
-        isUser[account]=false;
+        removeUser(account);
         delete users[account];
         emit ManufacturerRemoved(account);
     }
@@ -203,14 +206,13 @@ contract SuppyChain{
     function addDistributor(address account) public onlyManufacturer{
         
         require(!checkIsUser(account));
-        address[] memory tempChildIds;
         user memory distributor = user({
             role: 2,
             userId : account,
-            parentId : msg.sender,
-            childIds : tempChildIds
+            parentId : msg.sender
         });
         users[account] = distributor;
+        users[msg.sender].childIds[account]=true;
         setUser(account);
         emit DistributorAdded(account);
     }
@@ -219,7 +221,7 @@ contract SuppyChain{
         
         require(isUser[account]);
         require(users[account].role == 2);
-        isUser[account]=false;
+        removeUser(account);
         delete users[account];
         emit DistributorRemoved(account);
     }
@@ -227,15 +229,14 @@ contract SuppyChain{
     function addRetailer(address account) public onlyDistributor{
         
         require(!checkIsUser(account));
-        address[] memory tempChildIds;
         user memory retailer = user({
             role: 3,
             userId : account,
-            parentId : msg.sender,
-            childIds : tempChildIds
+            parentId : msg.sender
         });
         
         users[account] = retailer;
+        users[msg.sender].childIds[account] = true;
         setUser(account);
         emit RetailerAdded(account);
     }
@@ -244,7 +245,7 @@ contract SuppyChain{
         
         require(isUser[account]);
         require(users[account].role == 3);
-        isUser[account]=false;
+        removeUser(account);
         delete users[account];
         emit RetailerRemoved(account);
     }
