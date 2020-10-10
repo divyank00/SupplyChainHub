@@ -364,6 +364,7 @@ contract SupplyChain{
             for(uint i = 0;i<_lotId.length;i++){
                 lots[_lotId[i]].buyingPrices[activeDeal.buyerAddress] = (activeDeal.buyingPrice/activeDeal.capacity);
                 lots[_lotId[i]].sellingPrices[msg.sender] = (activeDeal.sellingPrice/activeDeal.capacity);
+                lots[_lotId[i]].buyingPrices[msg.sender] = 0;
                 lots[_lotId[i]].currentOwner = activeDeal.buyerAddress;
                 lots[_lotId[i]].productState = State.Sold;
             }
