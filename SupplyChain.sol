@@ -185,7 +185,7 @@ contract SupplyChain{
         return isUser[account];
     }
     
-    function getRole(address account) public view returns(int){
+    function getUserRole(address account) public view returns(int){
 
         if(account==contractOwner)
             return 0;
