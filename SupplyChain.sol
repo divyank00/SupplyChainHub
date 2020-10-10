@@ -343,14 +343,14 @@ contract SupplyChain{
         emit ForSale();
     }
     
-    function payFromDistributorToManufacturer(uint _capacity, uint _totalBuyingPrice, string _txnHash) public onlyDistributor{
+    function payFromDistributorToManufacturer(uint _quantity, uint _totalBuyingPrice, string _txnHash) public onlyDistributor{
         
-        require(_capacity<=users[users[msg.sender].parentId].currentQuantity);
-        users[msg.sender].currentQuantity+=_capacity;
-        users[users[msg.sender].parentId].currentQuantity-=_capacity;
+        require(_quantity<=users[users[msg.sender].parentId].currentQuantity);
+        users[msg.sender].currentQuantity+=_quantity;
+        users[users[msg.sender].parentId].currentQuantity-=_quantity;
         deal memory dealDetails = deal({
             txnHash: _txnHash,
-            capacity: _capacity,
+            capacity: _quantity,
             buyerAddress: msg.sender,
             buyingPrice:  _totalBuyingPrice,
             sellerAddress: users[msg.sender].parentId,
@@ -408,14 +408,14 @@ contract SupplyChain{
         emit ForSale();
     }
 
-    function payFromRetailerToDistributor(uint _capacity, uint _totalBuyingPrice, string _txnHash) public onlyRetailer{
+    function payFromRetailerToDistributor(uint _quantity, uint _totalBuyingPrice, string _txnHash) public onlyRetailer{
         
-        require(_capacity<=users[users[msg.sender].parentId].currentQuantity);
-        users[msg.sender].currentQuantity+=_capacity;
-        users[users[msg.sender].parentId].currentQuantity-=_capacity;
+        require(_quantity<=users[users[msg.sender].parentId].currentQuantity);
+        users[msg.sender].currentQuantity+=_quantity;
+        users[users[msg.sender].parentId].currentQuantity-=_quantity;
         deal memory dealDetails = deal({
             txnHash: _txnHash,
-            capacity: _capacity,
+            capacity: _quantity,
             buyerAddress: msg.sender,
             buyingPrice:  _totalBuyingPrice,
             sellerAddress: users[msg.sender].parentId,
