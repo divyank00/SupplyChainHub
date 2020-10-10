@@ -476,5 +476,4 @@ contract SupplyChain{
             uint(lots[_lotId].productState)
         );
     }
-    
 }
