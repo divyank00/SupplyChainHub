@@ -11,7 +11,7 @@ contract SupplyChain{
     mapping(address => bool) isUser;        // checks if he is part of supplychain
 
     enum State{
-        Unbuilt,
+        Assembling,
         Made,
         Packed,
         ForSale,
@@ -21,7 +21,7 @@ contract SupplyChain{
         Purchased
     }
     
-    State constant defaultState = State.Unbuilt;
+    State constant defaultState = State.Assembling;
     string brandName;
     
     struct user{
@@ -324,18 +324,23 @@ contract SupplyChain{
         return products[_productId];
     }
 
-    function trackProductByProductId(string memory _productId) public view returns(address[] memory){
+    function trackProductByProductId(string memory _productId) public view returns(uint, address[] memory, uint){
         
         string storage _lotId = products[_productId].lotId;
         return trackProductByLotId(_lotId);
     }
     
-    function trackProductByLotId(string memory _lotId) public view returns(address[] memory){
+    function trackProductByLotId(string memory _lotId) public view returns(uint, address[] memory, uint){
         
         address[] memory ret = new address[](4);
-        for (uint i = 0; i <= users[lots[_lotId].currentOwner].role; i++) {
+        uint n = users[lots[_lotId].currentOwner].role;
+        for (uint i=0; i<=n; i++) {
             ret[i]=lots[_lotId].trackUser[i];
         }
-        return ret;
+        return (
+            n,
+            ret,
+            uint(lots[_lotId].productState)
+        );
     }
 }
