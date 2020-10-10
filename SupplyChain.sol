@@ -213,13 +213,6 @@ contract SupplyChain{
         isUser[account]=true;
     }
 
-  /*  function removeUser(address account) internal{
-
-        users[users[account].parentId].childIds[account]=false;
-        users[account].chi
-        isUser[account]=false;
-    }
-    */
     
     function addManufacturer(string _name, string _officeAddress, address account) public onlyContractOwner{
         
@@ -239,15 +232,6 @@ contract SupplyChain{
         emit ManufacturerAdded(account);
     }
     
-    /*  function removeManufacturer(address account) public onlyContractOwner{
-        
-        require(isUser[account]);
-        require(users[account].role == 1);
-        removeUser(account);
-        delete users[account];
-        emit ManufacturerRemoved(account);
-    }
-    */
     
     function addDistributor(string _name, string _officeAddress, address account) public onlyManufacturer{
         
@@ -266,15 +250,6 @@ contract SupplyChain{
         emit DistributorAdded(account);
     }
     
-    /*
-    function removeDistributor(address account) public onlyManufacturer{
-        
-        require(isUser[account]);
-        require(users[account].role == 2);
-        removeUser(account);
-        delete users[account];
-        emit DistributorRemoved(account);
-    }*/
     
     function addRetailer(string _name, string _officeAddress, address account) public onlyDistributor{
         
@@ -293,30 +268,6 @@ contract SupplyChain{
         setUser(account);
         emit RetailerAdded(account);
     }
-
-    /*
-    function removeRetailer(address account) public onlyDistributor{
-        
-        require(isUser[account]);
-        require(users[account].role == 3);
-        removeUser(account);
-        delete users[account];
-        emit RetailerRemoved(account);
-    }
-    */
-
-    /*function addFactoryDetails(string memory _factoryId, string memory _originFactoryName, string memory _originFactoryInformation, string memory _originFactoryAddress) public onlyManufacturer {
-        
-        factory memory factoryDetails = factory({
-            factoryId : _factoryId,
-            originFactoryName : _originFactoryName,                   // Manufacturer Name
-            originFactoryInformation :  _originFactoryInformation,   // Manufacturer Information
-            originFactoryAddress : _originFactoryAddress            // Factory Address
-        });
-        
-        factories[_factoryId] = factoryDetails;
-        emit FactoryAdded(_factoryId);
-    }*/
     
     function makeLot(string memory _lotId, string[] memory _productIds) public onlyManufacturer{
         
