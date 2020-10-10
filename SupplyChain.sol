@@ -27,9 +27,9 @@ contract SupplyChain{
     struct user{
         uint role;
         address userId;
-        address parentId;     //stores the address of parent i.e. distributer will have manufacturer as his parent
-        mapping(address=>bool) childIds;   // mapping of current user to its children addresses
-    
+        address parentId;                   //stores the address of parent i.e. distributer will have manufacturer as his parent
+        mapping(address=>bool) childIds;    // mapping of current user to its children addresses
+        uint currentQuantity;
     }
     
     struct factory{
@@ -95,7 +95,8 @@ contract SupplyChain{
         user memory owner = user({
             role: 0,
             userId : msg.sender,
-            parentId : address(0)
+            parentId : address(0),
+            currentQuantity : 0
         });
         
         users[msg.sender] = owner;
@@ -214,7 +215,8 @@ contract SupplyChain{
         user memory manufacturer = user({
             role: 1,
             userId : account,
-            parentId : msg.sender
+            parentId : msg.sender,
+            currentQuantity : 0
         });
         
         users[account] = manufacturer;
@@ -239,7 +241,8 @@ contract SupplyChain{
         user memory distributor = user({
             role: 2,
             userId : account,
-            parentId : msg.sender
+            parentId : msg.sender,
+            currentQuantity : 0
         });
         users[account] = distributor;
         users[msg.sender].childIds[account]=true;
@@ -263,7 +266,8 @@ contract SupplyChain{
         user memory retailer = user({
             role: 3,
             userId : account,
-            parentId : msg.sender
+            parentId : msg.sender,
+            currentQuantity : 0
         });
         
         users[account] = retailer;
@@ -335,11 +339,15 @@ contract SupplyChain{
             lots[_lotId[i]].sellingPrices[msg.sender] = _price;
             lots[_lotId[i]].productState = State.ForSale;
         }
+        users[msg.sender].currentQuantity+=_lotId.length;
         emit ForSale();
     }
     
     function payFromDistributorToManufacturer(uint _capacity, uint _totalBuyingPrice, string _txnHash) public onlyDistributor{
         
+        require(_capacity<=users[users[msg.sender].parentId].currentQuantity);
+        users[msg.sender].currentQuantity+=_capacity;
+        users[users[msg.sender].parentId].currentQuantity-=_capacity;
         deal memory dealDetails = deal({
             txnHash: _txnHash,
             capacity: _capacity,
@@ -372,9 +380,9 @@ contract SupplyChain{
         }
     }
     
-    function shipLotManufacturerToDistributor(string[] memory _lotId, string _txnHash) public onlyManufacturer validDeal(_txnHash) sold(_lotId){
+    function shipLotFromManufacturerToDistributor(string[] memory _lotId, string _txnHash) public onlyManufacturer validDeal(_txnHash) sold(_lotId){
         
-        require(msg.sender!=deals[_txnHash].sellerAddress);
+        require(msg.sender!=deals[_txnHash].buyerAddress);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].trackUser[2] = deals[_txnHash].buyerAddress;
             lots[_lotId[i]].productState = State.Shipped;
@@ -391,7 +399,8 @@ contract SupplyChain{
     }
 
     function forSaleLotByDistributor(string[] memory _lotId, uint _price) public onlyDistributor received(_lotId){
-        
+                
+        require(users[msg.sender].currentQuantity>=_lotId.length);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices[msg.sender] = _price;
             lots[_lotId[i]].productState = State.ForSale;
@@ -401,6 +410,9 @@ contract SupplyChain{
 
     function payFromRetailerToDistributor(uint _capacity, uint _totalBuyingPrice, string _txnHash) public onlyRetailer{
         
+        require(_capacity<=users[users[msg.sender].parentId].currentQuantity);
+        users[msg.sender].currentQuantity+=_capacity;
+        users[users[msg.sender].parentId].currentQuantity-=_capacity;
         deal memory dealDetails = deal({
             txnHash: _txnHash,
             capacity: _capacity,
@@ -432,9 +444,9 @@ contract SupplyChain{
         }
     }
     
-    function shipLotDistributorToRetaler(string[] memory _lotId, string _txnHash) public onlyDistributor validDeal(_txnHash) sold(_lotId){
+    function shipLotFromDistributorToRetailer(string[] memory _lotId, string _txnHash) public onlyDistributor validDeal(_txnHash) sold(_lotId){
         
-        require(msg.sender!=deals[_txnHash].sellerAddress);
+        require(msg.sender!=deals[_txnHash].buyerAddress);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].trackUser[3] = deals[_txnHash].buyerAddress;
             lots[_lotId[i]].productState = State.Shipped;
