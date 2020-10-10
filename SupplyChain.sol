@@ -9,6 +9,7 @@ contract SupplyChain{
     mapping(string => product) products;    //mapping of productId with struct of product
     mapping(address => user) users;         //mapping of userAddress with struct of user
     mapping(address => bool) isUser;        // checks if he is part of supplychain
+    mapping(string => deal) deals;          //mapping of txnHash with struct of deal
 
     enum State{
         Assembling,
@@ -17,8 +18,7 @@ contract SupplyChain{
         ForSale,
         Sold,
         Shipped,
-        Received,
-        Purchased
+        Received
     }
     
     State constant defaultState = State.Assembling;
@@ -41,6 +41,15 @@ contract SupplyChain{
         
     }
     
+    struct deal{ 
+        string txnHash;
+        uint capacity;
+        address buyerAddress;
+        uint buyingPrice;
+        address sellerAddress;
+        uint sellingPrice;
+    }
+
     struct lot{ 
         string lotId;
         string factoryId;
@@ -78,6 +87,8 @@ contract SupplyChain{
     event FactoryAdded(string factoryId);
     event LotMade(string lotId);
     
+    event PaymentSuccessful();
+    event DealFailed(address buyerAddress);
     constructor() public {
     
         contractOwner = msg.sender;
@@ -107,6 +118,12 @@ contract SupplyChain{
        require(users[msg.sender].role == 2);
        _;
     }
+
+    modifier onlyRetailer{
+       
+       require(users[msg.sender].role == 3);
+       _;
+    }
     
     // Define a modifier that checks if the state of a lot is Made
     modifier made(string memory _lotId) {
@@ -118,7 +135,7 @@ contract SupplyChain{
     // Define a modifier that checks if the state of multiple lots is Packed
     modifier packed(string[] memory _lotId) {
         
-        for(uint i =0; i<_lotId.length;i++)
+        for(uint i=0; i<_lotId.length;i++)
             require(lots[_lotId[i]].productState == State.Packed);
         _;
     }
@@ -126,32 +143,42 @@ contract SupplyChain{
     // Define a modifier that checks if the state of multiple lots is ForSale
     modifier forSale(string[] memory _lotId) {
 
-        for(uint i =0; i<_lotId.length;i++)
+        for(uint i=0; i<_lotId.length;i++)
             require(lots[_lotId[i]].productState == State.ForSale);
         _;
     }
 
     // Define a modifier that checks if the state of multiple lots is Sold
-    modifier sold(string memory _lotId) {
+    modifier sold(string[] memory _lotId) {
 
-        require(lots[_lotId].productState == State.Sold);
-
+        for(uint i=0; i<_lotId.length;i++)
+            require(lots[_lotId[i]].productState == State.Sold);
         _;
     }
   
     // Define a modifier that checks if the state of multiple lots is Shipped
-    modifier shipped(string memory _lotId) {
+    modifier shipped(string[] memory _lotId) {
 
-        require(lots[_lotId].productState == State.Shipped);
+        for(uint i=0; i<_lotId.length;i++)
+            require(lots[_lotId[i]].productState == State.Shipped);
         _;
     }
 
     // Define a modifier that checks if the state of multiple lots is Received
-    modifier received(string memory _lotId) {
+    modifier received(string[] memory _lotId) {
 
-        require(lots[_lotId].productState == State.Received);
+        for(uint i=0; i<_lotId.length;i++)
+            require(lots[_lotId[i]].productState == State.Received);
         _;
     }
+
+    // Define a modifier that checks if the deal was valid
+    modifier validDeal(string txnHash) {
+
+        require(deals[txnHash].sellingPrice==deals[txnHash].buyingPrice);
+        _;
+    }
+    
     
     function checkIsUser(address account) internal view returns(bool){
         
@@ -173,11 +200,13 @@ contract SupplyChain{
         isUser[account]=true;
     }
 
-    function removeUser(address account) internal{
+  /*  function removeUser(address account) internal{
 
         users[users[account].parentId].childIds[account]=false;
+        users[account].chi
         isUser[account]=false;
     }
+    */
     
     function addManufacturer(address account) public onlyContractOwner{
         
@@ -195,7 +224,7 @@ contract SupplyChain{
     }
     
     
-    function removeManufacturer(address account) public onlyContractOwner{
+  /*  function removeManufacturer(address account) public onlyContractOwner{
         
         require(isUser[account]);
         require(users[account].role == 1);
@@ -203,7 +232,7 @@ contract SupplyChain{
         delete users[account];
         emit ManufacturerRemoved(account);
     }
-    
+    */
     function addDistributor(address account) public onlyManufacturer{
         
         require(!checkIsUser(account));
@@ -218,6 +247,7 @@ contract SupplyChain{
         emit DistributorAdded(account);
     }
     
+    /*
     function removeDistributor(address account) public onlyManufacturer{
         
         require(isUser[account]);
@@ -225,7 +255,7 @@ contract SupplyChain{
         removeUser(account);
         delete users[account];
         emit DistributorRemoved(account);
-    }
+    }*/
     
     function addRetailer(address account) public onlyDistributor{
         
@@ -241,7 +271,7 @@ contract SupplyChain{
         setUser(account);
         emit RetailerAdded(account);
     }
-    
+    /*
     function removeRetailer(address account) public onlyDistributor{
         
         require(isUser[account]);
@@ -250,7 +280,7 @@ contract SupplyChain{
         delete users[account];
         emit RetailerRemoved(account);
     }
-    
+    */
 
     function addFactoryDetails(string memory _factoryId, string memory _originFactoryName, string memory _originFactoryInformation, string memory _originFactoryLatitude, string memory _originFactoryLongitude) public onlyManufacturer {
         
@@ -299,7 +329,7 @@ contract SupplyChain{
         emit Packed();
     }
     
-    function forSaleLot(string[] memory _lotId, uint _price) public onlyManufacturer packed(_lotId){
+    function forSaleLotByManufacturer(string[] memory _lotId, uint _price) public onlyManufacturer packed(_lotId){
         
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices[msg.sender] = _price;
@@ -308,15 +338,115 @@ contract SupplyChain{
         emit ForSale();
     }
     
-    function sellLot(string[] memory _lotId, address distributorId, uint _price) public onlyManufacturer forSale(_lotId){
+    function payFromDistributorToManufacturer(uint _capacity, uint _totalBuyingPrice, string _txnHash) public onlyDistributor{
         
-        require(distributorId!=msg.sender);
+        deal memory dealDetails = deal({
+            txnHash: _txnHash,
+            capacity: _capacity,
+            buyerAddress: msg.sender,
+            buyingPrice:  _totalBuyingPrice,
+            sellerAddress: users[msg.sender].parentId,
+            sellingPrice: 0
+        });
+        deals[_txnHash] = dealDetails;
+        emit PaymentSuccessful();
+    }
+
+    function sellLotToDistributor(string _txnHash, uint _totalSellingPrice, string[] memory _lotId) public onlyManufacturer forSale(_lotId){
+        
+        deal storage activeDeal = deals[_txnHash];
+        if(activeDeal.buyingPrice!=_totalSellingPrice){
+            activeDeal.buyerAddress.transfer(activeDeal.buyingPrice);
+            emit DealFailed(activeDeal.buyerAddress);
+        }else{
+            activeDeal.sellingPrice = _totalSellingPrice;
+            deals[_txnHash] = activeDeal;
+            for(uint i = 0;i<_lotId.length;i++){
+                lots[_lotId[i]].buyingPrices[activeDeal.buyerAddress] = (activeDeal.buyingPrice/activeDeal.capacity);
+                lots[_lotId[i]].sellingPrices[msg.sender] = (activeDeal.sellingPrice/activeDeal.capacity);
+                lots[_lotId[i]].currentOwner = activeDeal.buyerAddress;
+                lots[_lotId[i]].productState = State.Sold;
+            }
+            emit Sold();
+        }
+    }
+    
+    function shipLotManufacturerToDistributor(string[] memory _lotId, string _txnHash) public onlyManufacturer validDeal(_txnHash) sold(_lotId){
+        
+        require(msg.sender!=deals[_txnHash].sellerAddress);
+        for(uint i = 0;i<_lotId.length;i++){
+            lots[_lotId[i]].trackUser[2] = deals[_txnHash].buyerAddress;
+            lots[_lotId[i]].productState = State.Shipped;
+        }
+        emit Shipped();
+    }
+
+    function receivedByDistributor(string[] memory _lotId) public onlyDistributor shipped(_lotId){
+
+        for(uint i = 0;i<_lotId.length;i++){
+            lots[_lotId[i]].productState = State.Received;
+        }
+        emit Received();
+    }
+
+    function forSaleLotByDistributor(string[] memory _lotId, uint _price) public onlyDistributor received(_lotId){
+        
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices[msg.sender] = _price;
-            lots[_lotId[i]].trackUser[2] = distributorId;
-            lots[_lotId[i]].productState = State.Sold;
+            lots[_lotId[i]].productState = State.ForSale;
         }
-        emit Sold();
+        emit ForSale();
+    }
+
+    function payFromRetailerToDistributor(uint _capacity, uint _totalBuyingPrice, string _txnHash) public onlyRetailer{
+        
+        deal memory dealDetails = deal({
+            txnHash: _txnHash,
+            capacity: _capacity,
+            buyerAddress: msg.sender,
+            buyingPrice:  _totalBuyingPrice,
+            sellerAddress: users[msg.sender].parentId,
+            sellingPrice: 0
+        });
+        deals[_txnHash] = dealDetails;
+        emit PaymentSuccessful();
+    }
+
+    function sellLotToRetailer(string _txnHash, uint _totalSellingPrice, string[] memory _lotId) public onlyDistributor forSale(_lotId){
+        
+        deal storage activeDeal = deals[_txnHash];
+        if(activeDeal.buyingPrice!=_totalSellingPrice){
+            activeDeal.buyerAddress.transfer(activeDeal.buyingPrice);
+            emit DealFailed(activeDeal.buyerAddress);
+        }else{
+            activeDeal.sellingPrice = _totalSellingPrice;
+            deals[_txnHash] = activeDeal;
+            for(uint i = 0;i<_lotId.length;i++){
+                lots[_lotId[i]].buyingPrices[activeDeal.buyerAddress] = (activeDeal.buyingPrice/activeDeal.capacity);
+                lots[_lotId[i]].sellingPrices[msg.sender] = (activeDeal.sellingPrice/activeDeal.capacity);
+                lots[_lotId[i]].currentOwner = activeDeal.buyerAddress;
+                lots[_lotId[i]].productState = State.Sold;
+            }
+            emit Sold();
+        }
+    }
+    
+    function shipLotDistributorToRetaler(string[] memory _lotId, string _txnHash) public onlyDistributor validDeal(_txnHash) sold(_lotId){
+        
+        require(msg.sender!=deals[_txnHash].sellerAddress);
+        for(uint i = 0;i<_lotId.length;i++){
+            lots[_lotId[i]].trackUser[3] = deals[_txnHash].buyerAddress;
+            lots[_lotId[i]].productState = State.Shipped;
+        }
+        emit Shipped();
+    }
+
+    function receivedByRetailer(string[] memory _lotId) public onlyRetailer shipped(_lotId){
+
+        for(uint i = 0;i<_lotId.length;i++){
+            lots[_lotId[i]].productState = State.Received;
+        }
+        emit Received();
     }
 
     function getProductDetails(string memory _productId) public view returns(product memory){
@@ -324,11 +454,13 @@ contract SupplyChain{
         return products[_productId];
     }
 
+
     function trackProductByProductId(string memory _productId) public view returns(uint, address[] memory, uint){
         
         string storage _lotId = products[_productId].lotId;
         return trackProductByLotId(_lotId);
     }
+
     
     function trackProductByLotId(string memory _lotId) public view returns(uint, address[] memory, uint){
         
@@ -343,4 +475,5 @@ contract SupplyChain{
             uint(lots[_lotId].productState)
         );
     }
+    
 }
