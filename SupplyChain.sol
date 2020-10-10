@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 contract SupplyChain{
     
     address contractOwner;
-    mapping(string => factory) factories;   //mapping of factoryId with struct of factory
+    // mapping(string => factory) factories;   //mapping of factoryId with struct of factory
     mapping(string => lot) lots;            //mapping of lotId with struct of lot
     mapping(string => product) products;    //mapping of productId with struct of product
     mapping(address => user) users;         //mapping of userAddress with struct of user
@@ -30,16 +30,16 @@ contract SupplyChain{
         address parentId;                   //stores the address of parent i.e. distributer will have manufacturer as his parent
         mapping(address=>bool) childIds;    // mapping of current user to its children addresses
         uint currentQuantity;
+        string name;
+        string officeAddress;
     }
     
-    struct factory{
+    /*struct factory{
         string factoryId;
         string  originFactoryName;          // Manufacturer Name
         string  originFactoryInformation;   // Manufacturer Information
-        string  originFactoryLatitude;      // Factory Latitude
-        string  originFactoryLongitude;     // Factory Latitude
-        
-    }
+        string  originFactoryAddress;       // Factory Address
+    }*/
     
     struct deal{ 
         string txnHash;
@@ -52,13 +52,14 @@ contract SupplyChain{
 
     struct lot{ 
         string lotId;
-        string factoryId;
+        // string factoryId;
         address currentOwner;
         string[] productIds;
         State productState;
         mapping(uint => address) trackUser;         //Roles mapped with userId [0->Owner, 1-> Manufacturer, 2-> Distributer, 3-> Retailer]
         mapping(address => uint) buyingPrices;      //above userId mapped to buyingPrices
         mapping(address => uint) sellingPrices;     //above userId mapped to sellingPrices
+        mapping(uint => string) trackTxn;           //Roles mapped with userId [0->Owner, 1-> Manufacturer, 2-> Distributer, 3-> Retailer]
     }
     
     
@@ -84,19 +85,21 @@ contract SupplyChain{
     event RetailerAdded(address indexed account);
     event RetailerRemoved(address indexed account);
     
-    event FactoryAdded(string factoryId);
+    // event FactoryAdded(string factoryId);
     event LotMade(string lotId);
     
     event PaymentSuccessful();
     event DealFailed(address buyerAddress);
-    constructor() public {
+    constructor(string _name, string _officeAddress) public {
     
         contractOwner = msg.sender;
         user memory owner = user({
             role: 0,
             userId : msg.sender,
             parentId : address(0),
-            currentQuantity : 0
+            currentQuantity : 0,
+            name: _name,
+            officeAddress: _officeAddress
         });
         
         users[msg.sender] = owner;
@@ -195,7 +198,16 @@ contract SupplyChain{
         else
             return -1;
     }
-    
+
+    function getUserDetails(address account) public view returns(string, string){
+            
+        require(checkIsUser(account));
+        return (
+            users[account].name,
+            users[account].officeAddress
+        );
+    }
+
     function setUser(address account) internal{
         
         isUser[account]=true;
@@ -209,14 +221,16 @@ contract SupplyChain{
     }
     */
     
-    function addManufacturer(address account) public onlyContractOwner{
+    function addManufacturer(string _name, string _officeAddress, address account) public onlyContractOwner{
         
         require(!checkIsUser(account));
         user memory manufacturer = user({
             role: 1,
             userId : account,
             parentId : msg.sender,
-            currentQuantity : 0
+            currentQuantity : 0,
+            name: _name,
+            officeAddress: _officeAddress
         });
         
         users[account] = manufacturer;
@@ -225,8 +239,7 @@ contract SupplyChain{
         emit ManufacturerAdded(account);
     }
     
-    
-  /*  function removeManufacturer(address account) public onlyContractOwner{
+    /*  function removeManufacturer(address account) public onlyContractOwner{
         
         require(isUser[account]);
         require(users[account].role == 1);
@@ -235,14 +248,17 @@ contract SupplyChain{
         emit ManufacturerRemoved(account);
     }
     */
-    function addDistributor(address account) public onlyManufacturer{
+    
+    function addDistributor(string _name, string _officeAddress, address account) public onlyManufacturer{
         
         require(!checkIsUser(account));
         user memory distributor = user({
             role: 2,
             userId : account,
             parentId : msg.sender,
-            currentQuantity : 0
+            currentQuantity : 0,
+            name: _name,
+            officeAddress: _officeAddress
         });
         users[account] = distributor;
         users[msg.sender].childIds[account]=true;
@@ -260,14 +276,16 @@ contract SupplyChain{
         emit DistributorRemoved(account);
     }*/
     
-    function addRetailer(address account) public onlyDistributor{
+    function addRetailer(string _name, string _officeAddress, address account) public onlyDistributor{
         
         require(!checkIsUser(account));
         user memory retailer = user({
             role: 3,
             userId : account,
             parentId : msg.sender,
-            currentQuantity : 0
+            currentQuantity : 0,
+            name: _name,
+            officeAddress: _officeAddress
         });
         
         users[account] = retailer;
@@ -275,6 +293,7 @@ contract SupplyChain{
         setUser(account);
         emit RetailerAdded(account);
     }
+
     /*
     function removeRetailer(address account) public onlyDistributor{
         
@@ -286,22 +305,20 @@ contract SupplyChain{
     }
     */
 
-    function addFactoryDetails(string memory _factoryId, string memory _originFactoryName, string memory _originFactoryInformation, string memory _originFactoryLatitude, string memory _originFactoryLongitude) public onlyManufacturer {
+    /*function addFactoryDetails(string memory _factoryId, string memory _originFactoryName, string memory _originFactoryInformation, string memory _originFactoryAddress) public onlyManufacturer {
         
         factory memory factoryDetails = factory({
-           
             factoryId : _factoryId,
-            originFactoryName : _originFactoryName,                 // Manufacturer Name
-            originFactoryInformation :  _originFactoryInformation,  // Manufacturer Information
-            originFactoryLatitude : _originFactoryLatitude,         // Factory Latitude
-            originFactoryLongitude : _originFactoryLongitude        // Factory Latitude
+            originFactoryName : _originFactoryName,                   // Manufacturer Name
+            originFactoryInformation :  _originFactoryInformation,   // Manufacturer Information
+            originFactoryAddress : _originFactoryAddress            // Factory Address
         });
         
         factories[_factoryId] = factoryDetails;
         emit FactoryAdded(_factoryId);
-    }
+    }*/
     
-    function makeLot(string memory _factoryId,string memory _lotId, string[] memory _productIds) public onlyManufacturer{
+    function makeLot(string memory _lotId, string[] memory _productIds) public onlyManufacturer{
         
         for(uint i = 0;i<_productIds.length;i++){
             product memory productDetails = product({
@@ -315,7 +332,7 @@ contract SupplyChain{
         
         lot memory lotDetails = lot({
             lotId : _lotId,
-            factoryId : _factoryId,
+            // factoryId : _factoryId,
             currentOwner : msg.sender,
             productIds : _productIds,
             productState : State.Made
@@ -385,6 +402,7 @@ contract SupplyChain{
         require(msg.sender!=deals[_txnHash].buyerAddress);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].trackUser[2] = deals[_txnHash].buyerAddress;
+            lots[_lotId[i]].trackTxn[2] = _txnHash;
             lots[_lotId[i]].productState = State.Shipped;
         }
         emit Shipped();
@@ -449,6 +467,7 @@ contract SupplyChain{
         require(msg.sender!=deals[_txnHash].buyerAddress);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].trackUser[3] = deals[_txnHash].buyerAddress;
+            lots[_lotId[i]].trackTxn[3] = _txnHash;
             lots[_lotId[i]].productState = State.Shipped;
         }
         emit Shipped();
@@ -467,6 +486,17 @@ contract SupplyChain{
         return products[_productId];
     }
 
+    function setProductFinalSellingPrice(string memory _productId, uint sellingPrice) public {
+        
+        require(getUserRole(msg.sender)==3);
+        products[_productId].finalSellingPrice = sellingPrice;
+    }
+    
+    function setProductFinalBuyingPrice(string memory _productId, uint buyingPrice) public {
+        
+        require(getUserRole(msg.sender)==-1);
+        products[_productId].finalBuyingPrice = buyingPrice;
+    }
 
     function trackProductByProductId(string memory _productId) public view returns(uint, address[] memory, uint){
         
