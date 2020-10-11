@@ -1,10 +1,13 @@
 package com.example.smartcontract;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kaopiz.kprogresshud.KProgressHUD;
+import com.shreyaspatil.MaterialDialog.MaterialDialog;
+import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,7 +49,11 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -164,8 +173,8 @@ public class callFunction extends AppCompatActivity {
                         read read = new read();
                         read.execute();
                     } else {
-                        write write = new write();
-                        write.execute();
+                        calculateGas calculateGas = new calculateGas();
+                        calculateGas.execute();
                     }
                 }
             });
@@ -187,6 +196,7 @@ public class callFunction extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            hideKeyboard();
             progressHUD.show();
         }
 
@@ -236,6 +246,86 @@ public class callFunction extends AppCompatActivity {
         }
     }
 
+    class calculateGas extends AsyncTask<Void, Void, String> {
+
+        final KProgressHUD progressHUD = KProgressHUD.create(callFunction.this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            hideKeyboard();
+            progressHUD.show();
+        }
+
+        protected String doInBackground(Void... params) {
+            String result = "";
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                String contractAddress = data.contractAddress;
+
+                Function function = new Function(obj.optString("name"), // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ",outputAsync.size()+"");
+                String txData = FunctionEncoder.encode(function);
+
+                Transaction t = Transaction.createEthCallTransaction(credentials.getAddress(),contractAddress,txData);
+                BigInteger val = web3j.ethEstimateGas(t).send().getAmountUsed();
+                Log.d("Address Gas Used: ",val+"");
+                Log.d("Address Gas Price: ", ""+4.1*1e-9+ " Ether");
+                Double txnFee = val.intValue()*4.1*1e-9;
+                DecimalFormat df = new DecimalFormat("#.##########");
+                df.setRoundingMode(RoundingMode.CEILING);
+                result = df.format(txnFee) + " Ether";
+                Log.d("Address Fee: ",result);
+            } catch (Exception e) {
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String txnFee) {
+            super.onPostExecute(txnFee);
+            progressHUD.dismiss();
+            MaterialDialog mDialog = new MaterialDialog.Builder(callFunction.this)
+                    .setTitle("Confirm Transaction?")
+                    .setMessage(txnFee + " will be deducted!")
+                    .setCancelable(false)
+                    .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int which) {
+                            dialogInterface.dismiss();
+                            write write = new write();
+                            write.execute();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int which) {
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .build();
+            mDialog.show();
+        }
+    }
+
     class write extends AsyncTask<Void, Void, String> {
 
         final KProgressHUD progressHUD = KProgressHUD.create(callFunction.this)
@@ -269,8 +359,7 @@ public class callFunction extends AppCompatActivity {
                 Function function = new Function(obj.optString("name"), // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters
-
-                // Encode function values in transaction data format
+                Log.d("Address Output: ",outputAsync.size()+"");
                 String txData = FunctionEncoder.encode(function);
 
                 TransactionManager txManager = new FastRawTransactionManager(web3j, credentials);
@@ -321,4 +410,11 @@ public class callFunction extends AppCompatActivity {
         }
     }
 
+    public void hideKeyboard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 }
