@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.17;
 pragma experimental ABIEncoderV2;
 
 contract SupplyChain{
@@ -44,7 +44,7 @@ contract SupplyChain{
     struct deal{ 
         string txnHash;
         uint capacity;
-        address buyerAddress;
+        address payable buyerAddress;
         uint buyingPrice;
         address sellerAddress;
         uint sellingPrice;
@@ -90,8 +90,8 @@ contract SupplyChain{
     
     event PaymentSuccessful();
     event DealFailed(address buyerAddress);
-    constructor(string _name, string _officeAddress) public {
-    
+    constructor(string memory _name, string memory _officeAddress) public {
+        require(bytes(_name).length!=0 && bytes(_officeAddress).length!=0);
         contractOwner = msg.sender;
         user memory owner = user({
             role: 0,
@@ -177,7 +177,7 @@ contract SupplyChain{
     }
 
     // Define a modifier that checks if the deal was valid
-    modifier validDeal(string txnHash) {
+    modifier validDeal(string memory txnHash) {
 
         require(deals[txnHash].sellingPrice==deals[txnHash].buyingPrice);
         _;
@@ -199,13 +199,20 @@ contract SupplyChain{
             return -1;
     }
 
-    function getUserDetails(address account) public view returns(string, string){
+    function getUserDetails(address account) public view returns(string memory, string memory){
             
-        require(checkIsUser(account));
-        return (
-            users[account].name,
-            users[account].officeAddress
-        );
+        if(account  == contractOwner){
+            return (
+                users[account].name,
+                users[account].officeAddress
+            );
+        }else{
+            require(checkIsUser(account));
+            return (
+                users[account].name,
+                users[account].officeAddress
+            );
+        }
     }
 
     function setUser(address account) internal{
@@ -221,7 +228,7 @@ contract SupplyChain{
     }
     */
     
-    function addManufacturer(string _name, string _officeAddress, address account) public onlyContractOwner{
+    function addManufacturer(string memory _name, string memory _officeAddress, address account) public onlyContractOwner{
         
         require(!checkIsUser(account));
         user memory manufacturer = user({
@@ -249,7 +256,7 @@ contract SupplyChain{
     }
     */
     
-    function addDistributor(string _name, string _officeAddress, address account) public onlyManufacturer{
+    function addDistributor(string memory _name, string memory _officeAddress, address account) public onlyManufacturer{
         
         require(!checkIsUser(account));
         user memory distributor = user({
@@ -276,7 +283,7 @@ contract SupplyChain{
         emit DistributorRemoved(account);
     }*/
     
-    function addRetailer(string _name, string _officeAddress, address account) public onlyDistributor{
+    function addRetailer(string memory _name, string memory _officeAddress, address account) public onlyDistributor{
         
         require(!checkIsUser(account));
         user memory retailer = user({
@@ -360,7 +367,7 @@ contract SupplyChain{
         emit ForSale();
     }
     
-    function payFromDistributorToManufacturer(uint _quantity, uint _totalBuyingPrice, string _txnHash) public onlyDistributor{
+    function payFromDistributorToManufacturer(uint _quantity, uint _totalBuyingPrice, string memory _txnHash) public onlyDistributor{
         
         require(_quantity<=users[users[msg.sender].parentId].currentQuantity);
         users[msg.sender].currentQuantity+=_quantity;
@@ -377,7 +384,7 @@ contract SupplyChain{
         emit PaymentSuccessful();
     }
 
-    function sellLotToDistributor(string _txnHash, uint _totalSellingPrice, string[] memory _lotId) public onlyManufacturer forSale(_lotId){
+    function sellLotToDistributor(string memory _txnHash, uint _totalSellingPrice, string[] memory _lotId) public onlyManufacturer forSale(_lotId){
         
         deal storage activeDeal = deals[_txnHash];
         if(activeDeal.buyingPrice!=_totalSellingPrice){
@@ -397,8 +404,8 @@ contract SupplyChain{
         }
     }
     
-    function shipLotFromManufacturerToDistributor(string[] memory _lotId, string _txnHash) public onlyManufacturer validDeal(_txnHash) sold(_lotId){
-        
+    function shipLotFromManufacturerToDistributor(string[] memory _lotId, string memory _txnHash) public onlyManufacturer validDeal(_txnHash) sold(_lotId){
+         
         require(msg.sender!=deals[_txnHash].buyerAddress);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].trackUser[2] = deals[_txnHash].buyerAddress;
@@ -426,7 +433,7 @@ contract SupplyChain{
         emit ForSale();
     }
 
-    function payFromRetailerToDistributor(uint _quantity, uint _totalBuyingPrice, string _txnHash) public onlyRetailer{
+    function payFromRetailerToDistributor(uint _quantity, uint _totalBuyingPrice, string memory _txnHash) public onlyRetailer{
         
         require(_quantity<=users[users[msg.sender].parentId].currentQuantity);
         users[msg.sender].currentQuantity+=_quantity;
@@ -443,7 +450,7 @@ contract SupplyChain{
         emit PaymentSuccessful();
     }
 
-    function sellLotToRetailer(string _txnHash, uint _totalSellingPrice, string[] memory _lotId) public onlyDistributor forSale(_lotId){
+    function sellLotToRetailer(string memory _txnHash, uint _totalSellingPrice, string[] memory _lotId) public onlyDistributor forSale(_lotId){
         
         deal storage activeDeal = deals[_txnHash];
         if(activeDeal.buyingPrice!=_totalSellingPrice){
@@ -462,7 +469,7 @@ contract SupplyChain{
         }
     }
     
-    function shipLotFromDistributorToRetailer(string[] memory _lotId, string _txnHash) public onlyDistributor validDeal(_txnHash) sold(_lotId){
+    function shipLotFromDistributorToRetailer(string[] memory _lotId, string memory _txnHash) public onlyDistributor validDeal(_txnHash) sold(_lotId){
         
         require(msg.sender!=deals[_txnHash].buyerAddress);
         for(uint i = 0;i<_lotId.length;i++){
