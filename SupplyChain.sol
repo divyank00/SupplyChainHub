@@ -78,9 +78,11 @@ contract SupplyChain{
     event Received();
     event TxAdded();
     
-    event ManufacturerAdded(address indexed account);
-    event ManufacturerRemoved(address indexed account);
-    event DistributorAdded(address indexed account);
+    event OwnerMadeManufacturer();
+    event UserAdded(address indexed account);
+    // event ManufacturerAdded(address indexed account);
+    // event ManufacturerRemoved(address indexed account);
+    // event DistributorAdded(address indexed account);
     event DistributorRemoved(address indexed account);
     event RetailerAdded(address indexed account);
     event RetailerRemoved(address indexed account);
@@ -90,6 +92,7 @@ contract SupplyChain{
     
     event PaymentSuccessful();
     event DealFailed(address buyerAddress);
+    
     constructor(string memory _name, string memory _officeAddress) public {
         require(bytes(_name).length!=0 && bytes(_officeAddress).length!=0);
         contractOwner = msg.sender;
@@ -102,6 +105,7 @@ contract SupplyChain{
             officeAddress: _officeAddress
         });
         
+        setUser(msg.sender);
         users[msg.sender] = owner;
     }
     
@@ -183,36 +187,27 @@ contract SupplyChain{
         _;
     }
     
-    
     function checkIsUser(address account) internal view returns(bool){
         
         return isUser[account];
     }
     
-    function getUserRole(address account) public view returns(int){
+    function getUserRole(address account) public view returns(uint){
 
         if(account==contractOwner)
             return 0;
         if(checkIsUser(account))
-            return int(users[account].role);
+            return users[account].role;
         else
-            return -1;
+            return 4;
     }
 
     function getUserDetails(address account) public view returns(string memory, string memory){
             
-        if(account  == contractOwner){
-            return (
+        return (
                 users[account].name,
                 users[account].officeAddress
             );
-        }else{
-            require(checkIsUser(account));
-            return (
-                users[account].name,
-                users[account].officeAddress
-            );
-        }
     }
 
     function setUser(address account) internal{
@@ -220,61 +215,161 @@ contract SupplyChain{
         isUser[account]=true;
     }
 
+  /*  function removeUser(address account) internal{
+
+        users[users[account].parentId].childIds[account]=false;
+        users[account].chi
+        isUser[account]=false;
+    }
+    */
     
-    function addManufacturer(string memory _name, string memory _officeAddress, address account) public onlyContractOwner{
+    function makeOwnerAsManufacturer() public onlyContractOwner{
         
-        require(!checkIsUser(account));
-        user memory manufacturer = user({
-            role: 1,
-            userId : account,
+        if(users[msg.sender].role==0){
+            users[msg.sender].role=1;
+            emit OwnerMadeManufacturer();
+        }
+    }
+    
+    function addChildUser(string memory _name, string memory _officeAddress, address _userAccount) public {
+        
+        require(!checkIsUser(_userAccount));
+        user memory child = user({
+            role: getUserRole(msg.sender)+1,
+            userId : _userAccount,
             parentId : msg.sender,
             currentQuantity : 0,
             name: _name,
             officeAddress: _officeAddress
         });
         
-        users[account] = manufacturer;
-        users[msg.sender].childIds[account] = true;
-        setUser(account);
-        emit ManufacturerAdded(account);
+        users[_userAccount] = child;
+        users[msg.sender].childIds[_userAccount] = true;
+        setUser(_userAccount);
+        emit UserAdded(_userAccount);
     }
     
-    
-    function addDistributor(string memory _name, string memory _officeAddress, address account) public onlyManufacturer{
+    function addOtherUser(string memory _name, string memory _officeAddress, address _parentAccount, address _userAccount, uint _userRole) public {
         
-        require(!checkIsUser(account));
-        user memory distributor = user({
-            role: 2,
-            userId : account,
-            parentId : msg.sender,
-            currentQuantity : 0,
-            name: _name,
-            officeAddress: _officeAddress
-        });
-        users[account] = distributor;
-        users[msg.sender].childIds[account]=true;
-        setUser(account);
-        emit DistributorAdded(account);
-    }
-    
-    
-    function addRetailer(string memory _name, string memory _officeAddress, address account) public onlyDistributor{
-        
-        require(!checkIsUser(account));
-        user memory retailer = user({
-            role: 3,
-            userId : account,
-            parentId : msg.sender,
+        require(!checkIsUser(_userAccount));
+        require(getUserRole(msg.sender)<_userRole);
+        if(_parentAccount!=contractOwner)
+            require(getUserRole(_parentAccount)==_userRole-1);
+        else{
+            require(_userRole==2);
+            makeOwnerAsManufacturer();
+        }
+        user memory child = user({
+            role: _userRole,
+            userId : _userAccount,
+            parentId : _parentAccount,
             currentQuantity : 0,
             name: _name,
             officeAddress: _officeAddress
         });
         
-        users[account] = retailer;
-        users[msg.sender].childIds[account] = true;
-        setUser(account);
-        emit RetailerAdded(account);
+        users[_userAccount] = child;
+        users[_parentAccount].childIds[_userAccount] = true;
+        setUser(_userAccount);
+        emit UserAdded(_userAccount);
     }
+    
+    // function addManufacturer(string memory _name, string memory _officeAddress, address account) public onlyContractOwner{
+        
+    //     require(!checkIsUser(account));
+    //     user memory manufacturer = user({
+    //         role: 1,
+    //         userId : account,
+    //         parentId : msg.sender,
+    //         currentQuantity : 0,
+    //         name: _name,
+    //         officeAddress: _officeAddress
+    //     });
+        
+    //     users[account] = manufacturer;
+    //     users[msg.sender].childIds[account] = true;
+    //     setUser(account);
+    //     emit ManufacturerAdded(account);
+    // }
+    
+    /*  function removeManufacturer(address account) public onlyContractOwner{
+        
+        require(isUser[account]);
+        require(users[account].role == 1);
+        removeUser(account);
+        delete users[account];
+        emit ManufacturerRemoved(account);
+    }
+    */
+    
+    // function addDistributor(string memory _name, string memory _officeAddress, address account) public onlyManufacturer{
+        
+    //     require(!checkIsUser(account));
+    //     user memory distributor = user({
+    //         role: 2,
+    //         userId : account,
+    //         parentId : msg.sender,
+    //         currentQuantity : 0,
+    //         name: _name,
+    //         officeAddress: _officeAddress
+    //     });
+    //     users[account] = distributor;
+    //     users[msg.sender].childIds[account]=true;
+    //     setUser(account);
+    //     emit DistributorAdded(account);
+    // }
+    
+    /*
+    function removeDistributor(address account) public onlyManufacturer{
+        
+        require(isUser[account]);
+        require(users[account].role == 2);
+        removeUser(account);
+        delete users[account];
+        emit DistributorRemoved(account);
+    }*/
+    
+    // function addRetailer(string memory _name, string memory _officeAddress, address account) public onlyDistributor{
+        
+    //     require(!checkIsUser(account));
+    //     user memory retailer = user({
+    //         role: 3,
+    //         userId : account,
+    //         parentId : msg.sender,
+    //         currentQuantity : 0,
+    //         name: _name,
+    //         officeAddress: _officeAddress
+    //     });
+        
+    //     users[account] = retailer;
+    //     users[msg.sender].childIds[account] = true;
+    //     setUser(account);
+    //     emit RetailerAdded(account);
+    // }
+
+    /*
+    function removeRetailer(address account) public onlyDistributor{
+        
+        require(isUser[account]);
+        require(users[account].role == 3);
+        removeUser(account);
+        delete users[account];
+        emit RetailerRemoved(account);
+    }
+    */
+
+    /*function addFactoryDetails(string memory _factoryId, string memory _originFactoryName, string memory _originFactoryInformation, string memory _originFactoryAddress) public onlyManufacturer {
+        
+        factory memory factoryDetails = factory({
+            factoryId : _factoryId,
+            originFactoryName : _originFactoryName,                   // Manufacturer Name
+            originFactoryInformation :  _originFactoryInformation,   // Manufacturer Information
+            originFactoryAddress : _originFactoryAddress            // Factory Address
+        });
+        
+        factories[_factoryId] = factoryDetails;
+        emit FactoryAdded(_factoryId);
+    }*/
     
     function makeLot(string memory _lotId, string[] memory _productIds) public onlyManufacturer{
         
@@ -452,7 +547,7 @@ contract SupplyChain{
     
     function setProductFinalBuyingPrice(string memory _productId, uint buyingPrice) public {
         
-        require(getUserRole(msg.sender)==-1);
+        require(getUserRole(msg.sender)==4);
         products[_productId].finalBuyingPrice = buyingPrice;
     }
 
@@ -462,7 +557,6 @@ contract SupplyChain{
         return trackProductByLotId(_lotId);
     }
 
-    
     function trackProductByLotId(string memory _lotId) public view returns(uint, address[] memory, uint){
         
         address[] memory ret = new address[](4);
