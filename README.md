@@ -1,2 +1,2 @@
 # SupplyChainHub
-ETHGlobal Hackathon Idea
+ETHOnline Hackathon Idea
