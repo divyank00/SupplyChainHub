@@ -216,33 +216,42 @@ def convert(s):
 
 
 
-info = {
-    "name" : "Product Supply Chain",
-    "role" : ["Manufacturer", "Distributer", "Retailer"]
-}
+# info = {
+#     "name" : "Product Supply Chain",
+#     "role" : ["Manufacturer", "Distributer", "Retailer"]
+#     "whocanaddwho": {"Retailer":["ContractOwner", "Manufacturer", "Distributer"]}
+# }
+
+def addModifierMany(role):
+    match_string = "//*addModifiers"
+    insert_string = """
+        modifier """ + role[0] +  + """{
+            
+            require(users[msg.sender].role == """ + str(info["role"].index(role) + 1) + """);
+            _;
+        }"""
+    writeToFile(match_string, insert_string)
 
 
+def generateContract(info)
+    doc = open("SupplyChainTemplate.sol", 'r+')
+    contents = doc.readlines()
+    doc.close()
+
+    for role in info["role"]:
+        addEvent(role)
+        addModifier(role)
+        addRole(role)
+        addMakePack(role)
+        addForSale(role)
+        addPayFrom(role)
+        addSellTo(role)
+        addShipLot(role)
+        addReceivedBy(role)
 
 
-
-doc = open("SupplyChainTemplate.sol", 'r+')
-contents = doc.readlines()
-doc.close()
-
-for role in info["role"]:
-    addEvent(role)
-    addModifier(role)
-    addRole(role)
-    addMakePack(role)
-    addForSale(role)
-    addPayFrom(role)
-    addSellTo(role)
-    addShipLot(role)
-    addReceivedBy(role)
-
-
-nameOfDoc = convert(info["name"]) + ".sol"
-newDoc = open(nameOfDoc, 'w')
-newDoc.seek(0)
-newDoc.writelines(contents)
-newDoc.close()
+    nameOfDoc = convert(info["name"]) + ".sol"
+    newDoc = open(nameOfDoc, 'w')
+    newDoc.seek(0)
+    newDoc.writelines(contents)
+    newDoc.close()
