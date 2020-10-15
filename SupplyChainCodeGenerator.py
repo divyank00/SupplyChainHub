@@ -233,7 +233,7 @@ def addModifierMany(role):
     writeToFile(match_string, insert_string)
 
 
-def generateContract(info)
+def generateContract(info):
     doc = open("SupplyChainTemplate.sol", 'r+')
     contents = doc.readlines()
     doc.close()
