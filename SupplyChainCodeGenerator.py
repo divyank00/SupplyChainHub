@@ -258,4 +258,3 @@ def generateContract(info):
     newDoc.close()
 
 
-generateContract(info)
