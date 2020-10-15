@@ -226,10 +226,10 @@ def convert(s):
 
 
 
-info = {
-    "name" : "Product trial Supply Chain",
-    "role" : ["Manufacturer", "Distributer", "Retailer"]
-}
+# info = {
+#     "name" : "Product trial Supply Chain",
+#     "role" : ["Manufacturer", "Distributer", "Retailer"]
+# }
 
 
 
