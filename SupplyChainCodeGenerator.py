@@ -1,4 +1,5 @@
 def writeToFile(match_string, insert_string):
+    global contents
     if match_string in contents[-1]:  # Handle last line to prevent IndexError
         contents.append(insert_string)
     else:
@@ -9,13 +10,15 @@ def writeToFile(match_string, insert_string):
 
 
 def addEvent(role):
+    global contents
     match_string = "//*addEvents"
     insert_string = """
         event """ + role + """Added(address indexed account);
         event """ + role + """Removed(address indexed account);"""
     writeToFile(match_string, insert_string)
 
-def addModifier(role):
+def addModifier(role, info):
+    global contents
     match_string = "//*addModifiers"
     insert_string = """
         modifier only""" + role + """{
@@ -25,17 +28,18 @@ def addModifier(role):
         }"""
     writeToFile(match_string, insert_string)
 
-def getOnlyRole(role):
+def getOnlyRole(role, info):
     if info["role"].index(role) == 0:
         return "ContractOwner"
     else:
         return info["role"][info["role"].index(role) - 1]
 
-def addRole(role):
+def addRole(role, info):
+    global contents
     match_string = "//*addRoles"
 
     insert_string = """
-        function add""" + role + """(string _name, string _officeAddress, address account) public only""" + getOnlyRole(role) +"""{
+        function add""" + role + """(string _name, string _officeAddress, address account) public only""" + getOnlyRole(role, info) +"""{
             
             require(!checkIsUser(account));
             user memory """ + role.lower() + """ = user({
@@ -55,7 +59,8 @@ def addRole(role):
     writeToFile(match_string, insert_string)
 
 
-def addForSale(role):
+def addForSale(role, info):
+    global contents
     if info["role"].index(role) < (len(info["role"]) -1):
         match_string = "//*addForSale"
         insert_string = """
@@ -73,7 +78,8 @@ def addForSale(role):
         return
 
 
-def addPayFrom(role):
+def addPayFrom(role, info):
+    global contents
     if info["role"].index(role) < (len(info["role"]) -1):
         match_string = "//*addPayFrom"
         insert_string = """
@@ -97,7 +103,8 @@ def addPayFrom(role):
     else:
         return
 
-def addSellTo(role):
+def addSellTo(role, info):
+    global contents
     if info["role"].index(role) < (len(info["role"]) -1):
         match_string = "//*addSellTo"
         insert_string = """
@@ -125,7 +132,8 @@ def addSellTo(role):
         return
 
 
-def addShipLot(role):
+def addShipLot(role, info):
+    global contents
     if info["role"].index(role) < (len(info["role"]) -1):
         match_string = "//*addShipLot"
         insert_string = """
@@ -144,7 +152,8 @@ def addShipLot(role):
         return
 
 
-def addReceivedBy(role):
+def addReceivedBy(role, info):
+    global contents
     if info["role"].index(role) < (len(info["role"]) -1):
         match_string = "//*addReceivedBy"
         insert_string = """
@@ -160,7 +169,8 @@ def addReceivedBy(role):
         return
 
 
-def addMakePack(role):
+def addMakePack(role, info):
+    global contents
     if info["role"].index(role) == 0:
         match_string = "//*addMakePack"
         insert_string = """
@@ -216,38 +226,29 @@ def convert(s):
 
 
 
-# info = {
-#     "name" : "Product Supply Chain",
-#     "role" : ["Manufacturer", "Distributer", "Retailer"]
-#     "whocanaddwho": {"Retailer":["ContractOwner", "Manufacturer", "Distributer"]}
-# }
+info = {
+    "name" : "Product trial Supply Chain",
+    "role" : ["Manufacturer", "Distributer", "Retailer"]
+}
 
-def addModifierMany(role):
-    match_string = "//*addModifiers"
-    insert_string = """
-        modifier """ + role[0] +  + """{
-            
-            require(users[msg.sender].role == """ + str(info["role"].index(role) + 1) + """);
-            _;
-        }"""
-    writeToFile(match_string, insert_string)
 
 
 def generateContract(info):
+    global contents
     doc = open("SupplyChainTemplate.sol", 'r+')
     contents = doc.readlines()
     doc.close()
 
     for role in info["role"]:
         addEvent(role)
-        addModifier(role)
-        addRole(role)
-        addMakePack(role)
-        addForSale(role)
-        addPayFrom(role)
-        addSellTo(role)
-        addShipLot(role)
-        addReceivedBy(role)
+        addModifier(role, info)
+        addRole(role, info)
+        addMakePack(role, info)
+        addForSale(role, info)
+        addPayFrom(role, info)
+        addSellTo(role, info)
+        addShipLot(role, info)
+        addReceivedBy(role, info)
 
 
     nameOfDoc = convert(info["name"]) + ".sol"
@@ -255,3 +256,6 @@ def generateContract(info):
     newDoc.seek(0)
     newDoc.writelines(contents)
     newDoc.close()
+
+
+generateContract(info)
