@@ -3,6 +3,7 @@ package com.example.smartcontract;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -67,6 +68,11 @@ public class callFunction extends AppCompatActivity {
     JSONObject obj = null;
     List<Type> inputAsync;
     List<TypeReference<?>> outputAsync;
+    public static final String SHAR_PREF = "sharedPref";
+    public static final String KEY = "key";
+    public static final String SEED = "seed";
+    String textkey,textseed;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +87,8 @@ public class callFunction extends AppCompatActivity {
         outputAsync = new ArrayList<>();
         Intent intent = getIntent();
         String object = intent.getStringExtra("object");
+        loadData();
+
         try {
             obj = new JSONObject(object);
             getSupportActionBar().setTitle(obj.optString("name"));
@@ -182,6 +190,15 @@ public class callFunction extends AppCompatActivity {
                 JSONException e) {
             e.printStackTrace();
         }
+    }
+
+
+
+    public void loadData(){
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHAR_PREF,MODE_PRIVATE);
+        textkey = sharedPreferences.getString(KEY,"");
+        textseed = sharedPreferences.getString(SEED,"");
     }
 
     class read extends AsyncTask<Void, Void, String> {
@@ -417,4 +434,5 @@ public class callFunction extends AppCompatActivity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
 }
