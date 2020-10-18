@@ -8,20 +8,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:404528752283:android:d0bf6e89c6773d4aacc83e",
+        "mobilesdk_app_id": "1:404528752283:android:3ab849746a875100acc83e",
         "android_client_info": {
-          "package_name": "supply.chain.hub"
+          "package_name": "com.example.smartcontract"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "404528752283-0pe4aiovbr78tqvdaak95el7s2sksk61.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "supply.chain.hub",
-            "certificate_hash": "53092839d093ec4c3671ad0c39251fd5eb1952ae"
-          }
-        },
         {
           "client_id": "404528752283-reut6hf7jposun3m0c79d39iaociej1c.apps.googleusercontent.com",
           "client_type": 3

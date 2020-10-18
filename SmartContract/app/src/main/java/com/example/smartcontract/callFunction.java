@@ -36,6 +36,7 @@ import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -50,6 +51,7 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -68,11 +70,7 @@ public class callFunction extends AppCompatActivity {
     JSONObject obj = null;
     List<Type> inputAsync;
     List<TypeReference<?>> outputAsync;
-    public static final String SHAR_PREF = "sharedPref";
-    public static final String KEY = "key";
-    public static final String SEED = "seed";
-    String textkey,textseed;
-
+    String contractAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +85,7 @@ public class callFunction extends AppCompatActivity {
         outputAsync = new ArrayList<>();
         Intent intent = getIntent();
         String object = intent.getStringExtra("object");
-        loadData();
-
+        contractAddress = intent.getStringExtra("contractAddress");
         try {
             obj = new JSONObject(object);
             getSupportActionBar().setTitle(obj.optString("name"));
@@ -123,66 +120,71 @@ public class callFunction extends AppCompatActivity {
                 public void onClick(View v) {
                     inputAsync.clear();
                     outputAsync.clear();
-                    for (int i = 0; i < inputs.size(); i++) {
-                        View view = input.getChildAt(i);
-                        if (view != null) {
-                            TextView textView = (TextView) view.findViewById(R.id.value);
-                            String text = textView.getText().toString();
-                            switch (inputs.get(i).optString("type")) {
+                    try {
+                        for (int i = 0; i < inputs.size(); i++) {
+                            View view = input.getChildAt(i);
+                            if (view != null) {
+                                TextView textView = (TextView) view.findViewById(R.id.value);
+                                String text = textView.getText().toString();
+                                switch (inputs.get(i).optString("type")) {
+                                    case "string":
+                                        inputAsync.add(new Utf8String(text));
+                                        break;
+                                    case "address":
+                                        inputAsync.add(new Address(text));
+                                        break;
+                                    case "uint256":
+                                        inputAsync.add(new Uint256((long) Double.parseDouble(text)));
+                                        break;
+                                    case "string[]":
+                                        List<Utf8String> list = new ArrayList<>();
+                                        String[] arr = text.split(",");
+                                        for (int j = 0; j < arr.length; j++) {
+                                            list.add(new Utf8String(arr[j].trim()));
+                                        }
+                                        inputAsync.add(new DynamicArray(Utf8String.class, list));
+                                        break;
+                                }
+                            }
+                        }
+                        for (int i = 0; i < outputs.size(); i++) {
+                            switch (outputs.get(i).optString("type")) {
                                 case "string":
-                                    inputAsync.add(new Utf8String(text));
+                                    outputAsync.add(new TypeReference<Utf8String>() {
+                                    });
                                     break;
                                 case "address":
-                                    inputAsync.add(new Address(text));
+                                    outputAsync.add(new TypeReference<Address>() {});
                                     break;
                                 case "uint256":
-                                    inputAsync.add(new Uint256((long) Double.parseDouble(text)));
+                                    outputAsync.add(new TypeReference<Uint256>() {});
+                                    break;
+                                case "int256":
+                                    outputAsync.add(new TypeReference<Int256>() {});
                                     break;
                                 case "string[]":
-                                    List<Utf8String> list = new ArrayList<>();
-                                    String[] arr = text.split(",");
-                                    for (int j = 0; j < arr.length; j++) {
-                                        list.add(new Utf8String(arr[j].trim()));
-                                    }
-                                    inputAsync.add(new DynamicArray(Utf8String.class, list));
+                                    outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {});
+                                    break;
+                                case "address[]":
+                                    outputAsync.add(new TypeReference<DynamicArray<Address>>() {});
+                                    break;
+                                case "tuple":
+                                    outputAsync.add(new TypeReference<org.web3j.abi.datatypes.DynamicStruct>() {});
                                     break;
                             }
                         }
-                    }
-                    for (int i = 0; i < outputs.size(); i++) {
-                        switch (outputs.get(i).optString("type")) {
-                            case "string":
-                                outputAsync.add(new TypeReference<Utf8String>(){});
-                                break;
-                            case "address":
-                                outputAsync.add(new TypeReference<Address>(){});
-                                break;
-                            case "uint256":
-                                outputAsync.add(new TypeReference<Uint256>(){});
-                                break;
-                            case "int256":
-                                outputAsync.add(new TypeReference<Int256>(){});
-                                break;
-                            case "string[]":
-                                outputAsync.add(new TypeReference<DynamicArray<Utf8String>>(){});
-                                break;
-                            case "address[]":
-                                outputAsync.add(new TypeReference<DynamicArray<Address>>(){});
-                                break;
-                            case "tuple":
-                                outputAsync.add(new TypeReference<org.web3j.abi.datatypes.DynamicStruct>(){});
-                                break;
-                                }
+                        for (int i = 0; i < inputAsync.size(); i++) {
+                            Log.d("Address Input: ", inputAsync.get(i).getValue().toString());
                         }
-                    for(int i=0;i<inputAsync.size();i++){
-                        Log.d("Address Input: ", inputAsync.get(i).getValue().toString());
-                    }
-                    if (obj != null && obj.optString("stateMutability").equals("view")) {
-                        read read = new read();
-                        read.execute();
-                    } else {
-                        calculateGas calculateGas = new calculateGas();
-                        calculateGas.execute();
+                        if (obj != null && obj.optString("stateMutability").equals("view")) {
+                            read read = new read();
+                            read.execute();
+                        } else {
+                            calculateGas calculateGas = new calculateGas();
+                            calculateGas.execute();
+                        }
+                    }catch (Exception e){
+                        Toast.makeText(callFunction.this, e.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -190,15 +192,6 @@ public class callFunction extends AppCompatActivity {
                 JSONException e) {
             e.printStackTrace();
         }
-    }
-
-
-
-    public void loadData(){
-
-        SharedPreferences sharedPreferences = getSharedPreferences(SHAR_PREF,MODE_PRIVATE);
-        textkey = sharedPreferences.getString(KEY,"");
-        textseed = sharedPreferences.getString(SEED,"");
     }
 
     class read extends AsyncTask<Void, Void, String> {
@@ -229,8 +222,6 @@ public class callFunction extends AppCompatActivity {
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
-                String contractAddress = data.contractAddress;
-
                 Function function = new Function(obj.optString("name"), // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters
@@ -292,8 +283,6 @@ public class callFunction extends AppCompatActivity {
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
-                String contractAddress = data.contractAddress;
-
                 Function function = new Function(obj.optString("name"), // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters
@@ -371,8 +360,6 @@ public class callFunction extends AppCompatActivity {
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
-                String contractAddress = data.contractAddress;
-
                 Function function = new Function(obj.optString("name"), // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters

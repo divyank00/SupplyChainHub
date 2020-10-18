@@ -2,89 +2,80 @@ package com.example.smartcontract;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.crypto.Bip32ECKeyPair;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.http.HttpService;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.web3j.crypto.MnemonicUtils;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText pk, ca, abi,seed;
+    EditText pk, seed;
     Button btn;
 
-    public static final String SHAR_PREF = "sharedPref";
-    public static final String KEY = "key";
-    public static final String SEED = "seed";
+    public static final String KEY = "privateKey";
+    public static final String PUBLIC_KEY = "publicKey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE);
+        if(sharedPreferences.contains(KEY)){
+            data.privateKey = sharedPreferences.getString(KEY,"");
+            Intent i = new Intent(this, AllContracts.class);
+            startActivity(i);
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main);
         pk = findViewById(R.id.privateKey);
-        ca = findViewById(R.id.contractAddress);
-        abi = findViewById(R.id.abi);
         btn = findViewById(R.id.button);
         seed = findViewById(R.id.seed);
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String key = "";
-                if(pk.getText().toString().isEmpty() && seed.getText().toString().isEmpty()){
-
-                    Toast.makeText(MainActivity.this, "Either enter the private key or seed phrase", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if(ca.getText().toString().isEmpty() || abi.getText().toString().isEmpty()){
-                    Toast.makeText(MainActivity.this, "Fill Data!", Toast.LENGTH_SHORT).show();
+                if (pk.getText().toString().trim().isEmpty() && seed.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Enter your private key or seed phrase", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                SharedPreferences sharedPreferences = getSharedPreferences(SHAR_PREF,MODE_PRIVATE);
+                SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                if(!pk.getText().toString().isEmpty()){
-
-                    key = pk.getText().toString().trim();
-                    editor.putString(KEY,key);
+                if (!pk.getText().toString().trim().isEmpty()) {
+                    String privateKey = pk.getText().toString().trim();
+                    Credentials credentials = Credentials.create(privateKey);
+                    editor.putString(PUBLIC_KEY,credentials.getAddress());
+                    editor.putString(KEY, privateKey);
                 }
-                else if(!seed.getText().toString().isEmpty()){
-                    key = seed.getText().toString().trim();
-                    editor.putString(SEED,key);
-                }
+                else if (!seed.getText().toString().trim().isEmpty()) {
+                    String mnemonic = seed.getText().toString().trim();
 
-                Intent i = new Intent(MainActivity.this,AllFunctions.class);
-                data.privateKey = key;
-                data.contractAddress = ca.getText().toString().trim();
-                data.abiCode = abi.getText().toString().trim();
+                    //m/44'/60'/0'/0 derivation path
+                    int[] derivationPath = {44 | Bip32ECKeyPair.HARDENED_BIT, 60 | Bip32ECKeyPair.HARDENED_BIT, 0 | Bip32ECKeyPair.HARDENED_BIT, 0, 0};
+
+                    // Generate a BIP32 master keypair from the mnemonic phrase
+                    Bip32ECKeyPair masterKeypair = Bip32ECKeyPair.generateKeyPair(MnemonicUtils.generateSeed(mnemonic, null));
+
+                    // Derive the keypair using the derivation path
+                    Bip32ECKeyPair derivedKeyPair = Bip32ECKeyPair.deriveKeyPair(masterKeypair, derivationPath);
+
+                    // Load the wallet for the derived keypair
+                    Credentials credentials = Credentials.create(derivedKeyPair);
+                    editor.putString(PUBLIC_KEY,credentials.getAddress());
+                    editor.putString(KEY, credentials.getEcKeyPair().getPrivateKey().toString(16));
+                }
+                editor.apply();
+
+                Intent i = new Intent(MainActivity.this, AllContracts.class);
+                data.privateKey = sharedPreferences.getString(KEY,"");
                 startActivity(i);
             }
         });

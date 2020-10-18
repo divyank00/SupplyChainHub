@@ -11,8 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AllFunctions"></activity>
+        <activity android:name=".AllFunctions" />
         <activity android:name=".callFunction" />
+        <activity android:name=".AllContracts" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

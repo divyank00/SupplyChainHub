@@ -6,86 +6,175 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
+
     <ScrollView
+        android:fillViewport="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_margin="10dp"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <TextView
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Private Key: " />
-            <EditText
-                android:id="@+id/privateKey"
-                android:textSize="16sp"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-
-            <TextView
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:layout_gravity="center"
-                android:text="OR" />
+                android:elevation="12dp"
+                android:translationZ="12dp"
+                app:cardCornerRadius="12dp">
 
-            <TextView
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Metamask Seed Phrase: " />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/seed"
-                android:textSize="16sp"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="center_horizontal"
+                        android:text="LOGIN"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Private Key: "
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/privateKey"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginVertical="20dp"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="fill_parent"
+                            android:layout_height="2dp"
+                            android:layout_centerVertical="true"
+                            android:layout_toLeftOf="@id/or"
+                            android:background="@color/colorPrimary" />
+
+                        <TextView
+                            android:id="@+id/or"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_gravity="center"
+                            android:layout_margin="10dp"
+                            android:paddingHorizontal="5dp"
+                            android:text="OR"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="fill_parent"
+                            android:layout_height="2dp"
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@id/or"
+                            android:background="@color/colorPrimary" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Metamask Seed Phrase: "
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/seed"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:elevation="12dp"
+                        android:translationZ="12dp"
+                        android:id="@+id/button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginVertical="10dp"
+                        android:text="Next" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="by default first account will be taken"/>
+                android:layout_margin="10dp"
+                android:elevation="12dp"
+                android:translationZ="12dp"
+                app:cardCornerRadius="12dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:orientation="vertical">
 
-            <TextView
-                android:layout_marginTop="10dp"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Contract Address: " />
-            <EditText
-                android:id="@+id/contractAddress"
-                android:textSize="16sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:layout_marginTop="10dp"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ABI: " />
-            <EditText
-                android:id="@+id/abi"
-                android:textSize="16sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="center_horizontal"
+                        android:text="TRACK PRODUCT"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/button"
-                android:layout_marginVertical="10dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Next" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Barcode: "
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <RelativeLayout
+                        android:layout_marginBottom="10dp"
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/scan"
+                            android:padding="5dp"
+                            android:clickable="true"
+                            android:tooltipText="Scan QR"
+                            android:layout_marginEnd="5dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"                            android:layout_alignParentEnd="true"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/barcode" />
+                        <EditText
+                            android:layout_marginEnd="10dp"
+                            android:layout_toStartOf="@id/scan"
+                            android:id="@+id/barcode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp" />
+                    </RelativeLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
         </LinearLayout>
+
     </ScrollView>
 
 
