@@ -46,22 +46,24 @@ public class AllFunctions extends AppCompatActivity {
         singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
             @Override
             public void onChanged(ObjectModel objectModel) {
-                if(objectModel.isStatus() && objectModel.getObj()!=null){
-                    try {
-                        String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
-                        JSONArray obj = new JSONArray(abi);
-                        List<JSONObject> functions = new ArrayList<>();
-                        for (int i = 0; i < obj.length(); i++) {
-                            if (((JSONObject) obj.get(i)).optString("type").equals("function")){
-                                functions.add((JSONObject) obj.get(i));
+                if(objectModel.isStatus()){
+                    if(objectModel.getObj()!=null) {
+                        try {
+                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
+                            JSONArray obj = new JSONArray(abi);
+                            List<JSONObject> functions = new ArrayList<>();
+                            for (int i = 0; i < obj.length(); i++) {
+                                if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
+                                    functions.add((JSONObject) obj.get(i));
+                                }
                             }
+                            loader.setVisibility(View.GONE);
+                            adapter = new Adapter(AllFunctions.this, functions, address);
+                            rV.setAdapter(adapter);
+                            rV.setLayoutManager(new LinearLayoutManager(AllFunctions.this));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                        loader.setVisibility(View.GONE);
-                        adapter = new Adapter(AllFunctions.this,functions, address);
-                        rV.setAdapter(adapter);
-                        rV.setLayoutManager(new LinearLayoutManager(AllFunctions.this));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
                 }else{
                     loader.setVisibility(View.GONE);
