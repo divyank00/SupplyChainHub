@@ -46,7 +46,7 @@ public class AllFunctions extends AppCompatActivity {
         singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
             @Override
             public void onChanged(ObjectModel objectModel) {
-                if(objectModel.isStatus()){
+                if(objectModel.isStatus() && objectModel.getObj()!=null){
                     try {
                         String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
                         JSONArray obj = new JSONArray(abi);
