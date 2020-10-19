@@ -196,7 +196,7 @@ contract SupplyChain{
         return isUser[account];
     }
     
-    function getUserRole(address account) internal view returns(uint){
+    function getActualUserRole(address account) internal view returns(uint){
 
         if(account==contractOwner)
             return 0;
@@ -206,7 +206,7 @@ contract SupplyChain{
             return uint(UserRoles.length-1);
     }
     
-    function getActualUserRole(address account) public view returns(uint){
+    function getUserRole(address account) public view returns(uint){
 
         if(checkIsUser(account))
             return users[account].role;
@@ -250,7 +250,7 @@ contract SupplyChain{
         require(!checkIsUser(_userAccount),"User already exists!");
         address[] memory _childIds;
         user memory child = user({
-            role: getUserRole(msg.sender)+1,
+            role: getActualUserRole(msg.sender)+1,
             userId : _userAccount,
             parentId : msg.sender,
             currentQuantity : 0,
@@ -271,16 +271,16 @@ contract SupplyChain{
         require(!checkIsUser(_userAccount),"User already exists!");
         require(getUserRole(msg.sender)<_userRole, "You don't have permission!");
         if(_parentAccount!=contractOwner)
-            require(getUserRole(_parentAccount)==_userRole-1, "Given parent doesn't have enough permission!");
+            require(getActualUserRole(_parentAccount)==_userRole-1, "Given parent doesn't have enough permission!");
         else{
             require(_userRole==2, "Given user doesn't have correct permission!");
             makeOwnerAsNextRole();
         }
         address[] memory _childIds;
         user memory child = user({
-            role: getUserRole(msg.sender)+1,
+            role: _userRole,
             userId : _userAccount,
-            parentId : msg.sender,
+            parentId : _parentAccount,
             currentQuantity : 0,
             name: _name,
             childIds: _childIds,
@@ -428,13 +428,13 @@ contract SupplyChain{
 
     function setProductFinalSellingPrice(string memory _productId, uint sellingPrice) public {
         
-        require(getUserRole(msg.sender)==uint(UserRoles.length-1), "You don't have enough permission!");
+        require(getActualUserRole(msg.sender)==uint(UserRoles.length-1), "You don't have enough permission!");
         products[_productId].finalSellingPrice = sellingPrice;
     }
     
     function setProductFinalBuyingPrice(string memory _productId, uint buyingPrice) public {
         
-        require(getUserRole(msg.sender)==uint(UserRoles.length-1), "You don't have enough permission!");
+        require(getActualUserRole(msg.sender)==uint(UserRoles.length-1), "You don't have enough permission!");
         products[_productId].finalBuyingPrice = buyingPrice;
     }
 
