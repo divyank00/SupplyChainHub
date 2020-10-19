@@ -304,7 +304,7 @@ public class callFunction extends AppCompatActivity {
                 df.setRoundingMode(RoundingMode.CEILING);
                 result = df.format(txnFee) + " Ether";
                 Log.d("Address Fee: ",result);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }
@@ -371,7 +371,7 @@ public class callFunction extends AppCompatActivity {
                         outputAsync); // Function returned parameters
                 Log.d("Address Output: ",outputAsync.size()+"");
                 String txData = FunctionEncoder.encode(function);
-
+                Log.d("Address Encode W",txData);
                 TransactionManager txManager = new FastRawTransactionManager(web3j, credentials);
 
                 // Send transaction
@@ -392,12 +392,12 @@ public class callFunction extends AppCompatActivity {
                     @Override
                     public void run() {
                         if(txReceipt.isStatusOK()){
-                            animationView.setVisibility(View.VISIBLE);
-                            animationView.animate();
+                            animationView.setAnimation(R.raw.success);
                         }else{
-                            animationView.setVisibility(View.GONE);
-                            Toast.makeText(callFunction.this, "Transaction Failed!", Toast.LENGTH_SHORT).show();
+                            animationView.setAnimation(R.raw.error);
                         }
+                        animationView.setVisibility(View.VISIBLE);
+                        animationView.playAnimation();
                     }
                 });
                 Log.d("Address", txHash);

@@ -55,13 +55,13 @@
                 android:text="Read" />
 
             <com.airbnb.lottie.LottieAnimationView
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:id="@+id/animationView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:lottie_rawRes="@raw/success"
                 app:lottie_autoPlay="true"
                 android:visibility="gone"
+
                 app:lottie_loop="false"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
