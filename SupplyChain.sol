@@ -80,6 +80,7 @@ contract SupplyChain{
     
     event OwnerGivenNextRole();
     event UserAdded(address indexed account);
+    event UserDetailsAdded(address sender);
 
     event LotMade(string lotId);
     
@@ -245,7 +246,7 @@ contract SupplyChain{
         }
     }
     
-    function addChildUser(string memory _name, address _userAccount) public {
+    function addChildUser(address _userAccount) public {
         
         require(!checkIsUser(_userAccount),"User already exists!");
         address[] memory _childIds;
@@ -254,7 +255,7 @@ contract SupplyChain{
             userId : _userAccount,
             parentId : msg.sender,
             currentQuantity : 0,
-            name: _name,
+            name: "",
             childIds: _childIds,
             longitude: "",
             latitute: ""
@@ -266,7 +267,7 @@ contract SupplyChain{
         emit UserAdded(_userAccount);
     }
     
-    function addOtherUser(string memory _name, address _parentAccount, address _userAccount, uint _userRole) public {
+    function addOtherUser(address _parentAccount, address _userAccount, uint _userRole) public {
         
         require(!checkIsUser(_userAccount),"User already exists!");
         require(getUserRole(msg.sender)<_userRole, "You don't have permission!");
@@ -282,7 +283,7 @@ contract SupplyChain{
             userId : _userAccount,
             parentId : _parentAccount,
             currentQuantity : 0,
-            name: _name,
+            name: "",
             childIds: _childIds,
             longitude: "",
             latitute: ""
@@ -294,6 +295,14 @@ contract SupplyChain{
         emit UserAdded(_userAccount);
     }
     
+    function setuserDetails(string memory _name, string memory _latitude, string memory _longitude) public {
+        
+        users[msg.sender].name = _name;
+        users[msg.sender].latitute = _latitude;
+        users[msg.sender].longitude = _longitude;
+        emit UserDetailsAdded(msg.sender);
+    }
+
     function makeLot(string memory _lotId, string[] memory _productIds) public onlyManufacturer{
         
         for(uint i = 0;i<_productIds.length;i++){
