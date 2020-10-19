@@ -166,11 +166,7 @@ public class AllContracts extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logOut:
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                clearSharedPref();
-                finish();
+                showLogoutDialog();
                 return true;
             case R.id.profile:
                 showProfileDialog();
@@ -178,6 +174,14 @@ public class AllContracts extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void showLogoutDialog() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        clearSharedPref();
+        finish();
     }
 
     void showProfileDialog() {
