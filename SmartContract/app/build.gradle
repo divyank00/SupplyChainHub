@@ -60,4 +60,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:20.3.0'
     implementation 'com.google.firebase:firebase-storage:19.2.0'
     implementation 'com.google.firebase:firebase-perf:19.0.9'
+
+    implementation "com.airbnb.android:lottie:3.4.0"
+
+    implementation 'com.journeyapps:zxing-android-embedded:3.4.0'
+
 }

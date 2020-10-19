@@ -3,21 +3,56 @@ package com.example.smartcontract;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 
+import com.example.smartcontract.models.ObjectModel;
+import com.example.smartcontract.viewModel.ProductLotViewModel;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.web3j.crypto.Bip32ECKeyPair;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.MnemonicUtils;
+import org.web3j.crypto.WalletFile;
+import org.web3j.utils.Numeric;
+
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import static org.web3j.crypto.Hash.sha3;
 
 public class MainActivity extends AppCompatActivity {
 
     EditText pk, seed;
     Button btn;
+    ImageView scan;
+    EditText barcode;
+    Button track;
+    private IntentIntegrator qrScan;
+    ProductLotViewModel productLotViewModel;
+    ProgressBar loader;
 
     public static final String KEY = "privateKey";
     public static final String PUBLIC_KEY = "publicKey";
@@ -26,18 +61,43 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE);
-        if(sharedPreferences.contains(KEY)){
-            data.privateKey = sharedPreferences.getString(KEY,"");
-            Intent i = new Intent(this, AllContracts.class);
-            startActivity(i);
-            finish();
-            return;
+        if (sharedPreferences.contains(KEY)) {
+            data.publicKey = sharedPreferences.getString(PUBLIC_KEY, "");
+            String encryptedKey = sharedPreferences.getString(KEY, "");
+            if (encryptedKey != null) {
+                String[] split = encryptedKey.substring(1, encryptedKey.length() - 1).split(", ");
+                byte[] encryptedBytes = new byte[split.length];
+                for (int i = 0; i < split.length; i++) {
+                    encryptedBytes[i] = Byte.parseByte(split[i]);
+                }
+                try {
+                    data.privateKey = decryptKey(encryptedBytes, data.publicKey);
+                } catch (Exception e) {
+                    Log.d("EncryptionError", "D: " + e.toString());
+                    e.printStackTrace();
+                }
+                Intent i = new Intent(this, AllContracts.class);
+                startActivity(i);
+                finish();
+                return;
+            }
         }
         setContentView(R.layout.activity_main);
         pk = findViewById(R.id.privateKey);
         btn = findViewById(R.id.button);
         seed = findViewById(R.id.seed);
-
+        scan = findViewById(R.id.scan);
+        track = findViewById(R.id.track);
+        barcode = findViewById(R.id.barcode);
+        loader = findViewById(R.id.loader);
+        productLotViewModel = new ProductLotViewModel();
+        qrScan = new IntentIntegrator(this);
+        scan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                qrScan.initiateScan();
+            }
+        });
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,10 +112,17 @@ public class MainActivity extends AppCompatActivity {
                 if (!pk.getText().toString().trim().isEmpty()) {
                     String privateKey = pk.getText().toString().trim();
                     Credentials credentials = Credentials.create(privateKey);
-                    editor.putString(PUBLIC_KEY,credentials.getAddress());
-                    editor.putString(KEY, privateKey);
-                }
-                else if (!seed.getText().toString().trim().isEmpty()) {
+                    data.privateKey = privateKey;
+                    editor.putString(PUBLIC_KEY, credentials.getAddress());
+                    try {
+                        byte[] encryptedBytes = encryptKey(privateKey, credentials.getAddress());
+                        String encryptedKey = Arrays.toString(encryptedBytes);
+                        editor.putString(KEY, encryptedKey);
+                    } catch (Exception e) {
+                        Log.d("EncryptionError", e.toString());
+                        e.printStackTrace();
+                    }
+                } else if (!seed.getText().toString().trim().isEmpty()) {
                     String mnemonic = seed.getText().toString().trim();
 
                     //m/44'/60'/0'/0 derivation path
@@ -69,15 +136,82 @@ public class MainActivity extends AppCompatActivity {
 
                     // Load the wallet for the derived keypair
                     Credentials credentials = Credentials.create(derivedKeyPair);
-                    editor.putString(PUBLIC_KEY,credentials.getAddress());
-                    editor.putString(KEY, credentials.getEcKeyPair().getPrivateKey().toString(16));
+                    data.privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
+                    editor.putString(PUBLIC_KEY, credentials.getAddress());
+                    try {
+                        byte[] encryptedBytes = encryptKey(credentials.getEcKeyPair().getPrivateKey().toString(16), credentials.getAddress());
+                        String encryptedKey = Arrays.toString(encryptedBytes);
+                        editor.putString(KEY, encryptedKey);
+                    } catch (Exception e) {
+                        Log.d("EncryptionError", e.toString());
+                        e.printStackTrace();
+                    }
                 }
                 editor.apply();
-
                 Intent i = new Intent(MainActivity.this, AllContracts.class);
-                data.privateKey = sharedPreferences.getString(KEY,"");
                 startActivity(i);
+                finish();
             }
         });
+        track.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String productId = barcode.getText().toString().trim();
+                if (productId.isEmpty()) {
+                    barcode.setError("Enter a ProductId");
+                    return;
+                }
+                track.setVisibility(View.GONE);
+                loader.setVisibility(View.VISIBLE);
+                productLotViewModel.getLotId(productId).observe(MainActivity.this, new Observer<ObjectModel>() {
+                    @Override
+                    public void onChanged(ObjectModel objectModel) {
+                        if (objectModel.isStatus()) {
+                            String lotId = (String) objectModel.getObj();
+                            Toast.makeText(MainActivity.this, lotId, Toast.LENGTH_SHORT).show();
+                            loader.setVisibility(View.GONE);
+                            track.setVisibility(View.VISIBLE);
+                        } else {
+                            Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                            loader.setVisibility(View.GONE);
+                            track.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            //if qrcode has nothing in it
+            if (result.getContents() == null) {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            } else {
+                //if qr contains data
+                Log.d("Address", result.getContents());
+                barcode.setText(result.getContents());
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    public static byte[] encryptKey(String privateKey, String publicKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
+        SecretKey secret = new SecretKeySpec(publicKey.substring(0, 32).getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        byte[] cipherText = cipher.doFinal(privateKey.getBytes("UTF-8"));
+        return cipherText;
+    }
+
+    public static String decryptKey(byte[] cipherText, String publicKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException {
+        SecretKey secret = new SecretKeySpec(publicKey.substring(0, 32).getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secret);
+        String decryptString = new String(cipher.doFinal(cipherText), "UTF-8");
+        return decryptString;
     }
 }

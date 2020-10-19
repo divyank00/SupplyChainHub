@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
@@ -71,6 +72,7 @@ public class callFunction extends AppCompatActivity {
     List<Type> inputAsync;
     List<TypeReference<?>> outputAsync;
     String contractAddress;
+    LottieAnimationView animationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +83,7 @@ public class callFunction extends AppCompatActivity {
         call = findViewById(R.id.call);
         inputTV = findViewById(R.id.inputTV);
         outputTV = findViewById(R.id.outputTV);
+        animationView = findViewById(R.id.animationView);
         inputAsync = new ArrayList<>();
         outputAsync = new ArrayList<>();
         Intent intent = getIntent();
@@ -289,6 +292,9 @@ public class callFunction extends AppCompatActivity {
                 Log.d("Address Output: ",outputAsync.size()+"");
                 String txData = FunctionEncoder.encode(function);
 
+                Log.d("Address Public: ",credentials.getAddress()+"");
+                Log.d("Address Encode: ",txData+"");
+                Log.d("Address Contract: ",contractAddress+"");
                 Transaction t = Transaction.createEthCallTransaction(credentials.getAddress(),contractAddress,txData);
                 BigInteger val = web3j.ethEstimateGas(t).send().getAmountUsed();
                 Log.d("Address Gas Used: ",val+"");
@@ -298,7 +304,7 @@ public class callFunction extends AppCompatActivity {
                 df.setRoundingMode(RoundingMode.CEILING);
                 result = df.format(txnFee) + " Ether";
                 Log.d("Address Fee: ",result);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }
@@ -386,8 +392,10 @@ public class callFunction extends AppCompatActivity {
                     @Override
                     public void run() {
                         if(txReceipt.isStatusOK()){
-                            Toast.makeText(callFunction.this, "Transaction Successful!", Toast.LENGTH_SHORT).show();
+                            animationView.setVisibility(View.VISIBLE);
+                            animationView.animate();
                         }else{
+                            animationView.setVisibility(View.GONE);
                             Toast.makeText(callFunction.this, "Transaction Failed!", Toast.LENGTH_SHORT).show();
                         }
                     }
