@@ -215,6 +215,18 @@ contract SupplyChain{
             return uint(UserRoles.length-1);
     }
     
+    function getSmartContractDetails() public view returns(string memory, string memory, string memory, string memory, address){
+
+        require(checkIsUser(msg.sender),"You can't access this data!");
+        return (
+            companyName,
+            productName,
+            productCategory,
+            users[contractOwner].name,
+            contractOwner
+        );
+    }
+
     function getUserDetails(address account) public view returns(string memory, string memory, string memory, address, address[] memory){
         return (
             users[account].name,
@@ -426,15 +438,6 @@ contract SupplyChain{
             lots[_lotId[i]].productState = State.ForSale;
         }
         emit ForSale();
-    }
-
-    function getSmartContractDetails() public view returns(string memory, string memory, string memory){
-
-        return (
-            companyName,
-            productName,
-            productCategory
-        );
     }
 
     function setProductFinalSellingPrice(string memory _productId, uint sellingPrice) public {
