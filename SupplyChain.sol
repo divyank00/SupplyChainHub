@@ -438,12 +438,13 @@ contract SupplyChain{
         products[_productId].finalBuyingPrice = buyingPrice;
     }
 
-    function trackProductByProductId(string memory _productId) public view returns(address, uint, address[] memory, uint[] memory, uint[] memory, string[] memory){
+    function trackProductByProductId(string memory _productId) public view returns(string memory, uint, address, address[] memory, uint[] memory, uint[] memory, string[] memory){
         
         string storage _lotId = products[_productId].lotId;
         return (
-            lots[_lotId].currentOwner,
+            _lotId,
             uint(lots[_lotId].productState),
+            lots[_lotId].currentOwner,
             lots[_lotId].trackUser,
             lots[_lotId].buyingPrices,
             lots[_lotId].sellingPrices,
@@ -451,12 +452,12 @@ contract SupplyChain{
         );
     }
 
-    function trackProductByLotId(string memory _lotId) public view returns(string[] memory, address, uint, address[] memory, uint[] memory, uint[] memory, string[] memory){
+    function trackProductByLotId(string memory _lotId) public view returns(string[] memory, uint, address, address[] memory, uint[] memory, uint[] memory, string[] memory){
         
         return (
             lots[_lotId].productIds,
-            lots[_lotId].currentOwner,
             uint(lots[_lotId].productState),
+            lots[_lotId].currentOwner,
             lots[_lotId].trackUser,
             lots[_lotId].buyingPrices,
             lots[_lotId].sellingPrices,
