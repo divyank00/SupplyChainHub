@@ -64,6 +64,9 @@ public class AllFunctions extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                    }else{
+                        loader.setVisibility(View.GONE);
+                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
                     }
                 }else{
                     loader.setVisibility(View.GONE);
