@@ -19,17 +19,11 @@ import com.example.smartcontract.viewModel.ProductLotViewModel;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.web3j.crypto.Bip32ECKeyPair;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.MnemonicUtils;
-import org.web3j.crypto.WalletFile;
-import org.web3j.utils.Numeric;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -40,8 +34,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import static org.web3j.crypto.Hash.sha3;
 
 public class MainActivity extends AppCompatActivity {
 
