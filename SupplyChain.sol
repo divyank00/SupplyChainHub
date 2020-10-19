@@ -297,7 +297,8 @@ contract SupplyChain{
     
     function setUserDetails(string memory _name, string memory _latitude, string memory _longitude) public {
         
-        require(checkIsUser(msg.sender),"You are not a part of this Suppy-Chain");
+        require(checkIsUser(msg.sender),"You are not a part of this Supply-Chain");
+        require(bytes(users[msg.sender].name).length==0,"You have added your details already!");
         users[msg.sender].name = _name;
         users[msg.sender].latitute = _latitude;
         users[msg.sender].longitude = _longitude;
