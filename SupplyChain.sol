@@ -87,8 +87,11 @@ contract SupplyChain{
     event PaymentSuccessful();
     event DealFailed(address buyerAddress);
     
-    constructor(string memory _name, string memory _latitude, string memory _longitude) public {
-        require(bytes(_name).length!=0 && bytes(_latitude).length!=0 && bytes(_longitude).length!=0);
+    constructor(string memory _companyName, string memory _productName, string memory _productCategory, string memory _name, string memory _latitude, string memory _longitude) public {
+        require(bytes(_companyName).length!=0 && bytes(_productName).length!=0 && bytes(_name).length!=0 && bytes(_latitude).length!=0 && bytes(_longitude).length!=0,"All parameters are compulsory!");
+        companyName = _companyName;
+        productName = _productName;
+        productCategory = _productCategory;
         contractOwner = msg.sender;
         address[] memory _childIds;
         user memory owner = user({
