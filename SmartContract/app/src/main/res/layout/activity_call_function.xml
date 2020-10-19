@@ -24,6 +24,7 @@
                 android:textStyle="bold"
                 android:text="Input" />
             <androidx.recyclerview.widget.RecyclerView
+                android:overScrollMode="never"
                 android:id="@+id/input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -61,7 +62,6 @@
                 android:layout_height="wrap_content"
                 app:lottie_autoPlay="true"
                 android:visibility="gone"
-
                 app:lottie_loop="false"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

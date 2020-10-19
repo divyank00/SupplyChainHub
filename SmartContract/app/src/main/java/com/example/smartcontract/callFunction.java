@@ -94,10 +94,10 @@ public class callFunction extends AppCompatActivity {
             getSupportActionBar().setTitle(obj.optString("name"));
             if (obj.optString("stateMutability").equals("view")) {
                 call.setText("READ");
-                call.setBackgroundColor(0xFF90ee90);
+                call.setBackgroundColor(0xFF2eb82e);
             } else {
                 call.setText("WRITE");
-                call.setBackgroundColor(0xFFadd8e6);
+                call.setBackgroundColor(0xFF3366ff);
             }
             List<JSONObject> inputs = new ArrayList<>();
             for (int i = 0; i < obj.optJSONArray("inputs").length(); i++) {
