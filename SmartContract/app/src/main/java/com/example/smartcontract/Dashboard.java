@@ -15,9 +15,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -188,6 +191,9 @@ public class Dashboard extends AppCompatActivity {
         taskRunner.executeAsync(new getUserDetails(), (result) -> {
             if (result.isStatus()) {
                 if (!result.getData().isEmpty()) {
+                    if (result.getData().get(1).getValue().toString().isEmpty()) {
+                        setProfileDialog();
+                    }
                     userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
                     if (contractOwnerAddress != null && contractOwnerAddress.equals(Data.publicKey)) {
                         userRole.setText("You are the owner!");
@@ -333,6 +339,61 @@ public class Dashboard extends AppCompatActivity {
             if (result.isStatus()) {
                 ownerRole.setChecked(true);
                 ownerRole.setEnabled(false);
+                showTransactionDialog(true, result.getData(), null);
+            } else {
+                showTransactionDialog(false, result.getData(), result.getErrorMsg());
+            }
+        });
+    }
+
+    private void executeSetUserDetailsGas(String name, String lat, String lon, Dialog dialog) {
+        final KProgressHUD progressHUD = KProgressHUD.create(Dashboard.this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
+        taskRunner.executeAsync(new setUserDetailsGas(name, lat, lon), (result) -> {
+            progressHUD.dismiss();
+            if (result.isStatus() && !result.getData().isEmpty()) {
+                MaterialDialog mDialog = new MaterialDialog.Builder(Dashboard.this)
+                        .setTitle("Confirm Transaction?")
+                        .setMessage(result.getData() + " will be deducted!")
+                        .setCancelable(false)
+                        .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                dialogInterface.dismiss();
+                                executeSetUserDetails(name, lat, lon, dialog);
+                            }
+                        })
+                        .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                        .build();
+                mDialog.show();
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void executeSetUserDetails(String name, String lat, String lon, Dialog dialog) {
+        final KProgressHUD progressHUD = KProgressHUD.create(Dashboard.this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
+        taskRunner.executeAsync(new setUserDetails(name, lat, lon), (result) -> {
+            progressHUD.dismiss();
+            if (result.isStatus()) {
+                dialog.dismiss();
                 showTransactionDialog(true, result.getData(), null);
             } else {
                 showTransactionDialog(false, result.getData(), result.getErrorMsg());
@@ -601,6 +662,119 @@ public class Dashboard extends AppCompatActivity {
         }
     }
 
+    class setUserDetailsGas implements Callable<WriteObject> {
+
+        String name, lat, lon;
+
+        public setUserDetailsGas(String name, String lat, String lon) {
+            this.name = name;
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        @Override
+        public WriteObject call() {
+            WriteObject result = new WriteObject();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = Data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                inputAsync.add(new Utf8String(name));
+                inputAsync.add(new Utf8String(lat));
+                inputAsync.add(new Utf8String(lon));
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+
+                Function function = new Function("setUserDetails", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String txData = FunctionEncoder.encode(function);
+
+                Transaction t = Transaction.createEthCallTransaction(credentials.getAddress(), contractAddress, txData);
+                BigInteger val = web3j.ethEstimateGas(t).send().getAmountUsed();
+                Log.d("Address Gas Used: ", val + "");
+                Log.d("Address Gas Price: ", "" + 4.1 * 1e-9 + " Ether");
+                Double txnFee = val.intValue() * 4.1 * 1e-9;
+                DecimalFormat df = new DecimalFormat("#.##########");
+                df.setRoundingMode(RoundingMode.CEILING);
+                result = new WriteObject(true, df.format(txnFee) + " Ether", null);
+            } catch (Exception e) {
+                result = new WriteObject(false, null, e.getMessage());
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class setUserDetails implements Callable<WriteObject> {
+
+        String name, lat, lon;
+
+        public setUserDetails(String name, String lat, String lon) {
+            this.name = name;
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        @Override
+        public WriteObject call() {
+            WriteObject result = new WriteObject();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = Data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                inputAsync.add(new Utf8String(name));
+                inputAsync.add(new Utf8String(lat));
+                inputAsync.add(new Utf8String(lon));
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+
+                Function function = new Function("setUserDetails", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String txData = FunctionEncoder.encode(function);
+                TransactionManager txManager = new FastRawTransactionManager(web3j, credentials);
+                String txHash = txManager.sendTransaction(
+                        DefaultGasProvider.GAS_PRICE,
+                        DefaultGasProvider.GAS_LIMIT,
+                        contractAddress,
+                        txData,
+                        BigInteger.ZERO).getTransactionHash();
+
+                TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
+                        web3j,
+                        TransactionManager.DEFAULT_POLLING_FREQUENCY,
+                        TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH);
+                TransactionReceipt txReceipt = receiptProcessor.waitForTransactionReceipt(txHash);
+                if (txReceipt.isStatusOK()) {
+                    result = new WriteObject(true, txHash, null);
+                } else {
+                    result = new WriteObject(false, txHash, txReceipt.getRevertReason());
+                }
+            } catch (Exception e) {
+                result = new WriteObject(false, null, e.getMessage());
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
     class Object {
         private List<Type> data;
         private boolean status;
@@ -716,6 +890,43 @@ public class Dashboard extends AppCompatActivity {
                     ClipData clip = ClipData.newPlainText("PublicAddress", txnHash);
                     clipboard.setPrimaryClip(clip);
                     Toast.makeText(Dashboard.this, "Transaction Hash copied to clipboard!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.show();
+            dialog.getWindow().setAttributes(lp);
+        } catch (Exception e) {
+            Log.d("Address Error", e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    private void setProfileDialog() {
+        try {
+            final Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.set_profile_dialog);
+            EditText name = dialog.findViewById(R.id.name);
+            EditText lat = dialog.findViewById(R.id.lat);
+            EditText lon = dialog.findViewById(R.id.lon);
+            Button confirm = dialog.findViewById(R.id.button);
+            dialog.setCancelable(false);
+            dialog.setCanceledOnTouchOutside(false);
+            confirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (name.getText().toString().trim().isEmpty()) {
+                        name.setError("Mandatory Field!");
+                    } else if (lat.getText().toString().isEmpty()) {
+                        lat.setError("Mandatory Field!");
+                    } else if (lon.getText().toString().isEmpty()) {
+                        lon.setError("Mandatory Field!");
+                    } else {
+                        executeSetUserDetailsGas(name.getText().toString(), lat.getText().toString(), lon.getText().toString(), dialog);
+                    }
                 }
             });
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

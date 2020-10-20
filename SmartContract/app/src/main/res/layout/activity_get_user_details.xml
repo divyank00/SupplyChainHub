@@ -77,7 +77,7 @@
                                 android:gravity="center_horizontal"
                                 android:text="RESULT"
                                 android:textColor="#FF2eb82e"
-                                android:textSize="24sp"
+                                android:textSize="20sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -104,7 +104,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Name: "
-                                android:textSize="16sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -118,7 +118,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Location: "
-                                android:textSize="16sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -127,7 +127,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Parent: "
                                 android:textIsSelectable="true"
-                                android:textSize="16sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -136,7 +136,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Child: "
                                 android:textIsSelectable="true"
-                                android:textSize="16sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -144,7 +144,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Quantity: "
-                                android:textSize="16sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
