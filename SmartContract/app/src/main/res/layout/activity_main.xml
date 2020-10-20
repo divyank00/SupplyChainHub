@@ -37,7 +37,7 @@
                         android:layout_marginBottom="10dp"
                         android:gravity="center_horizontal"
                         android:text="LOGIN"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
@@ -134,7 +134,7 @@
                         android:layout_marginBottom="10dp"
                         android:gravity="center_horizontal"
                         android:text="TRACK PRODUCT"
-                        android:textColor="@color/colorAccent"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
@@ -146,7 +146,6 @@
                         android:textStyle="bold" />
 
                     <RelativeLayout
-                        android:layout_marginBottom="10dp"
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
@@ -157,7 +156,8 @@
                             android:clickable="true"
                             android:tooltipText="Scan QR"
                             android:layout_marginEnd="5dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"                            android:layout_alignParentEnd="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:layout_alignParentEnd="true"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:src="@drawable/barcode" />
@@ -168,8 +168,25 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textSize="16sp" />
-                    </RelativeLayout>
 
+                    </RelativeLayout>
+                    <Button
+                        android:elevation="12dp"
+                        android:translationZ="12dp"
+                        android:id="@+id/track"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginVertical="10dp"
+                        android:text="Track" />
+
+                    <ProgressBar
+                        android:id="@+id/loader"
+                        android:layout_marginVertical="10dp"
+                        android:visibility="gone"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

@@ -47,21 +47,26 @@ public class AllFunctions extends AppCompatActivity {
             @Override
             public void onChanged(ObjectModel objectModel) {
                 if(objectModel.isStatus()){
-                    try {
-                        String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
-                        JSONArray obj = new JSONArray(abi);
-                        List<JSONObject> functions = new ArrayList<>();
-                        for (int i = 0; i < obj.length(); i++) {
-                            if (((JSONObject) obj.get(i)).optString("type").equals("function")){
-                                functions.add((JSONObject) obj.get(i));
+                    if(objectModel.getObj()!=null) {
+                        try {
+                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
+                            JSONArray obj = new JSONArray(abi);
+                            List<JSONObject> functions = new ArrayList<>();
+                            for (int i = 0; i < obj.length(); i++) {
+                                if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
+                                    functions.add((JSONObject) obj.get(i));
+                                }
                             }
+                            loader.setVisibility(View.GONE);
+                            adapter = new Adapter(AllFunctions.this, functions, address);
+                            rV.setAdapter(adapter);
+                            rV.setLayoutManager(new LinearLayoutManager(AllFunctions.this));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
+                    }else{
                         loader.setVisibility(View.GONE);
-                        adapter = new Adapter(AllFunctions.this,functions, address);
-                        rV.setAdapter(adapter);
-                        rV.setLayoutManager(new LinearLayoutManager(AllFunctions.this));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
                     }
                 }else{
                     loader.setVisibility(View.GONE);

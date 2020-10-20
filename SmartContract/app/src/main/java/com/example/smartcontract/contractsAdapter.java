@@ -1,5 +1,7 @@
 package com.example.smartcontract;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -7,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -15,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.smartcontract.models.ContractModel;
 
 import java.util.List;
+
+import static androidx.core.content.ContextCompat.getSystemService;
 
 public class contractsAdapter extends RecyclerView.Adapter<contractsAdapter.ViewHolder> {
 
@@ -40,9 +45,19 @@ public class contractsAdapter extends RecyclerView.Adapter<contractsAdapter.View
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(mContext,AllFunctions.class);
+                Intent i = new Intent(mContext,Dashboard.class);
                 i.putExtra("contractAddress",contracts.get(holder.getAdapterPosition()).getAddress());
                 mContext.startActivity(i);
+            }
+        });
+        holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(mContext, ClipboardManager.class);
+                ClipData clip = ClipData.newPlainText("Address", contracts.get(holder.getAdapterPosition()).getAddress());
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(mContext, "Contract Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                return true;
             }
         });
     }

@@ -1,11 +1,28 @@
 package com.example.smartcontract;
 
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,10 +33,38 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.smartcontract.models.ContractModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.AllContractsViewModel;
+import com.kaopiz.kprogresshud.KProgressHUD;
+import com.shreyaspatil.MaterialDialog.MaterialDialog;
+import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.http.HttpService;
+
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import static androidx.core.content.ContextCompat.getSystemService;
 
 public class AllContracts extends AppCompatActivity {
 
@@ -70,8 +115,8 @@ public class AllContracts extends AppCompatActivity {
                         name.setError("Enter a suitable name!");
                         return;
                     }
-                    for(ContractModel contractModel : mList){
-                        if(contractModel.getAddress().equals(address.getText().toString().trim())){
+                    for (ContractModel contractModel : mList) {
+                        if (contractModel.getAddress().equals(address.getText().toString().trim())) {
                             Toast.makeText(AllContracts.this, "Following Supply-Chain already exists!", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -95,7 +140,13 @@ public class AllContracts extends AppCompatActivity {
                             });
                 }
             });
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
             dialog.show();
+            dialog.getWindow().setAttributes(lp);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,5 +164,131 @@ public class AllContracts extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.logOut:
+                showLogoutDialog();
+                return true;
+            case R.id.profile:
+                showProfileDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showLogoutDialog() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        clearSharedPref();
+        finish();
+    }
+
+    void showProfileDialog() {
+        try {
+            final Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.profile_dialog);
+            LinearLayout copyAddress = dialog.findViewById(R.id.copyAddress);
+            TextView address = dialog.findViewById(R.id.publicAddress);
+            TextView balance = dialog.findViewById(R.id.currentBalance);
+            ProgressBar balLoader = dialog.findViewById(R.id.balLoader);
+            address.setText(data.publicKey);
+            copyAddress.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("PublicAddress", address.getText().toString());
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(AllContracts.this, "Public Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            copyAddress.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("PublicAddress", address.getText().toString());
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(AllContracts.this, "Public Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+            TaskRunner taskRunner = new TaskRunner();
+            taskRunner.executeAsync(new getAccBal(), (result) -> {
+                balance.setText(result);
+                balLoader.setVisibility(View.GONE);
+                balance.setVisibility(View.VISIBLE);
+            });
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.show();
+            dialog.getWindow().setAttributes(lp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static class TaskRunner {
+        //        private final Executor executor = Executors.newSingleThreadExecutor(); // change according to your requirements
+        private final Executor executor = new ThreadPoolExecutor(5, 128, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        public interface Callback<R> {
+            void onComplete(R result);
+        }
+
+        public <R> void executeAsync(Callable<R> callable, Dashboard.TaskRunner.Callback<R> callback) {
+            executor.execute(() -> {
+                try {
+                    final R result = callable.call();
+                    handler.post(() -> {
+                        callback.onComplete(result);
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    class getAccBal implements Callable<String> {
+
+        @Override
+        public String call() {
+            String result = "";
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                EthGetBalance balanceResult = web3j.ethGetBalance(data.publicKey, DefaultBlockParameterName.LATEST).send();
+                BigInteger wei = balanceResult.getBalance();
+                result = wei.doubleValue() / 1e18 + " ETH";
+            } catch (Exception e) {
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    void clearSharedPref() {
+        SharedPreferences preferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.apply();
     }
 }

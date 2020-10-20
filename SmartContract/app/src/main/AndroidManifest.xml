@@ -13,10 +13,20 @@
         android:theme="@style/AppTheme">
         <activity android:name=".mapUsers.MapActivity">
         </activity>
-        <activity android:name=".AllFunctions" />
-        <activity android:name=".callFunction" />
-        <activity android:name=".AllContracts" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".AddUser"></activity>
+        <activity android:name=".Dashboard" />
+        <activity
+            android:name=".AllFunctions"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".callFunction"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".AllContracts"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

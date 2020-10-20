@@ -51,7 +51,7 @@ dependencies {
     implementation 'com.shreyaspatil:MaterialDialog:2.1'
 
     // Material Design Library
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.2.1'
 
     implementation 'com.google.firebase:firebase-auth:19.4.0'
     implementation 'com.google.firebase:firebase-analytics:17.6.0'
@@ -61,4 +61,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:20.3.0'
     implementation 'com.google.firebase:firebase-storage:19.2.0'
     implementation 'com.google.firebase:firebase-perf:19.0.9'
+
+    implementation 'com.github.arcadefire:nice-spinner:1.4.4'
+    implementation 'com.github.sharish:ShimmerRecyclerView:v1.3'
+
+    implementation "com.airbnb.android:lottie:3.4.0"
+
+    implementation 'com.journeyapps:zxing-android-embedded:3.4.0'
+
 }

@@ -1,0 +1,803 @@
+package com.example.smartcontract;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatToggleButton;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+
+import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
+
+import com.airbnb.lottie.LottieAnimationView;
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.example.smartcontract.models.ListenerModel;
+import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.kaopiz.kprogresshud.KProgressHUD;
+import com.shreyaspatil.MaterialDialog.MaterialDialog;
+import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
+
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.crypto.Credentials;
+import org.web3j.exceptions.MessageDecodingException;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.FastRawTransactionManager;
+import org.web3j.tx.TransactionManager;
+import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import static androidx.core.content.ContextCompat.getSystemService;
+
+public class Dashboard extends AppCompatActivity {
+
+    ProgressBar productDetailsLoader, userDetailsLoader;
+    LinearLayout productDetails, ownerClick, userDetails, parentClick, ownerRoleLinearLayout;
+    TextView companyName, productName, productCategory, owner, userRole, userParent, currentQuantity, ownerText;
+    SwitchCompat ownerRole;
+    String contractAddress, contractOwnerAddress;
+    TaskRunner taskRunner;
+    DashboardAdapter dashboardAdapter;
+    List<ListenerModel> listenerModelList;
+    ShimmerRecyclerView userFunctions;
+    int userRoleInt;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_dashboard);
+        Intent intent = getIntent();
+        setGlobal(intent);
+        executeGetUserRolesArray();
+    }
+
+    private void setGlobal(Intent intent) {
+        taskRunner = new TaskRunner();
+        contractAddress = intent.getStringExtra("contractAddress");
+        productDetailsLoader = findViewById(R.id.productDetailsLoader);
+        productDetails = findViewById(R.id.productDetails);
+        companyName = findViewById(R.id.companyName);
+        productName = findViewById(R.id.productName);
+        productCategory = findViewById(R.id.productCategory);
+        owner = findViewById(R.id.owner);
+        ownerClick = findViewById(R.id.ownerClick);
+        userDetailsLoader = findViewById(R.id.userDetailsLoader);
+        userDetails = findViewById(R.id.userDetails);
+        parentClick = findViewById(R.id.parentClick);
+        userRole = findViewById(R.id.userRole);
+        userParent = findViewById(R.id.userParent);
+        currentQuantity = findViewById(R.id.currentQuantity);
+        ownerText = findViewById(R.id.ownerText);
+        ownerRole = findViewById(R.id.ownerRole);
+        ownerRoleLinearLayout = findViewById(R.id.ownerRoleLinearLayout);
+        userFunctions = findViewById(R.id.userFunctions);
+        listenerModelList = new ArrayList<>();
+        dashboardAdapter = new DashboardAdapter(Dashboard.this, listenerModelList);
+        userFunctions.setAdapter(dashboardAdapter);
+        userFunctions.setLayoutManager(new GridLayoutManager(this, 2));
+        userFunctions.showShimmerAdapter();
+    }
+
+    private void executeGetUserRolesArray() {
+        taskRunner.executeAsync(new getUserRolesArray(), (result) -> {
+            if (result.isStatus()) {
+                if (!result.getData().isEmpty()) {
+                    List<Utf8String> roles = (List<Utf8String>) result.getData().get(0).getValue();
+                    data.userRoles.add("Owner");
+                    for (int i = 1; i < roles.size(); i++) {
+                        data.userRoles.add(roles.get(i).toString());
+                    }
+                    Log.d("Address Roles", data.userRoles.toString() + "");
+                    executeGetSmartContractDetails();
+                }
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void executeGetSmartContractDetails() {
+        taskRunner.executeAsync(new getSmartContractDetails(), (result) -> {
+            if (result.isStatus()) {
+                if (!result.getData().isEmpty()) {
+                    companyName.setText(result.getData().get(0).getValue().toString());
+                    productName.setText(result.getData().get(1).getValue().toString());
+                    if (!result.getData().get(2).getValue().toString().trim().isEmpty()) {
+                        productCategory.setText("(" + result.getData().get(2).getValue().toString() + ")");
+                    } else {
+                        productCategory.setVisibility(View.GONE);
+                    }
+                    contractOwnerAddress = result.getData().get(4).getValue().toString();
+                    owner.setText("Owner: " + result.getData().get(3).getValue().toString() + "\n(" + contractOwnerAddress + ")");
+                    ownerClick.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText("PublicAddress", result.getData().get(4).getValue().toString());
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(Dashboard.this, "Owner Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                            return true;
+                        }
+                    });
+                    ownerClick.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText("PublicAddress", result.getData().get(4).getValue().toString());
+                            clipboard.setPrimaryClip(clip);
+                            Toast.makeText(Dashboard.this, "Owner Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    productDetailsLoader.setVisibility(View.GONE);
+                    productDetails.setVisibility(View.VISIBLE);
+                    executeGetUserDetails();
+                }
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+    }
+
+    private void executeGetUserDetails() {
+        taskRunner.executeAsync(new getUserDetails(), (result) -> {
+            if (result.isStatus()) {
+                if (!result.getData().isEmpty()) {
+                    userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
+                    if (contractOwnerAddress != null && contractOwnerAddress.equals(data.publicKey)) {
+                        userRole.setText("You are the owner!");
+                        ownerText.setText("Are you a " + data.userRoles.get(1).toString() + " also?");
+                        ownerText.setVisibility(View.VISIBLE);
+                        ownerRoleLinearLayout.setVisibility(View.VISIBLE);
+                        parentClick.setVisibility(View.GONE);
+                        if (userRoleInt != 0) {
+                            ownerRole.setChecked(true);
+                            ownerRole.setEnabled(false);
+                            currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
+                        } else {
+                            ownerRole.setChecked(false);
+                            ownerRole.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    if (isChecked) {
+                                        ownerRole.setChecked(false);
+                                        executeMakeOwnerAsNextRoleGas();
+                                    }
+                                }
+                            });
+                            currentQuantity.setVisibility(View.GONE);
+                        }
+                    } else {
+                        userRole.setText("You are a " + data.userRoles.get(userRoleInt) + "!");
+                        userParent.setText("Your " + data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
+                        currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
+                        parentClick.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("PublicAddress", result.getData().get(4).getValue().toString());
+                                clipboard.setPrimaryClip(clip);
+                                Toast.makeText(Dashboard.this, data.userRoles.get((int) result.getData().get(0).getValue() - 1) + " Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                                return false;
+                            }
+                        });
+                    }
+                    userDetailsLoader.setVisibility(View.GONE);
+                    userDetails.setVisibility(View.VISIBLE);
+                    userFunctions.hideShimmerAdapter();
+                    if (userRoleInt < data.userRoles.size() - 1) {
+                        listenerModelList.add(new ListenerModel("Add User", "You can add user in the Smart-Contract!", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(v.getContext(), AddUser.class);
+                                if (contractOwnerAddress.equals(data.publicKey)) {
+                                    intent.putExtra("userRole", 0);
+                                } else {
+                                    intent.putExtra("userRole", userRoleInt);
+                                }
+                                intent.putExtra("contractAddress", contractAddress);
+                                startActivity(intent);
+                            }
+                        }));
+                    }
+                    dashboardAdapter.notifyDataSetChanged();
+                }
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+    }
+
+    private void executeMakeOwnerAsNextRoleGas() {
+        final KProgressHUD progressHUD = KProgressHUD.create(Dashboard.this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
+        taskRunner.executeAsync(new makeOwnerAsNextRoleGas(), (result) -> {
+            progressHUD.dismiss();
+            if (result.isStatus() && !result.getData().isEmpty()) {
+                MaterialDialog mDialog = new MaterialDialog.Builder(Dashboard.this)
+                        .setTitle("Confirm Transaction?")
+                        .setMessage(result.getData() + " will be deducted!")
+                        .setCancelable(false)
+                        .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                dialogInterface.dismiss();
+                                executeMakeOwnerAsNextRole();
+                            }
+                        })
+                        .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                        .build();
+                mDialog.show();
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void executeMakeOwnerAsNextRole() {
+        final KProgressHUD progressHUD = KProgressHUD.create(Dashboard.this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
+        taskRunner.executeAsync(new makeOwnerAsNextRole(), (result) -> {
+            progressHUD.dismiss();
+            if (result.isStatus()) {
+                ownerRole.setChecked(true);
+                ownerRole.setEnabled(false);
+                showTransactionDialog(true, result.getData(), null);
+            } else {
+                showTransactionDialog(false, result.getData(), result.getErrorMsg());
+            }
+        });
+    }
+
+    public static class TaskRunner {
+        //        private final Executor executor = Executors.newSingleThreadExecutor(); // change according to your requirements
+        private final Executor executor = new ThreadPoolExecutor(5, 128, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        public interface Callback<R> {
+            void onComplete(R result);
+        }
+
+        public <R> void executeAsync(Callable<R> callable, Callback<R> callback) {
+            executor.execute(() -> {
+                try {
+                    final R result = callable.call();
+                    handler.post(() -> {
+                        callback.onComplete(result);
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    class getUserRolesArray implements Callable<Object> {
+
+        @Override
+        public Object call() {
+            Object result = new Object();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+                outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {
+                });
+                Function function = new Function("getUserRolesArray", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String encodedFunction = FunctionEncoder.encode(function);
+                EthCall ethCall = web3j.ethCall(
+                        Transaction.createEthCallTransaction(credentials.getAddress(), contractAddress, encodedFunction),
+                        DefaultBlockParameterName.LATEST)
+                        .sendAsync().get();
+                if (!ethCall.isReverted()) {
+                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
+                } else {
+                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
+                }
+            } catch (Exception e) {
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class getSmartContractDetails implements Callable<Object> {
+
+        @Override
+        public Object call() {
+            Object result = new Object();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+                outputAsync.add(new TypeReference<Utf8String>() {
+                });
+                outputAsync.add(new TypeReference<Utf8String>() {
+                });
+                outputAsync.add(new TypeReference<Utf8String>() {
+                });
+                outputAsync.add(new TypeReference<Utf8String>() {
+                });
+                outputAsync.add(new TypeReference<Address>() {
+                });
+                Function function = new Function("getSmartContractDetails", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String encodedFunction = FunctionEncoder.encode(function);
+                EthCall ethCall = web3j.ethCall(
+                        Transaction.createEthCallTransaction(credentials.getAddress(), contractAddress, encodedFunction),
+                        DefaultBlockParameterName.LATEST)
+                        .sendAsync().get();
+                if (!ethCall.isReverted()) {
+                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
+                } else {
+                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
+                }
+            } catch (Exception e) {
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class getUserDetails implements Callable<Object> {
+
+        @Override
+        public Object call() {
+            Object result = new Object();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                inputAsync.add(new Address(data.publicKey));
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+                outputAsync.add(new TypeReference<Uint256>() {
+                });
+                outputAsync.add(new TypeReference<Utf8String>() {
+                });
+                outputAsync.add(new TypeReference<Utf8String>() {
+                });
+                outputAsync.add(new TypeReference<Utf8String>() {
+                });
+                outputAsync.add(new TypeReference<Address>() {
+                });
+                outputAsync.add(new TypeReference<DynamicArray<Address>>() {
+                });
+                outputAsync.add(new TypeReference<Uint256>() {
+                });
+                Function function = new Function("getUserDetails", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String encodedFunction = FunctionEncoder.encode(function);
+                EthCall ethCall = web3j.ethCall(
+                        Transaction.createEthCallTransaction(credentials.getAddress(), contractAddress, encodedFunction),
+                        DefaultBlockParameterName.LATEST)
+                        .sendAsync().get();
+                if (!ethCall.isReverted()) {
+                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
+                } else {
+                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
+                }
+            } catch (Exception e) {
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class makeOwnerAsNextRoleGas implements Callable<WriteObject> {
+
+        @Override
+        public WriteObject call() {
+            WriteObject result = new WriteObject();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+
+                Function function = new Function("makeOwnerAsNextRole", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String txData = FunctionEncoder.encode(function);
+
+                Transaction t = Transaction.createEthCallTransaction(credentials.getAddress(), contractAddress, txData);
+                BigInteger val = web3j.ethEstimateGas(t).send().getAmountUsed();
+                Log.d("Address Gas Used: ", val + "");
+                Log.d("Address Gas Price: ", "" + 4.1 * 1e-9 + " Ether");
+                Double txnFee = val.intValue() * 4.1 * 1e-9;
+                DecimalFormat df = new DecimalFormat("#.##########");
+                df.setRoundingMode(RoundingMode.CEILING);
+                result = new WriteObject(true, df.format(txnFee) + " Ether", null);
+            } catch (Exception e) {
+                result = new WriteObject(false, null, "You don't have required permissions!");
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class makeOwnerAsNextRole implements Callable<WriteObject> {
+
+        @Override
+        public WriteObject call() {
+            WriteObject result = new WriteObject();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+
+                Function function = new Function("makeOwnerAsNextRole", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String txData = FunctionEncoder.encode(function);
+                TransactionManager txManager = new FastRawTransactionManager(web3j, credentials);
+                String txHash = txManager.sendTransaction(
+                        DefaultGasProvider.GAS_PRICE,
+                        DefaultGasProvider.GAS_LIMIT,
+                        contractAddress,
+                        txData,
+                        BigInteger.ZERO).getTransactionHash();
+
+                TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
+                        web3j,
+                        TransactionManager.DEFAULT_POLLING_FREQUENCY,
+                        TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH);
+                TransactionReceipt txReceipt = receiptProcessor.waitForTransactionReceipt(txHash);
+                if (txReceipt.isStatusOK()) {
+                    result = new WriteObject(true, txHash, null);
+                } else {
+                    result = new WriteObject(false, null, txReceipt.getRevertReason());
+                }
+            } catch (Exception e) {
+                result = new WriteObject(false, null, e.getMessage());
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class Object {
+        private List<Type> data;
+        private boolean status;
+
+        public boolean isStatus() {
+            return status;
+        }
+
+        public void setStatus(boolean status) {
+            this.status = status;
+        }
+
+        public Object() {
+        }
+
+        public List<Type> getData() {
+            return data;
+        }
+
+        public void setData(List<Type> data) {
+            this.data = data;
+        }
+
+        public Object(boolean status, List<Type> data, String errorMsg) {
+            this.data = data;
+            this.status = status;
+            this.errorMsg = errorMsg;
+        }
+
+        public String getErrorMsg() {
+            return errorMsg;
+        }
+
+        public void setErrorMsg(String errorMsg) {
+            this.errorMsg = errorMsg;
+        }
+
+        private String errorMsg;
+    }
+
+    class WriteObject {
+        private boolean status;
+
+        public boolean isStatus() {
+            return status;
+        }
+
+        public void setStatus(boolean status) {
+            this.status = status;
+        }
+
+        public WriteObject() {
+        }
+
+        public WriteObject(boolean status, String data, String errorMsg) {
+            this.status = status;
+            this.data = data;
+            this.errorMsg = errorMsg;
+        }
+
+        public String getErrorMsg() {
+            return errorMsg;
+        }
+
+        public void setErrorMsg(String errorMsg) {
+            this.errorMsg = errorMsg;
+        }
+
+        private String errorMsg;
+
+        public String getData() {
+            return data;
+        }
+
+        public void setData(String data) {
+            this.data = data;
+        }
+
+        private String data;
+    }
+
+    private void showTransactionDialog(boolean successful, String txnHash, String errorMsg) {
+        try {
+            Log.d("Address Dashboard", txnHash);
+            final Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.transaction_dialog);
+            ImageView txnHashCopy = dialog.findViewById(R.id.txnHashCopy);
+            TextView txnHashTV = dialog.findViewById(R.id.txnHash);
+            TextView txnUrl = dialog.findViewById(R.id.txnUrl);
+            TextView txnError = dialog.findViewById(R.id.txnError);
+            LottieAnimationView animationView = dialog.findViewById(R.id.animationView);
+            txnHashTV.setText(txnHash);
+            txnUrl.setText("https://rinkeby.etherscan.io/tx/" + txnHash);
+            if (successful) {
+                animationView.setAnimation(R.raw.success);
+                txnError.setVisibility(View.GONE);
+            } else {
+                animationView.setAnimation(R.raw.error);
+                txnError.setText("Error: " + errorMsg);
+                txnError.setVisibility(View.VISIBLE);
+            }
+            animationView.setVisibility(View.VISIBLE);
+            animationView.playAnimation();
+            txnHashCopy.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("PublicAddress", txnHash);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(Dashboard.this, "Transaction Hash copied to clipboard!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.show();
+            dialog.getWindow().setAttributes(lp);
+        } catch (Exception e) {
+            Log.d("Address Error", e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.logOut:
+                showLogoutDialog();
+                return true;
+            case R.id.profile:
+                showProfileDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showLogoutDialog() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        clearSharedPref();
+        finish();
+    }
+
+    void showProfileDialog() {
+        try {
+            final Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.profile_dialog);
+            LinearLayout copyAddress = dialog.findViewById(R.id.copyAddress);
+            TextView address = dialog.findViewById(R.id.publicAddress);
+            TextView balance = dialog.findViewById(R.id.currentBalance);
+            ProgressBar balLoader = dialog.findViewById(R.id.balLoader);
+            address.setText(data.publicKey);
+            copyAddress.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("PublicAddress", address.getText().toString());
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(Dashboard.this, "Public Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            copyAddress.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("PublicAddress", address.getText().toString());
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(Dashboard.this, "Public Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+            AllContracts.TaskRunner taskRunner = new AllContracts.TaskRunner();
+            taskRunner.executeAsync(new getAccBal(), (result) -> {
+                balance.setText(result);
+                balLoader.setVisibility(View.GONE);
+                balance.setVisibility(View.VISIBLE);
+            });
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.show();
+            dialog.getWindow().setAttributes(lp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    class getAccBal implements Callable<String> {
+
+        @Override
+        public String call() {
+            String result = "";
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                EthGetBalance balanceResult = web3j.ethGetBalance(data.publicKey, DefaultBlockParameterName.LATEST).send();
+                BigInteger wei = balanceResult.getBalance();
+                result = wei.doubleValue() / 1e18 + " ETH";
+            } catch (Exception e) {
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    void clearSharedPref() {
+        SharedPreferences preferences = getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.apply();
+    }
+}
