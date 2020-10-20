@@ -32,6 +32,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.smartcontract.models.ContractModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.AllContractsViewModel;
+import com.shreyaspatil.MaterialDialog.MaterialDialog;
+import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -170,11 +172,27 @@ public class AllContracts extends AppCompatActivity {
     }
 
     private void showLogoutDialog() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        clearSharedPref();
-        finish();
+        MaterialDialog mDialog = new MaterialDialog.Builder(AllContracts.this)
+                .setTitle("Confirmation")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        dialogInterface.dismiss();
+                        Intent intent = new Intent(AllContracts.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        clearSharedPref();
+                        finish();                    }
+                })
+                .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .build();
+        mDialog.show();
     }
 
     void showProfileDialog() {

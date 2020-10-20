@@ -36,6 +36,7 @@ import com.airbnb.lottie.LottieAnimationView;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.example.smartcontract.functions.AddUser;
 import com.example.smartcontract.functions.GetUserDetails;
+import com.example.smartcontract.functions.MakeLot;
 import com.example.smartcontract.models.ListenerModel;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
@@ -281,6 +282,32 @@ public class Dashboard extends AppCompatActivity {
                             startActivity(intent);
                         }
                     }));
+                    if (userRoleInt == 1) {
+                        listenerModelList.add(new ListenerModel("Add Lots & Products", "You have to add the lots & products which have been made!", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(v.getContext(), MakeLot.class);
+                                intent.putExtra("contractAddress", contractAddress);
+                                startActivity(intent);
+                            }
+                        }));
+                        listenerModelList.add(new ListenerModel("Pack Lots & Products", "You have to update the status of the packed lots & products!", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(v.getContext(), MakeLot.class);
+                                intent.putExtra("contractAddress", contractAddress);
+                                startActivity(intent);
+                            }
+                        }));
+                        listenerModelList.add(new ListenerModel("Put For Sale", "You have to put the lots & products on Sale!", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(v.getContext(), MakeLot.class);
+                                intent.putExtra("contractAddress", contractAddress);
+                                startActivity(intent);
+                            }
+                        }));
+                    }
                     dashboardAdapter.notifyDataSetChanged();
                 }
             } else {
@@ -964,11 +991,27 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void showLogoutDialog() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        clearSharedPref();
-        finish();
+        MaterialDialog mDialog = new MaterialDialog.Builder(Dashboard.this)
+                .setTitle("Confirmation")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        dialogInterface.dismiss();
+                        Intent intent = new Intent(Dashboard.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        clearSharedPref();
+                        finish();                    }
+                })
+                .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .build();
+        mDialog.show();
     }
 
     void showProfileDialog() {
