@@ -93,6 +93,7 @@ public class AddUser extends AppCompatActivity {
                     parentAddress.setVisibility(View.GONE);
                     parentAddress.setText("");
                 } else {
+                    parentAddressTV.setText(dataSet.get(position - 1) + "\'s Public Address:");
                     parentAddressTV.setVisibility(View.VISIBLE);
                     parentAddress.setVisibility(View.VISIBLE);
                 }
@@ -460,7 +461,7 @@ public class AddUser extends AppCompatActivity {
                 if (txReceipt.isStatusOK()) {
                     result = new WriteObject(true, txHash, null);
                 } else {
-                    Log.d("Address Revert: ",txReceipt.getRevertReason());
+                    Log.d("Address Revert: ", txReceipt.getRevertReason());
                     result = new WriteObject(false, txHash, txReceipt.getRevertReason());
                 }
             } catch (Exception e) {
@@ -535,7 +536,7 @@ public class AddUser extends AppCompatActivity {
                 txnError.setVisibility(View.GONE);
             } else {
                 animationView.setAnimation(R.raw.error);
-                txnError.setText("Error: " + errorMsg!=null?errorMsg:"Something went wrong!");
+                txnError.setText("Error: " + errorMsg != null ? errorMsg : "Something went wrong!");
                 txnError.setVisibility(View.VISIBLE);
             }
             animationView.setVisibility(View.VISIBLE);
