@@ -300,6 +300,7 @@ public class callFunction extends AppCompatActivity {
                 Log.d("Address Gas Used: ", val + "");
                 Log.d("Address Gas Price: ", "" + 4.1 * 1e-9 + " Ether");
                 Double txnFee = val.intValue() * 4.1 * 1e-9;
+              
                 DecimalFormat df = new DecimalFormat("#.##########");
                 df.setRoundingMode(RoundingMode.CEILING);
                 result = df.format(txnFee) + " Ether";
