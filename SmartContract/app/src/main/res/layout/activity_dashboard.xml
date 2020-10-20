@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Dashboard">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/contentLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_marginTop="20dp"
+                    android:layout_marginHorizontal="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:elevation="12dp"
+                    android:layout_gravity="center_horizontal"
+                    android:translationZ="12dp"
+                    app:cardCornerRadius="6dp">
+
+                    <LinearLayout
+                        android:padding="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:gravity="center_horizontal"
+                            android:id="@+id/companyName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:text="Company Name"
+                            android:textColor="#000"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:gravity="center_horizontal"
+                            android:id="@+id/productName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="5dp"
+                            android:text="Product Name"
+                            android:textColor="#000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:gravity="center_horizontal"
+                            android:id="@+id/productCategory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:textColor="#000"
+                            android:text="(Category)"
+                            android:textSize="14sp" />
+
+                        <LinearLayout
+                            android:id="@+id/ownerClick"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="5dp"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:padding="5dp">
+
+                            <TextView
+                                android:id="@+id/owner"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:gravity="center_horizontal"
+                                android:text="Owner: Name\n(Address)"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/loader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true" />
+        </RelativeLayout>
+    </ScrollView>
+</LinearLayout>

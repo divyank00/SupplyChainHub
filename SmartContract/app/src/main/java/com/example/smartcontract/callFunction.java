@@ -1,9 +1,7 @@
 package com.example.smartcontract;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,22 +27,17 @@ import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.DynamicStruct;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.StructType;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.exceptions.MessageDecodingException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
-import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.FastRawTransactionManager;
@@ -54,11 +47,9 @@ import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 

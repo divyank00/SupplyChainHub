@@ -35,7 +35,7 @@ contract SupplyChain{
         address[] childIds;         // array of its children addresses
         uint currentQuantity;
         string name;
-        string latitute;
+        string latitude;
         string longitude;
     }
     
@@ -101,7 +101,7 @@ contract SupplyChain{
             currentQuantity : 0,
             name: _name,
             childIds: _childIds,
-            latitute: _latitude,
+            latitude: _latitude,
             longitude: _longitude
         });
         setUser(msg.sender);
@@ -234,7 +234,7 @@ contract SupplyChain{
         return (
             users[account].name,
             users[account].longitude,
-            users[account].latitute,
+            users[account].latitude,
             users[account].parentId,
             users[account].childIds
         );
@@ -273,7 +273,7 @@ contract SupplyChain{
             name: "",
             childIds: _childIds,
             longitude: "",
-            latitute: ""
+            latitude: ""
         });
         
         users[_userAccount] = child;
@@ -301,7 +301,7 @@ contract SupplyChain{
             name: "",
             childIds: _childIds,
             longitude: "",
-            latitute: ""
+            latitude: ""
         });
         
         users[_userAccount] = child;
@@ -315,7 +315,7 @@ contract SupplyChain{
         require(checkIsUser(msg.sender),"You are not a part of this Supply-Chain");
         require(bytes(users[msg.sender].name).length==0,"You have added your details already!");
         users[msg.sender].name = _name;
-        users[msg.sender].latitute = _latitude;
+        users[msg.sender].latitude = _latitude;
         users[msg.sender].longitude = _longitude;
         emit UserDetailsAdded(msg.sender);
     }

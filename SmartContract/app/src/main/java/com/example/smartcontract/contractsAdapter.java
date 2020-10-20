@@ -45,7 +45,7 @@ public class contractsAdapter extends RecyclerView.Adapter<contractsAdapter.View
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(mContext,AllFunctions.class);
+                Intent i = new Intent(mContext,Dashboard.class);
                 i.putExtra("contractAddress",contracts.get(holder.getAdapterPosition()).getAddress());
                 mContext.startActivity(i);
             }
