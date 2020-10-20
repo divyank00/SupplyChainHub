@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class data {
+public class Data {
     public static String privateKey;
     public static String publicKey;
     public static Map<Integer, String> State = new HashMap<Integer, String>() {{

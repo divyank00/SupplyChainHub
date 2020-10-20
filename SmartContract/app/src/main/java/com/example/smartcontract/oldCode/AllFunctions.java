@@ -1,4 +1,4 @@
-package com.example.smartcontract;
+package com.example.smartcontract.oldCode;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.smartcontract.R;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.models.SingleContractModel;
 import com.example.smartcontract.viewModel.SingleContractViewModel;

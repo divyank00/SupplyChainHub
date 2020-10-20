@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smartcontract.models.ContractModel;
@@ -21,12 +20,12 @@ import java.util.List;
 
 import static androidx.core.content.ContextCompat.getSystemService;
 
-public class contractsAdapter extends RecyclerView.Adapter<contractsAdapter.ViewHolder> {
+public class AllContractsAdapter extends RecyclerView.Adapter<AllContractsAdapter.ViewHolder> {
 
     Context mContext;
     List<ContractModel> contracts;
 
-    public contractsAdapter(Context mContext, List<ContractModel> contracts) {
+    public AllContractsAdapter(Context mContext, List<ContractModel> contracts) {
         this.mContext = mContext;
         this.contracts = contracts;
     }

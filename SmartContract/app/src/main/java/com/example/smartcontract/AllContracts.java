@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,28 +32,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.smartcontract.models.ContractModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.AllContractsViewModel;
-import com.kaopiz.kprogresshud.KProgressHUD;
-import com.shreyaspatil.MaterialDialog.MaterialDialog;
-import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.http.HttpService;
 
 import java.math.BigInteger;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -64,12 +48,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 public class AllContracts extends AppCompatActivity {
 
     RecyclerView rV;
-    contractsAdapter adapter;
+    AllContractsAdapter adapter;
     Button button;
     List<ContractModel> mList;
     ProgressBar loader;
@@ -89,7 +71,7 @@ public class AllContracts extends AppCompatActivity {
         });
         loader = findViewById(R.id.loader);
         mList = new ArrayList<>();
-        adapter = new contractsAdapter(this, mList);
+        adapter = new AllContractsAdapter(this, mList);
         rV.setLayoutManager(new LinearLayoutManager(this));
         rV.setAdapter(adapter);
         allContractsViewModel = new AllContractsViewModel();
@@ -203,7 +185,7 @@ public class AllContracts extends AppCompatActivity {
             TextView address = dialog.findViewById(R.id.publicAddress);
             TextView balance = dialog.findViewById(R.id.currentBalance);
             ProgressBar balLoader = dialog.findViewById(R.id.balLoader);
-            address.setText(data.publicKey);
+            address.setText(Data.publicKey);
             copyAddress.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -274,7 +256,7 @@ public class AllContracts extends AppCompatActivity {
                 System.out.println("Connecting to Ethereum ...");
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
-                EthGetBalance balanceResult = web3j.ethGetBalance(data.publicKey, DefaultBlockParameterName.LATEST).send();
+                EthGetBalance balanceResult = web3j.ethGetBalance(Data.publicKey, DefaultBlockParameterName.LATEST).send();
                 BigInteger wei = balanceResult.getBalance();
                 result = wei.doubleValue() / 1e18 + " ETH";
             } catch (Exception e) {

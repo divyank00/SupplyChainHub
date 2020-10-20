@@ -1,18 +1,11 @@
 package com.example.smartcontract.viewModel;
 
-import android.app.Dialog;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.smartcontract.AllContracts;
-import com.example.smartcontract.data;
+import com.example.smartcontract.Data;
 import com.example.smartcontract.models.ContractModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -35,7 +28,7 @@ public class AllContractsViewModel extends ViewModel {
 
     public LiveData<ObjectModel> getContracts() {
         userLiveData = new MutableLiveData<>();
-        firebaseFirestore.collection("User").document(data.privateKey).collection("Contracts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firebaseFirestore.collection("User").document(Data.privateKey).collection("Contracts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful() && task.getResult() != null) {
@@ -60,7 +53,7 @@ public class AllContractsViewModel extends ViewModel {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful() && task.getResult()!=null && task.getResult().exists()){
-                    firebaseFirestore.collection("User").document(data.privateKey).collection("Contracts").add(model).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                    firebaseFirestore.collection("User").document(Data.privateKey).collection("Contracts").add(model).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentReference> task) {
                             if (task.isSuccessful()) {

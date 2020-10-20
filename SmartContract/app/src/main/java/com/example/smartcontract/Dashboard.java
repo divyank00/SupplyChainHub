@@ -1,10 +1,5 @@
 package com.example.smartcontract;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatToggleButton;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
-
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -13,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,15 +21,19 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.example.smartcontract.functions.AddUser;
+import com.example.smartcontract.functions.GetUserDetails;
 import com.example.smartcontract.models.ListenerModel;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
@@ -50,7 +48,6 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
-import org.web3j.exceptions.MessageDecodingException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -64,7 +61,6 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -72,18 +68,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import static androidx.core.content.ContextCompat.getSystemService;
 
 public class Dashboard extends AppCompatActivity {
 
     ProgressBar productDetailsLoader, userDetailsLoader;
     LinearLayout productDetails, ownerClick, userDetails, parentClick, ownerRoleLinearLayout;
-    TextView companyName, productName, productCategory, owner, userRole, userParent, currentQuantity, ownerText;
+    TextView companyName, productName, productCategory, owner, userRole, userParent, userChildren, currentQuantity, ownerText;
     SwitchCompat ownerRole;
     String contractAddress, contractOwnerAddress;
     TaskRunner taskRunner;
@@ -116,6 +109,7 @@ public class Dashboard extends AppCompatActivity {
         parentClick = findViewById(R.id.parentClick);
         userRole = findViewById(R.id.userRole);
         userParent = findViewById(R.id.userParent);
+        userChildren = findViewById(R.id.userChildren);
         currentQuantity = findViewById(R.id.currentQuantity);
         ownerText = findViewById(R.id.ownerText);
         ownerRole = findViewById(R.id.ownerRole);
@@ -124,7 +118,7 @@ public class Dashboard extends AppCompatActivity {
         listenerModelList = new ArrayList<>();
         dashboardAdapter = new DashboardAdapter(Dashboard.this, listenerModelList);
         userFunctions.setAdapter(dashboardAdapter);
-        userFunctions.setLayoutManager(new GridLayoutManager(this, 2));
+        userFunctions.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         userFunctions.showShimmerAdapter();
     }
 
@@ -133,11 +127,11 @@ public class Dashboard extends AppCompatActivity {
             if (result.isStatus()) {
                 if (!result.getData().isEmpty()) {
                     List<Utf8String> roles = (List<Utf8String>) result.getData().get(0).getValue();
-                    data.userRoles.add("Owner");
+                    Data.userRoles.add("Owner");
                     for (int i = 1; i < roles.size(); i++) {
-                        data.userRoles.add(roles.get(i).toString());
+                        Data.userRoles.add(roles.get(i).toString());
                     }
-                    Log.d("Address Roles", data.userRoles.toString() + "");
+                    Log.d("Address Roles", Data.userRoles.toString() + "");
                     executeGetSmartContractDetails();
                 }
             } else {
@@ -194,9 +188,9 @@ public class Dashboard extends AppCompatActivity {
             if (result.isStatus()) {
                 if (!result.getData().isEmpty()) {
                     userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
-                    if (contractOwnerAddress != null && contractOwnerAddress.equals(data.publicKey)) {
+                    if (contractOwnerAddress != null && contractOwnerAddress.equals(Data.publicKey)) {
                         userRole.setText("You are the owner!");
-                        ownerText.setText("Are you a " + data.userRoles.get(1).toString() + " also?");
+                        ownerText.setText("Are you a " + Data.userRoles.get(1).toString() + " also?");
                         ownerText.setVisibility(View.VISIBLE);
                         ownerRoleLinearLayout.setVisibility(View.VISIBLE);
                         parentClick.setVisibility(View.GONE);
@@ -217,30 +211,47 @@ public class Dashboard extends AppCompatActivity {
                             });
                             currentQuantity.setVisibility(View.GONE);
                         }
-                    } else {
-                        userRole.setText("You are a " + data.userRoles.get(userRoleInt) + "!");
-                        userParent.setText("Your " + data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
-                        currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
-                        parentClick.setOnLongClickListener(new View.OnLongClickListener() {
-                            @Override
-                            public boolean onLongClick(View v) {
-                                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                ClipData clip = ClipData.newPlainText("PublicAddress", result.getData().get(4).getValue().toString());
-                                clipboard.setPrimaryClip(clip);
-                                Toast.makeText(Dashboard.this, data.userRoles.get((int) result.getData().get(0).getValue() - 1) + " Address copied to clipboard!", Toast.LENGTH_SHORT).show();
-                                return false;
-                            }
-                        });
+                    }
+                    else {
+                        userRole.setText("You are a " + Data.userRoles.get(userRoleInt) + "!");
+                        if (userRoleInt == 1) {
+                            parentClick.setVisibility(View.GONE);
+                        } else {
+                            userParent.setText("Your " + Data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
+                            currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
+                            parentClick.setOnLongClickListener(new View.OnLongClickListener() {
+                                @Override
+                                public boolean onLongClick(View v) {
+                                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                    ClipData clip = ClipData.newPlainText("PublicAddress", result.getData().get(4).getValue().toString());
+                                    clipboard.setPrimaryClip(clip);
+                                    Toast.makeText(Dashboard.this, Data.userRoles.get(userRoleInt - 1) + " Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                                    return false;
+                                }
+                            });
+                        }
+                    }
+                    if(userRoleInt==Data.userRoles.size()-1){
+                        userChildren.setVisibility(View.GONE);
+                    }else{
+                        String childAdd = result.getData().get(5).getValue().toString();
+                        childAdd = childAdd.substring(1,childAdd.length()-1);
+                        if(childAdd.isEmpty()){
+                            userChildren.setVisibility(View.GONE);
+                        }else {
+                            userChildren.setText(Data.userRoles.get(userRoleInt + 1) + "s: " + childAdd);
+                            userChildren.setVisibility(View.VISIBLE);
+                        }
                     }
                     userDetailsLoader.setVisibility(View.GONE);
                     userDetails.setVisibility(View.VISIBLE);
                     userFunctions.hideShimmerAdapter();
-                    if (userRoleInt < data.userRoles.size() - 1) {
+                    if (userRoleInt < Data.userRoles.size() - 1) {
                         listenerModelList.add(new ListenerModel("Add User", "You can add user in the Smart-Contract!", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), AddUser.class);
-                                if (contractOwnerAddress.equals(data.publicKey)) {
+                                if (contractOwnerAddress.equals(Data.publicKey)) {
                                     intent.putExtra("userRole", 0);
                                 } else {
                                     intent.putExtra("userRole", userRoleInt);
@@ -250,6 +261,14 @@ public class Dashboard extends AppCompatActivity {
                             }
                         }));
                     }
+                    listenerModelList.add(new ListenerModel("Get User Details", "You can get details of any user in the Smart-Contract!", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(v.getContext(), GetUserDetails.class);
+                            intent.putExtra("contractAddress", contractAddress);
+                            startActivity(intent);
+                        }
+                    }));
                     dashboardAdapter.notifyDataSetChanged();
                 }
             } else {
@@ -349,7 +368,7 @@ public class Dashboard extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
@@ -390,7 +409,7 @@ public class Dashboard extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
@@ -439,12 +458,12 @@ public class Dashboard extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
                 List<Type> inputAsync = new ArrayList<>();
-                inputAsync.add(new Address(data.publicKey));
+                inputAsync.add(new Address(Data.publicKey));
                 List<TypeReference<?>> outputAsync = new ArrayList<>();
                 outputAsync.add(new TypeReference<Uint256>() {
                 });
@@ -493,7 +512,7 @@ public class Dashboard extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
@@ -534,7 +553,7 @@ public class Dashboard extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
@@ -562,7 +581,7 @@ public class Dashboard extends AppCompatActivity {
                 if (txReceipt.isStatusOK()) {
                     result = new WriteObject(true, txHash, null);
                 } else {
-                    result = new WriteObject(false, null, txReceipt.getRevertReason());
+                    result = new WriteObject(false, txHash, txReceipt.getRevertReason());
                 }
             } catch (Exception e) {
                 result = new WriteObject(false, null, e.getMessage());
@@ -656,7 +675,6 @@ public class Dashboard extends AppCompatActivity {
 
     private void showTransactionDialog(boolean successful, String txnHash, String errorMsg) {
         try {
-            Log.d("Address Dashboard", txnHash);
             final Dialog dialog = new Dialog(this);
             dialog.setContentView(R.layout.transaction_dialog);
             ImageView txnHashCopy = dialog.findViewById(R.id.txnHashCopy);
@@ -664,14 +682,20 @@ public class Dashboard extends AppCompatActivity {
             TextView txnUrl = dialog.findViewById(R.id.txnUrl);
             TextView txnError = dialog.findViewById(R.id.txnError);
             LottieAnimationView animationView = dialog.findViewById(R.id.animationView);
-            txnHashTV.setText(txnHash);
-            txnUrl.setText("https://rinkeby.etherscan.io/tx/" + txnHash);
+            if (txnHash != null && !txnHash.isEmpty()) {
+                txnHashTV.setText(txnHash);
+                txnUrl.setText("https://rinkeby.etherscan.io/tx/" + txnHash);
+            } else {
+                txnHashCopy.setVisibility(View.GONE);
+                txnHashTV.setVisibility(View.GONE);
+                txnUrl.setVisibility(View.GONE);
+            }
             if (successful) {
                 animationView.setAnimation(R.raw.success);
                 txnError.setVisibility(View.GONE);
             } else {
                 animationView.setAnimation(R.raw.error);
-                txnError.setText("Error: " + errorMsg);
+                txnError.setText("Error: " + errorMsg != null ? errorMsg : "Something went wrong!");
                 txnError.setVisibility(View.VISIBLE);
             }
             animationView.setVisibility(View.VISIBLE);
@@ -735,7 +759,7 @@ public class Dashboard extends AppCompatActivity {
             TextView address = dialog.findViewById(R.id.publicAddress);
             TextView balance = dialog.findViewById(R.id.currentBalance);
             ProgressBar balLoader = dialog.findViewById(R.id.balLoader);
-            address.setText(data.publicKey);
+            address.setText(Data.publicKey);
             copyAddress.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -783,7 +807,7 @@ public class Dashboard extends AppCompatActivity {
                 System.out.println("Connecting to Ethereum ...");
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
-                EthGetBalance balanceResult = web3j.ethGetBalance(data.publicKey, DefaultBlockParameterName.LATEST).send();
+                EthGetBalance balanceResult = web3j.ethGetBalance(Data.publicKey, DefaultBlockParameterName.LATEST).send();
                 BigInteger wei = balanceResult.getBalance();
                 result = wei.doubleValue() / 1e18 + " ETH";
             } catch (Exception e) {

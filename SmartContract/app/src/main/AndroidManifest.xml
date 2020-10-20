@@ -11,13 +11,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AddUser"></activity>
+        <activity android:name=".functions.GetUserDetails"></activity>
+        <activity android:name=".functions.AddUser" />
         <activity android:name=".Dashboard" />
         <activity
-            android:name=".AllFunctions"
+            android:name=".oldCode.AllFunctions"
             android:configChanges="orientation|screenSize" />
         <activity
-            android:name=".callFunction"
+            android:name=".oldCode.callFunction"
             android:configChanges="orientation|screenSize" />
         <activity
             android:name=".AllContracts"

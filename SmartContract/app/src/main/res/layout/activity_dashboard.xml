@@ -43,7 +43,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
-                            android:layout_marginTop="10dp"
                             android:gravity="center_horizontal"
                             android:text="Company Name"
                             android:textColor="#000"
@@ -129,30 +128,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
-                            android:layout_marginVertical="10dp"
                             android:gravity="center_horizontal"
                             android:text="You are the owner!"
                             android:textColor="#000"
                             android:textSize="16sp"
                             android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:id="@+id/parentClick"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:background="?attr/selectableItemBackground"
-                            android:clickable="true"
-                            android:padding="5dp">
-
-                            <TextView
-                                android:id="@+id/userParent"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center_horizontal"
-                                android:text="Address"
-                                android:textSize="14sp" />
-                        </LinearLayout>
 
                         <TextView
                             android:id="@+id/ownerText"
@@ -162,7 +142,7 @@
                             android:gravity="center_horizontal"
                             android:text="Are you a Manufacturer also?"
                             android:textSize="16sp"
-                            android:visibility="visible" />
+                            android:visibility="gone" />
 
                         <LinearLayout
                             android:id="@+id/ownerRoleLinearLayout"
@@ -193,6 +173,33 @@
                                 android:textSize="16sp" />
                         </LinearLayout>
 
+                        <LinearLayout
+                            android:id="@+id/parentClick"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:padding="5dp">
+
+                            <TextView
+                                android:id="@+id/userParent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_horizontal"
+                                android:text="Address"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:textIsSelectable="true"
+                            android:id="@+id/userChildren"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="Child Address"
+                            android:textSize="14sp" />
+
                         <TextView
                             android:id="@+id/currentQuantity"
                             android:layout_width="wrap_content"
@@ -208,7 +215,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:padding="40dp" />
+                        android:padding="30dp" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 

@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPreferences = getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE);
         if (sharedPreferences.contains(KEY)) {
-            data.publicKey = sharedPreferences.getString(PUBLIC_KEY, "");
+            Data.publicKey = sharedPreferences.getString(PUBLIC_KEY, "");
             String encryptedKey = sharedPreferences.getString(KEY, "");
             if (encryptedKey != null) {
                 try {
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < split.length; i++) {
                         encryptedBytes[i] = Byte.parseByte(split[i]);
                     }
-                    data.privateKey = decryptKey(encryptedBytes, data.publicKey);
+                    Data.privateKey = decryptKey(encryptedBytes, Data.publicKey);
                 } catch (Exception e) {
                     Log.d("EncryptionError", "D: " + e.toString());
                     e.printStackTrace();
@@ -105,8 +105,8 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         String privateKey = pk.getText().toString().trim();
                         Credentials credentials = Credentials.create(privateKey);
-                        data.privateKey = privateKey;
-                        data.publicKey = credentials.getAddress();
+                        Data.privateKey = privateKey;
+                        Data.publicKey = credentials.getAddress();
                         byte[] encryptedBytes = encryptKey(privateKey, credentials.getAddress());
                         String encryptedKey = Arrays.toString(encryptedBytes);
                         editor.putString(PUBLIC_KEY, credentials.getAddress());
@@ -134,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
 
                     // Load the wallet for the derived keypair
                     Credentials credentials = Credentials.create(derivedKeyPair);
-                    data.privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
-                    data.publicKey = credentials.getAddress();
+                    Data.privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
+                    Data.publicKey = credentials.getAddress();
                     try {
                         byte[] encryptedBytes = encryptKey(credentials.getEcKeyPair().getPrivateKey().toString(16), credentials.getAddress());
                         String encryptedKey = Arrays.toString(encryptedBytes);

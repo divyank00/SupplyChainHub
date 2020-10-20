@@ -1,4 +1,4 @@
-package com.example.smartcontract;
+package com.example.smartcontract.oldCode;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.example.smartcontract.R;
+import com.example.smartcontract.Data;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
@@ -219,7 +221,7 @@ public class callFunction extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
@@ -280,7 +282,7 @@ public class callFunction extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
@@ -370,7 +372,7 @@ public class callFunction extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-                String pk = data.privateKey;
+                String pk = Data.privateKey;
                 Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions

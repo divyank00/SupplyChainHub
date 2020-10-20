@@ -1,4 +1,4 @@
-package com.example.smartcontract;
+package com.example.smartcontract.oldCode;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.smartcontract.R;
 
 import org.json.JSONObject;
 
@@ -40,7 +42,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(mContext,callFunction.class);
+                Intent i = new Intent(mContext, callFunction.class);
                 i.putExtra("object",functions.get(holder.getAdapterPosition()).toString());
                 i.putExtra("contractAddress",contractAddress);
                 mContext.startActivity(i);
