@@ -57,12 +57,12 @@ public class MainActivity extends AppCompatActivity {
             data.publicKey = sharedPreferences.getString(PUBLIC_KEY, "");
             String encryptedKey = sharedPreferences.getString(KEY, "");
             if (encryptedKey != null) {
-                String[] split = encryptedKey.substring(1, encryptedKey.length() - 1).split(", ");
-                byte[] encryptedBytes = new byte[split.length];
-                for (int i = 0; i < split.length; i++) {
-                    encryptedBytes[i] = Byte.parseByte(split[i]);
-                }
                 try {
+                    String[] split = encryptedKey.substring(1, encryptedKey.length() - 1).split(", ");
+                    byte[] encryptedBytes = new byte[split.length];
+                    for (int i = 0; i < split.length; i++) {
+                        encryptedBytes[i] = Byte.parseByte(split[i]);
+                    }
                     data.privateKey = decryptKey(encryptedBytes, data.publicKey);
                 } catch (Exception e) {
                     Log.d("EncryptionError", "D: " + e.toString());
@@ -102,16 +102,21 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
                 if (!pk.getText().toString().trim().isEmpty()) {
-                    String privateKey = pk.getText().toString().trim();
-                    Credentials credentials = Credentials.create(privateKey);
-                    data.privateKey = privateKey;
-                    data.publicKey = credentials.getAddress();
-                    editor.putString(PUBLIC_KEY, credentials.getAddress());
                     try {
+                        String privateKey = pk.getText().toString().trim();
+                        Credentials credentials = Credentials.create(privateKey);
+                        data.privateKey = privateKey;
+                        data.publicKey = credentials.getAddress();
                         byte[] encryptedBytes = encryptKey(privateKey, credentials.getAddress());
                         String encryptedKey = Arrays.toString(encryptedBytes);
+                        editor.putString(PUBLIC_KEY, credentials.getAddress());
                         editor.putString(KEY, encryptedKey);
+                        editor.apply();
+                        Intent i = new Intent(MainActivity.this, AllContracts.class);
+                        startActivity(i);
+                        finish();
                     } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "You have typed the seed phrase instead of private key!", Toast.LENGTH_SHORT).show();
                         Log.d("EncryptionError", e.toString());
                         e.printStackTrace();
                     }
@@ -131,20 +136,20 @@ public class MainActivity extends AppCompatActivity {
                     Credentials credentials = Credentials.create(derivedKeyPair);
                     data.privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
                     data.publicKey = credentials.getAddress();
-                    editor.putString(PUBLIC_KEY, credentials.getAddress());
                     try {
                         byte[] encryptedBytes = encryptKey(credentials.getEcKeyPair().getPrivateKey().toString(16), credentials.getAddress());
                         String encryptedKey = Arrays.toString(encryptedBytes);
+                        editor.putString(PUBLIC_KEY, credentials.getAddress());
                         editor.putString(KEY, encryptedKey);
+                        editor.apply();
+                        Intent i = new Intent(MainActivity.this, AllContracts.class);
+                        startActivity(i);
+                        finish();
                     } catch (Exception e) {
                         Log.d("EncryptionError", e.toString());
                         e.printStackTrace();
                     }
                 }
-                editor.apply();
-                Intent i = new Intent(MainActivity.this, AllContracts.class);
-                startActivity(i);
-                finish();
             }
         });
         track.setOnClickListener(new View.OnClickListener() {

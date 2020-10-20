@@ -23,12 +23,10 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.View
 
     Context mContext;
     List<ListenerModel> listeners;
-    String contractAddress;
 
-    public DashboardAdapter(Context mContext, List<ListenerModel> listeners, String contractAddress) {
+    public DashboardAdapter(Context mContext, List<ListenerModel> listeners) {
         this.mContext = mContext;
         this.listeners = listeners;
-        this.contractAddress= contractAddress;
     }
 
     @NonNull

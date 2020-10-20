@@ -198,7 +198,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
-                            android:layout_marginVertical="10dp"
                             android:gravity="center_horizontal"
                             android:text="Quantity: 10"
                             android:textSize="14sp" />
@@ -220,11 +219,12 @@
                 android:orientation="horizontal">
 
                 <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+                    android:overScrollMode="never"
                     android:id="@+id/userFunctions"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:shimmer_demo_angle="45"
-                    app:shimmer_demo_child_count="6"
+                    app:shimmer_demo_child_count="10"
                     app:shimmer_demo_layout="@layout/shimmer_dashboard"
                     app:shimmer_demo_layout_manager_type="grid" />
 

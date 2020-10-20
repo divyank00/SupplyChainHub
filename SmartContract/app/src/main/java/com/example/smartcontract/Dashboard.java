@@ -3,6 +3,7 @@ package com.example.smartcontract;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatToggleButton;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.app.Dialog;
 import android.content.ClipData;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.example.smartcontract.models.ListenerModel;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.kaopiz.kprogresshud.KProgressHUD;
@@ -87,6 +89,8 @@ public class Dashboard extends AppCompatActivity {
     TaskRunner taskRunner;
     DashboardAdapter dashboardAdapter;
     List<ListenerModel> listenerModelList;
+    ShimmerRecyclerView userFunctions;
+    int userRoleInt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,8 +120,12 @@ public class Dashboard extends AppCompatActivity {
         ownerText = findViewById(R.id.ownerText);
         ownerRole = findViewById(R.id.ownerRole);
         ownerRoleLinearLayout = findViewById(R.id.ownerRoleLinearLayout);
+        userFunctions = findViewById(R.id.userFunctions);
         listenerModelList = new ArrayList<>();
-        dashboardAdapter = new DashboardAdapter(Dashboard.this, listenerModelList, contractAddress);
+        dashboardAdapter = new DashboardAdapter(Dashboard.this, listenerModelList);
+        userFunctions.setAdapter(dashboardAdapter);
+        userFunctions.setLayoutManager(new GridLayoutManager(this, 2));
+        userFunctions.showShimmerAdapter();
     }
 
     private void executeGetUserRolesArray() {
@@ -185,13 +193,14 @@ public class Dashboard extends AppCompatActivity {
         taskRunner.executeAsync(new getUserDetails(), (result) -> {
             if (result.isStatus()) {
                 if (!result.getData().isEmpty()) {
+                    userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
                     if (contractOwnerAddress != null && contractOwnerAddress.equals(data.publicKey)) {
                         userRole.setText("You are the owner!");
                         ownerText.setText("Are you a " + data.userRoles.get(1).toString() + " also?");
                         ownerText.setVisibility(View.VISIBLE);
                         ownerRoleLinearLayout.setVisibility(View.VISIBLE);
                         parentClick.setVisibility(View.GONE);
-                        if ((Integer.parseInt(result.getData().get(0).getValue().toString())) != 0) {
+                        if (userRoleInt != 0) {
                             ownerRole.setChecked(true);
                             ownerRole.setEnabled(false);
                             currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
@@ -209,8 +218,8 @@ public class Dashboard extends AppCompatActivity {
                             currentQuantity.setVisibility(View.GONE);
                         }
                     } else {
-                        userRole.setText("You are a " + data.userRoles.get(Integer.parseInt(result.getData().get(0).getValue().toString())) + "!");
-                        userParent.setText("Your " + data.userRoles.get(Integer.parseInt(result.getData().get(0).getValue().toString()) - 1) + ":\n" + result.getData().get(4).getValue().toString());
+                        userRole.setText("You are a " + data.userRoles.get(userRoleInt) + "!");
+                        userParent.setText("Your " + data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
                         currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
                         parentClick.setOnLongClickListener(new View.OnLongClickListener() {
                             @Override
@@ -225,22 +234,23 @@ public class Dashboard extends AppCompatActivity {
                     }
                     userDetailsLoader.setVisibility(View.GONE);
                     userDetails.setVisibility(View.VISIBLE);
-//                    addUserLoader.setVisibility(View.GONE);
-//                    addUser.setVisibility(View.VISIBLE);
-//                    addUser.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            startActivity(new Intent(Dashboard.this, AddUser.class));
-//                        }
-//                    });
-//                    getUserDetailsLoader.setVisibility(View.GONE);
-//                    getUserDetails.setVisibility(View.VISIBLE);
-//                    getUserDetails.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//
-//                        }
-//                    });
+                    userFunctions.hideShimmerAdapter();
+                    if (userRoleInt < data.userRoles.size() - 1) {
+                        listenerModelList.add(new ListenerModel("Add User", "You can add user in the Smart-Contract!", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(v.getContext(), AddUser.class);
+                                if (contractOwnerAddress.equals(data.publicKey)) {
+                                    intent.putExtra("userRole", 0);
+                                } else {
+                                    intent.putExtra("userRole", userRoleInt);
+                                }
+                                intent.putExtra("contractAddress", contractAddress);
+                                startActivity(intent);
+                            }
+                        }));
+                    }
+                    dashboardAdapter.notifyDataSetChanged();
                 }
             } else {
                 Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
