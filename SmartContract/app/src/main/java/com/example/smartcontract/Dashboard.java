@@ -126,6 +126,7 @@ public class Dashboard extends AppCompatActivity {
         taskRunner.executeAsync(new getUserRolesArray(), (result) -> {
             if (result.isStatus()) {
                 if (!result.getData().isEmpty()) {
+                    Data.userRoles.clear();
                     List<Utf8String> roles = (List<Utf8String>) result.getData().get(0).getValue();
                     Data.userRoles.add("Owner");
                     for (int i = 1; i < roles.size(); i++) {
@@ -211,8 +212,7 @@ public class Dashboard extends AppCompatActivity {
                             });
                             currentQuantity.setVisibility(View.GONE);
                         }
-                    }
-                    else {
+                    } else {
                         userRole.setText("You are a " + Data.userRoles.get(userRoleInt) + "!");
                         if (userRoleInt == 1) {
                             parentClick.setVisibility(View.GONE);
@@ -231,15 +231,21 @@ public class Dashboard extends AppCompatActivity {
                             });
                         }
                     }
-                    if(userRoleInt==Data.userRoles.size()-1){
+                    if (userRoleInt == Data.userRoles.size() - 1) {
                         userChildren.setVisibility(View.GONE);
-                    }else{
+                    } else {
                         String childAdd = result.getData().get(5).getValue().toString();
-                        childAdd = childAdd.substring(1,childAdd.length()-1);
-                        if(childAdd.isEmpty()){
+                        childAdd = childAdd.substring(1, childAdd.length() - 1);
+                        if (childAdd.isEmpty()) {
                             userChildren.setVisibility(View.GONE);
-                        }else {
-                            userChildren.setText(Data.userRoles.get(userRoleInt + 1) + "s: " + childAdd);
+                        } else {
+                            String text = Data.userRoles.get(userRoleInt + 1) + "s: ";
+                            String[] arr = childAdd.split(",");
+                            for (int i = 0; i < arr.length - 1; i++) {
+                                text += arr[i].trim() + ",\n";
+                            }
+                            text += arr[arr.length - 1];
+                            userChildren.setText(text);
                             userChildren.setVisibility(View.VISIBLE);
                         }
                     }
@@ -391,6 +397,7 @@ public class Dashboard extends AppCompatActivity {
                     result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
                 }
             } catch (Exception e) {
+                Toast.makeText(Dashboard.this, e.toString(), Toast.LENGTH_SHORT).show();
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }
@@ -440,6 +447,7 @@ public class Dashboard extends AppCompatActivity {
                     result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
                 }
             } catch (Exception e) {
+                Toast.makeText(Dashboard.this, e.toString(), Toast.LENGTH_SHORT).show();
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }
@@ -494,6 +502,7 @@ public class Dashboard extends AppCompatActivity {
                     result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
                 }
             } catch (Exception e) {
+                Toast.makeText(Dashboard.this, e.toString(), Toast.LENGTH_SHORT).show();
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }

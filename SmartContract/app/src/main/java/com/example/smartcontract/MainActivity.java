@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(i);
                         finish();
                     } catch (Exception e) {
-                        Toast.makeText(MainActivity.this, "You have typed the seed phrase instead of private key!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "It seems you have typed the seed phrase instead of private key!", Toast.LENGTH_SHORT).show();
                         Log.d("EncryptionError", e.toString());
                         e.printStackTrace();
                     }

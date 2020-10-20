@@ -192,6 +192,7 @@
                         </LinearLayout>
 
                         <TextView
+                            android:gravity="center_horizontal"
                             android:textIsSelectable="true"
                             android:id="@+id/userChildren"
                             android:layout_width="wrap_content"
@@ -206,7 +207,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:gravity="center_horizontal"
-                            android:text="Quantity: 10"
+                            android:text="Quantity: 0"
                             android:textSize="14sp" />
                     </LinearLayout>
 

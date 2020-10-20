@@ -49,7 +49,7 @@ public class GetUserDetails extends AppCompatActivity {
     TaskRunner taskRunner;
     Button button;
     CardView resultCard;
-    TextView userRole, name, location, parentAddress, childAddresses, currentQuantity;
+    TextView userRole, name, location, parentAddress, childAddresses, currentQuantity, error;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +68,20 @@ public class GetUserDetails extends AppCompatActivity {
         parentAddress = findViewById(R.id.parentAddress);
         childAddresses = findViewById(R.id.childAddresses);
         currentQuantity = findViewById(R.id.currentQuantity);
+        error = findViewById(R.id.error);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                executeGetUserDetails();
+                if (userAddress.getText().toString().trim().isEmpty()) {
+                    userAddress.setError("Mandatory Field!");
+                } else {
+                    executeGetUserDetails(userAddress.getText().toString().trim());
+                }
             }
         });
     }
 
-    private void executeGetUserDetails() {
+    private void executeGetUserDetails(String address) {
         final KProgressHUD progressHUD = KProgressHUD.create(GetUserDetails.this)
                 .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
                 .setLabel("Please wait")
@@ -84,23 +89,26 @@ public class GetUserDetails extends AppCompatActivity {
                 .setAnimationSpeed(2)
                 .setDimAmount(0.5f)
                 .show();
-        taskRunner.executeAsync(new getUserDetails(), (result) -> {
+        taskRunner.executeAsync(new getUserDetails(address), (result) -> {
             progressHUD.dismiss();
             if (result.isStatus() && !result.getData().isEmpty()) {
                 int userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
                 if (userRoleInt == Data.userRoles.size() - 1) {
-                    userRole.setText("User not a member of this Smart-Contract");
+                    error.setText("User not a member of this Smart-Contract!");
+                    error.setVisibility(View.VISIBLE);
+                    userRole.setVisibility(View.GONE);
                     name.setVisibility(View.GONE);
                     location.setVisibility(View.GONE);
                     parentAddress.setVisibility(View.GONE);
                     childAddresses.setVisibility(View.GONE);
                     currentQuantity.setVisibility(View.GONE);
                 } else {
+                    error.setVisibility(View.GONE);
                     userRole.setText("Role: " + Data.userRoles.get(userRoleInt));
                     userRole.setVisibility(View.VISIBLE);
-                    if(result.getData().get(1).getValue().toString().isEmpty()){
+                    if (result.getData().get(1).getValue().toString().isEmpty()) {
                         name.setVisibility(View.GONE);
-                    }else{
+                    } else {
                         name.setText("Name: " + result.getData().get(1).getValue().toString());
                         name.setVisibility(View.VISIBLE);
                     }
@@ -114,17 +122,23 @@ public class GetUserDetails extends AppCompatActivity {
                         parentAddress.setVisibility(View.GONE);
                     } else {
                         parentAddress.setVisibility(View.VISIBLE);
-                        parentAddress.setText(Data.userRoles.get(userRoleInt - 1) + ": " + result.getData().get(4).getValue().toString());
+                        parentAddress.setText(Data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
                     }
                     if (userRoleInt == Data.userRoles.size() - 2) {
                         childAddresses.setVisibility(View.GONE);
                     } else {
                         String childAdd = result.getData().get(5).getValue().toString();
-                        childAdd = childAdd.substring(1,childAdd.length()-1);
-                        if(childAdd.isEmpty()){
+                        childAdd = childAdd.substring(1, childAdd.length() - 1);
+                        if (childAdd.isEmpty()) {
                             childAddresses.setVisibility(View.GONE);
-                        }else {
-                            childAddresses.setText(Data.userRoles.get(userRoleInt + 1) + "s: " + childAdd);
+                        } else {
+                            String text = Data.userRoles.get(userRoleInt + 1) + "s:\n";
+                            String[] arr = childAdd.split(",");
+                            for (int i = 0; i < arr.length - 1; i++) {
+                                text += arr[i].trim() + ",\n";
+                            }
+                            text += arr[arr.length - 1];
+                            childAddresses.setText(text);
                             childAddresses.setVisibility(View.VISIBLE);
                         }
                     }
@@ -168,6 +182,12 @@ public class GetUserDetails extends AppCompatActivity {
 
     class getUserDetails implements Callable<Object> {
 
+        String address;
+
+        public getUserDetails(String address) {
+            this.address = address;
+        }
+
         @Override
         public Object call() {
             Object result = new Object();
@@ -182,7 +202,7 @@ public class GetUserDetails extends AppCompatActivity {
 
                 // Contract and functions
                 List<Type> inputAsync = new ArrayList<>();
-                inputAsync.add(new Address(Data.publicKey));
+                inputAsync.add(new Address(address));
                 List<TypeReference<?>> outputAsync = new ArrayList<>();
                 outputAsync.add(new TypeReference<Uint256>() {
                 });
@@ -213,6 +233,7 @@ public class GetUserDetails extends AppCompatActivity {
                     result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
                 }
             } catch (Exception e) {
+                result = new Object(false,null,e.toString());
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }
