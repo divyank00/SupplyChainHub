@@ -1,6 +1,8 @@
 package com.example.smartcontract;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatToggleButton;
+import androidx.appcompat.widget.SwitchCompat;
 
 import android.app.Dialog;
 import android.content.ClipData;
@@ -27,8 +29,11 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.example.smartcontract.models.ListenerModel;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
@@ -74,12 +79,14 @@ import static androidx.core.content.ContextCompat.getSystemService;
 
 public class Dashboard extends AppCompatActivity {
 
-    ProgressBar productDetailsLoader, userDetailsLoader, addUserLoader, getUserDetailsLoader;
-    LinearLayout productDetails, ownerClick, userDetails, parentClick, addUser, getUserDetails;
+    ProgressBar productDetailsLoader, userDetailsLoader;
+    LinearLayout productDetails, ownerClick, userDetails, parentClick, ownerRoleLinearLayout;
     TextView companyName, productName, productCategory, owner, userRole, userParent, currentQuantity, ownerText;
-    Switch ownerRole;
+    SwitchCompat ownerRole;
     String contractAddress, contractOwnerAddress;
     TaskRunner taskRunner;
+    DashboardAdapter dashboardAdapter;
+    List<ListenerModel> listenerModelList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,10 +115,9 @@ public class Dashboard extends AppCompatActivity {
         currentQuantity = findViewById(R.id.currentQuantity);
         ownerText = findViewById(R.id.ownerText);
         ownerRole = findViewById(R.id.ownerRole);
-        addUser = findViewById(R.id.addUser);
-        addUserLoader = findViewById(R.id.addUserLoader);
-        getUserDetails = findViewById(R.id.getUserDetails);
-        getUserDetailsLoader = findViewById(R.id.getUserDetailsLoader);
+        ownerRoleLinearLayout = findViewById(R.id.ownerRoleLinearLayout);
+        listenerModelList = new ArrayList<>();
+        dashboardAdapter = new DashboardAdapter(Dashboard.this, listenerModelList, contractAddress);
     }
 
     private void executeGetUserRolesArray() {
@@ -183,7 +189,7 @@ public class Dashboard extends AppCompatActivity {
                         userRole.setText("You are the owner!");
                         ownerText.setText("Are you a " + data.userRoles.get(1).toString() + " also?");
                         ownerText.setVisibility(View.VISIBLE);
-                        ownerRole.setVisibility(View.VISIBLE);
+                        ownerRoleLinearLayout.setVisibility(View.VISIBLE);
                         parentClick.setVisibility(View.GONE);
                         if ((Integer.parseInt(result.getData().get(0).getValue().toString())) != 0) {
                             ownerRole.setChecked(true);
@@ -219,22 +225,22 @@ public class Dashboard extends AppCompatActivity {
                     }
                     userDetailsLoader.setVisibility(View.GONE);
                     userDetails.setVisibility(View.VISIBLE);
-                    addUserLoader.setVisibility(View.GONE);
-                    addUser.setVisibility(View.VISIBLE);
-                    addUser.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                        }
-                    });
-                    getUserDetailsLoader.setVisibility(View.GONE);
-                    getUserDetails.setVisibility(View.VISIBLE);
-                    getUserDetails.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                        }
-                    });
+//                    addUserLoader.setVisibility(View.GONE);
+//                    addUser.setVisibility(View.VISIBLE);
+//                    addUser.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            startActivity(new Intent(Dashboard.this, AddUser.class));
+//                        }
+//                    });
+//                    getUserDetailsLoader.setVisibility(View.GONE);
+//                    getUserDetails.setVisibility(View.VISIBLE);
+//                    getUserDetails.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//
+//                        }
+//                    });
                 }
             } else {
                 Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
@@ -784,5 +790,4 @@ public class Dashboard extends AppCompatActivity {
         editor.clear();
         editor.apply();
     }
-
 }
