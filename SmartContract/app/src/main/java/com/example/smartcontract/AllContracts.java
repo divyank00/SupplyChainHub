@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,11 +38,17 @@ import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
 import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.http.HttpService;
 
@@ -50,6 +58,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static androidx.core.content.ContextCompat.getSystemService;
 
@@ -61,8 +74,6 @@ public class AllContracts extends AppCompatActivity {
     List<ContractModel> mList;
     ProgressBar loader;
     AllContractsViewModel allContractsViewModel;
-    TextView balance;
-    ProgressBar balLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,8 +201,8 @@ public class AllContracts extends AppCompatActivity {
             dialog.setContentView(R.layout.profile_dialog);
             LinearLayout copyAddress = dialog.findViewById(R.id.copyAddress);
             TextView address = dialog.findViewById(R.id.publicAddress);
-            balance = dialog.findViewById(R.id.currentBalance);
-            balLoader = dialog.findViewById(R.id.balLoader);
+            TextView balance = dialog.findViewById(R.id.currentBalance);
+            ProgressBar balLoader = dialog.findViewById(R.id.balLoader);
             address.setText(data.publicKey);
             copyAddress.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -212,8 +223,12 @@ public class AllContracts extends AppCompatActivity {
                     return true;
                 }
             });
-            getAccBal getAccBal = new getAccBal();
-            getAccBal.execute();
+            TaskRunner taskRunner = new TaskRunner();
+            taskRunner.executeAsync(new getAccBal(), (result) -> {
+                balance.setText(result);
+                balLoader.setVisibility(View.GONE);
+                balance.setVisibility(View.VISIBLE);
+            });
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
             lp.copyFrom(dialog.getWindow().getAttributes());
@@ -226,9 +241,33 @@ public class AllContracts extends AppCompatActivity {
         }
     }
 
-    class getAccBal extends AsyncTask<Void, Void, String> {
+    public static class TaskRunner {
+        //        private final Executor executor = Executors.newSingleThreadExecutor(); // change according to your requirements
+        private final Executor executor = new ThreadPoolExecutor(5, 128, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        private final Handler handler = new Handler(Looper.getMainLooper());
 
-        protected String doInBackground(Void... params) {
+        public interface Callback<R> {
+            void onComplete(R result);
+        }
+
+        public <R> void executeAsync(Callable<R> callable, Dashboard.TaskRunner.Callback<R> callback) {
+            executor.execute(() -> {
+                try {
+                    final R result = callable.call();
+                    handler.post(() -> {
+                        callback.onComplete(result);
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    class getAccBal implements Callable<String> {
+
+        @Override
+        public String call() {
             String result = "";
             try {
                 // Connect to the node
@@ -243,14 +282,6 @@ public class AllContracts extends AppCompatActivity {
                 e.printStackTrace();
             }
             return result;
-        }
-
-        @Override
-        protected void onPostExecute(String bal) {
-            super.onPostExecute(bal);
-            balance.setText(bal);
-            balLoader.setVisibility(View.GONE);
-            balance.setVisibility(View.VISIBLE);
         }
     }
 

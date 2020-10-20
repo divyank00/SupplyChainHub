@@ -22,7 +22,7 @@ contract SupplyChain{
     
     State constant defaultState = State.Assembling;
     
-    string[] UserRoles = ["Owner", "Manufacturer", "Distributer", "Retailer", "Customer"];
+    string[] UserRoles = ["Owner", "Manufacturer", "Distributor", "Retailer", "Customer"];
     
     string companyName;
     string productName;
@@ -230,13 +230,15 @@ contract SupplyChain{
         );
     }
 
-    function getUserDetails(address account) public view returns(string memory, string memory, string memory, address, address[] memory){
+    function getUserDetails(address account) public view returns(uint, string memory, string memory, string memory, address, address[] memory, uint){
         return (
+            getUserRole(account),
             users[account].name,
             users[account].longitude,
             users[account].latitude,
             users[account].parentId,
-            users[account].childIds
+            users[account].childIds,
+            users[account].currentQuantity
         );
     }
 

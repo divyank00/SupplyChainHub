@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                     String privateKey = pk.getText().toString().trim();
                     Credentials credentials = Credentials.create(privateKey);
                     data.privateKey = privateKey;
+                    data.publicKey = credentials.getAddress();
                     editor.putString(PUBLIC_KEY, credentials.getAddress());
                     try {
                         byte[] encryptedBytes = encryptKey(privateKey, credentials.getAddress());
@@ -129,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
                     // Load the wallet for the derived keypair
                     Credentials credentials = Credentials.create(derivedKeyPair);
                     data.privateKey = credentials.getEcKeyPair().getPrivateKey().toString(16);
+                    data.publicKey = credentials.getAddress();
                     editor.putString(PUBLIC_KEY, credentials.getAddress());
                     try {
                         byte[] encryptedBytes = encryptKey(credentials.getEcKeyPair().getPrivateKey().toString(16), credentials.getAddress());

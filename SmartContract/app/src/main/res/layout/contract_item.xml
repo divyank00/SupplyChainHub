@@ -12,7 +12,8 @@
     <LinearLayout
         android:id="@+id/cardView"
         android:clickable="true"
-        android:background="?attr/selectableItemBackgroundBorderless"                            android:layout_alignParentEnd="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_alignParentEnd="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"

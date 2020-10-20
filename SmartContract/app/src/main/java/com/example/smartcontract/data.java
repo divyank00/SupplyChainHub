@@ -1,6 +1,8 @@
 package com.example.smartcontract;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class data {
@@ -15,5 +17,5 @@ public class data {
         put(5, "Shipped");
         put(6, "Received");
     }};
-    public static String[] userRoles;
+    public static List<String> userRoles = new ArrayList<>();
 }
