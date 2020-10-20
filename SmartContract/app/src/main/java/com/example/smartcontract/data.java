@@ -15,4 +15,5 @@ public class data {
         put(5, "Shipped");
         put(6, "Received");
     }};
+    public static String[] userRoles;
 }

@@ -186,7 +186,7 @@ contract SupplyChain{
         _;
     }
     
-    function getUserRolesArray() internal view returns(string[] memory){
+    function getUserRolesArray() public view returns(string[] memory){
         return UserRoles;
     }
     
