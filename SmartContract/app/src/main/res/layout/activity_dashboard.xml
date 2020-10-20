@@ -223,9 +223,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
                             android:orientation="vertical"
                             android:padding="30dp"
-                            android:visibility="visible">
+                            android:visibility="gone">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -250,7 +252,6 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/card2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="20dp"
@@ -266,11 +267,14 @@
                         android:layout_height="match_parent">
 
                         <LinearLayout
+                            android:id="@+id/getUserDetails"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
                             android:orientation="vertical"
                             android:padding="30dp"
-                            android:visibility="visible">
+                            android:visibility="gone">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -284,6 +288,7 @@
                         </LinearLayout>
 
                         <ProgressBar
+                            android:id="@+id/getUserDetailsLoader"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"

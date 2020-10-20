@@ -74,8 +74,8 @@ import static androidx.core.content.ContextCompat.getSystemService;
 
 public class Dashboard extends AppCompatActivity {
 
-    ProgressBar productDetailsLoader, userDetailsLoader;
-    LinearLayout productDetails, ownerClick, userDetails, parentClick;
+    ProgressBar productDetailsLoader, userDetailsLoader, addUserLoader, getUserDetailsLoader;
+    LinearLayout productDetails, ownerClick, userDetails, parentClick, addUser, getUserDetails;
     TextView companyName, productName, productCategory, owner, userRole, userParent, currentQuantity, ownerText;
     Switch ownerRole;
     String contractAddress, contractOwnerAddress;
@@ -108,6 +108,10 @@ public class Dashboard extends AppCompatActivity {
         currentQuantity = findViewById(R.id.currentQuantity);
         ownerText = findViewById(R.id.ownerText);
         ownerRole = findViewById(R.id.ownerRole);
+        addUser = findViewById(R.id.addUser);
+        addUserLoader = findViewById(R.id.addUserLoader);
+        getUserDetails = findViewById(R.id.getUserDetails);
+        getUserDetailsLoader = findViewById(R.id.getUserDetailsLoader);
     }
 
     private void executeGetUserRolesArray() {
@@ -215,6 +219,22 @@ public class Dashboard extends AppCompatActivity {
                     }
                     userDetailsLoader.setVisibility(View.GONE);
                     userDetails.setVisibility(View.VISIBLE);
+                    addUserLoader.setVisibility(View.GONE);
+                    addUser.setVisibility(View.VISIBLE);
+                    addUser.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                        }
+                    });
+                    getUserDetailsLoader.setVisibility(View.GONE);
+                    getUserDetails.setVisibility(View.VISIBLE);
+                    getUserDetails.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                        }
+                    });
                 }
             } else {
                 Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
