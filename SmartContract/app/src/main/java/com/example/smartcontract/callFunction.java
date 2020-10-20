@@ -290,7 +290,7 @@ public class callFunction extends AppCompatActivity {
                 String txData = FunctionEncoder.encode(function);
 
                 Transaction t = Transaction.createEthCallTransaction(credentials.getAddress(),contractAddress,txData);
-                BigInteger val = web3j.ethEstimateGas(t).send().getAmountUsed();
+               BigInteger val = web3j.ethEstimateGas(t).send().getAmountUsed();
                 Log.d("Address Gas Used: ",val+"");
                 Log.d("Address Gas Price: ", ""+4.1*1e-9+ " Ether");
                 Double txnFee = val.intValue()*4.1*1e-9;
