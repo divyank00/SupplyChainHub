@@ -67,6 +67,6 @@ dependencies {
 
     implementation "com.airbnb.android:lottie:3.4.0"
 
-    implementation 'com.journeyapps:zxing-android-embedded:3.4.0'
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
 
 }

@@ -186,10 +186,11 @@ contract SupplyChain{
         _;
     }
     
+    
     function getUserRolesArray() public view returns(string[] memory){
         return UserRoles;
     }
-    
+
     function getOwner() public view returns(address){
 
         return contractOwner;
@@ -363,6 +364,7 @@ contract SupplyChain{
     function packLot(string memory _lotId) public onlyManufacturer made(_lotId){
         
         lots[_lotId].productState = State.Packed;
+        users[msg.sender].currentQuantity=users[msg.sender].currentQuantity+1;
         emit Packed();
     }
     

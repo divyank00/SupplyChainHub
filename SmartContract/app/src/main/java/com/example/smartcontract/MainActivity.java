@@ -1,5 +1,6 @@
 package com.example.smartcontract;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,11 +12,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
+import com.google.zxing.client.android.Intents;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -83,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         barcode = findViewById(R.id.barcode);
         loader = findViewById(R.id.loader);
         productLotViewModel = new ProductLotViewModel();
-        qrScan = new IntentIntegrator(this);
+        qrScan = new IntentIntegrator(this).setRequestCode(1);
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,24 +160,22 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String productId = barcode.getText().toString().trim();
                 if (productId.isEmpty()) {
-                    barcode.setError("Enter a ProductId");
+                    barcode.setError("Enter a ProductId or LotId");
                     return;
                 }
                 track.setVisibility(View.GONE);
                 loader.setVisibility(View.VISIBLE);
-                productLotViewModel.getLotId(productId).observe(MainActivity.this, new Observer<ObjectModel>() {
+                productLotViewModel.getAddress(productId).observe(MainActivity.this, new Observer<ObjectModel>() {
                     @Override
                     public void onChanged(ObjectModel objectModel) {
                         if (objectModel.isStatus()) {
-                            String lotId = (String) objectModel.getObj();
-                            Toast.makeText(MainActivity.this, lotId, Toast.LENGTH_SHORT).show();
-                            loader.setVisibility(View.GONE);
-                            track.setVisibility(View.VISIBLE);
+                            String address = (String) objectModel.getObj();
+                            Toast.makeText(MainActivity.this, address, Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
-                            loader.setVisibility(View.GONE);
-                            track.setVisibility(View.VISIBLE);
                         }
+                        loader.setVisibility(View.GONE);
+                        track.setVisibility(View.VISIBLE);
                     }
                 });
             }
@@ -182,20 +183,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            //if qrcode has nothing in it
-            if (result.getContents() == null) {
-                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                barcode.setText(contents);
             } else {
-                //if qr contains data
-                Log.d("Address", result.getContents());
-                barcode.setText(result.getContents());
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public static byte[] encryptKey(String privateKey, String publicKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
