@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -29,14 +28,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.example.smartcontract.functions.AddUser;
 import com.example.smartcontract.functions.GetUserDetails;
-import com.example.smartcontract.functions.MakeLot;
+import com.example.smartcontract.functions.MakePackLot;
 import com.example.smartcontract.models.ListenerModel;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
@@ -283,26 +281,18 @@ public class Dashboard extends AppCompatActivity {
                         }
                     }));
                     if (userRoleInt == 1) {
-                        listenerModelList.add(new ListenerModel("Add Lots & Products", "You have to add the lots & products which have been made!", new View.OnClickListener() {
+                        listenerModelList.add(new ListenerModel("Add & Pack Lots & Products", "You have to add the lots & products which have just been made and update once they are packed!", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent intent = new Intent(v.getContext(), MakeLot.class);
+                                Intent intent = new Intent(v.getContext(), MakePackLot.class);
                                 intent.putExtra("contractAddress", contractAddress);
                                 startActivity(intent);
                             }
                         }));
-                        listenerModelList.add(new ListenerModel("Pack Lots & Products", "You have to update the status of the packed lots & products!", new View.OnClickListener() {
+                        listenerModelList.add(new ListenerModel("Pack Lots & Products", "You have to update the status of the packed lots & products to 'Packed'!", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent intent = new Intent(v.getContext(), MakeLot.class);
-                                intent.putExtra("contractAddress", contractAddress);
-                                startActivity(intent);
-                            }
-                        }));
-                        listenerModelList.add(new ListenerModel("Put For Sale", "You have to put the lots & products on Sale!", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(v.getContext(), MakeLot.class);
+                                Intent intent = new Intent(v.getContext(), MakePackLot.class);
                                 intent.putExtra("contractAddress", contractAddress);
                                 startActivity(intent);
                             }
