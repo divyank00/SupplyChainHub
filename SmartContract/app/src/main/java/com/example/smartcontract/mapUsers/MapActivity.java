@@ -72,7 +72,6 @@ public class MapActivity extends AppCompatActivity {
         cusAddress = intent.getStringExtra("publicAddress");
         userAddress = new ArrayList<>();
         linear = findViewById(R.id.linear);
-
         executeTrackProductByProductId();
     }
 
@@ -85,7 +84,6 @@ public class MapActivity extends AppCompatActivity {
                         executeGetUserDetails(userAddress.get(i).toString());
                     }
                 }
-                createUI();
             } else {
                 Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
             }
@@ -103,6 +101,7 @@ public class MapActivity extends AppCompatActivity {
                     names.add(name);
                     arr.add(url);
                 }
+                createUI();
             } else {
                 Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
             }
@@ -180,7 +179,6 @@ public class MapActivity extends AppCompatActivity {
         linear.addView(tex);
 
     }
-
 
     public static class TaskRunner {
         //        private final Executor executor = Executors.newSingleThreadExecutor(); // change according to your requirements

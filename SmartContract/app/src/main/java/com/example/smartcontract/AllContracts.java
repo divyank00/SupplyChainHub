@@ -36,6 +36,7 @@ import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ContractModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.AllContractsViewModel;
+import com.example.smartcontract.viewModel.ProductLotViewModel;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
@@ -65,7 +66,7 @@ public class AllContracts extends AppCompatActivity {
     AllContractsViewModel allContractsViewModel;
 
     IntentIntegrator qrScanLotId, qrScanProductId;
-    EditText productId,lotId;
+    EditText productId, lotId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,7 +195,8 @@ public class AllContracts extends AppCompatActivity {
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         clearSharedPref();
-                        finish();                    }
+                        finish();
+                    }
                 })
                 .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
                     @Override
@@ -261,8 +263,10 @@ public class AllContracts extends AppCompatActivity {
             productId = dialog.findViewById(R.id.productId);
             lotId = dialog.findViewById(R.id.lotId);
             Button track = dialog.findViewById(R.id.button);
+            ProgressBar trackLoader = dialog.findViewById(R.id.trackLoader);
             qrScanProductId = new IntentIntegrator(this).setRequestCode(8);
             qrScanLotId = new IntentIntegrator(this).setRequestCode(9);
+            ProductLotViewModel productLotViewModel = new ProductLotViewModel();
             scanProductId.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -280,18 +284,49 @@ public class AllContracts extends AppCompatActivity {
                 public void onClick(View v) {
                     productId.setError(null);
                     lotId.setError(null);
-                    if(productId.getText().toString().trim().isEmpty() && lotId.getText().toString().trim().isEmpty()){
+                    if (productId.getText().toString().trim().isEmpty() && lotId.getText().toString().trim().isEmpty()) {
                         productId.setError("Mandatory Field!");
-                    }else if(!productId.getText().toString().trim().isEmpty()){
-                        Intent intent = new Intent(AllContracts.this, MapActivity.class);
-                        intent.putExtra("productId",productId.getText().toString().trim().isEmpty());
-                        intent.putExtra("publicAddress",Data.publicKey);
-                        startActivity(intent);
-                    }else{
-                        Intent intent = new Intent(AllContracts.this, MapActivity.class);
-                        intent.putExtra("lotId",lotId.getText().toString().trim().isEmpty());
-                        intent.putExtra("publicAddress",Data.publicKey);
-                        startActivity(intent);
+                    } else if (!productId.getText().toString().trim().isEmpty()) {
+                        track.setVisibility(View.GONE);
+                        trackLoader.setVisibility(View.VISIBLE);
+                        productLotViewModel.getAddress(productId.getText().toString().trim()).observe(AllContracts.this, new Observer<ObjectModel>() {
+                            @Override
+                            public void onChanged(ObjectModel objectModel) {
+                                if (objectModel.isStatus()) {
+                                    String contractAddress = (String) objectModel.getObj();
+                                    Intent intent = new Intent(AllContracts.this, MapActivity.class);
+                                    intent.putExtra("contractAddress", contractAddress);
+                                    intent.putExtra("productId", productId.getText().toString().trim());
+                                    intent.putExtra("publicAddress", Data.publicKey);
+                                    startActivity(intent);
+
+                                } else {
+                                    Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                                trackLoader.setVisibility(View.GONE);
+                                track.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    } else if (!lotId.getText().toString().trim().isEmpty()) {
+                        trackLoader.setVisibility(View.VISIBLE);
+                        productLotViewModel.getAddress(productId.getText().toString().trim()).observe(AllContracts.this, new Observer<ObjectModel>() {
+                            @Override
+                            public void onChanged(ObjectModel objectModel) {
+                                if (objectModel.isStatus()) {
+                                    String contractAddress = (String) objectModel.getObj();
+                                    Intent intent = new Intent(AllContracts.this, MapActivity.class);
+                                    intent.putExtra("contractAddress", contractAddress);
+                                    intent.putExtra("lotId", lotId.getText().toString().trim().isEmpty());
+                                    intent.putExtra("publicAddress", Data.publicKey);
+                                    startActivity(intent);
+
+                                } else {
+                                    Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                                trackLoader.setVisibility(View.GONE);
+                                track.setVisibility(View.VISIBLE);
+                            }
+                        });
                     }
                 }
             });
