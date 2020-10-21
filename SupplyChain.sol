@@ -66,7 +66,7 @@ contract SupplyChain{
     struct product{
         string productId;       //Barcode
         string lotId;
-        uint finalBuyingPrice;
+        // uint finalBuyingPrice;
         uint finalSellingPrice;
     }
     
@@ -329,7 +329,7 @@ contract SupplyChain{
             product memory productDetails = product({
                 productId : _productIds[i],
                 lotId : _lotId,
-                finalBuyingPrice : 0,
+                // finalBuyingPrice : 0,
                 finalSellingPrice : 0
             });
             products[_productIds[i]] = productDetails;
@@ -453,11 +453,11 @@ contract SupplyChain{
         products[_productId].finalSellingPrice = sellingPrice;
     }
     
-    function setProductFinalBuyingPrice(string memory _productId, uint buyingPrice) public {
+    // function setProductFinalBuyingPrice(string memory _productId, uint buyingPrice) public {
         
-        require(getActualUserRole(msg.sender)==uint(UserRoles.length-1), "You don't have enough permission!");
-        products[_productId].finalBuyingPrice = buyingPrice;
-    }
+    //     require(getActualUserRole(msg.sender)==uint(UserRoles.length-1), "You don't have enough permission!");
+    //     products[_productId].finalBuyingPrice = buyingPrice;
+    // }
 
     function trackProductByProductId(string memory _productId) public view returns(string memory, uint, address, address[] memory, uint[] memory, uint[] memory, string[] memory){
         

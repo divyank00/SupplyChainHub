@@ -413,7 +413,7 @@ public class MakePackLot extends AppCompatActivity {
                         map.put(prodId, contractAddress);
                     }
                 }
-                
+
                 Function function = new Function("makeLot", // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters

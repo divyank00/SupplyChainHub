@@ -63,6 +63,7 @@ public class AllFunctions extends AppCompatActivity {
         usedFunctions.add("trackProductByLotId");
         usedFunctions.add("trackProductByProductId");
         usedFunctions.add("checkIsUser");
+        usedFunctions.add("setProductFinalSellingPrice");
     }
 
     void getContract() {
