@@ -41,8 +41,20 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.http.HttpService;
 
@@ -64,6 +76,7 @@ public class AllContracts extends AppCompatActivity {
     List<ContractModel> mList;
     ProgressBar loader;
     AllContractsViewModel allContractsViewModel;
+    TaskRunner taskRunner;
 
     IntentIntegrator qrScanLotId, qrScanProductId;
     EditText productId, lotId;
@@ -72,6 +85,7 @@ public class AllContracts extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_contracts);
+        taskRunner = new TaskRunner();
         rV = findViewById(R.id.rV);
         button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -116,21 +130,32 @@ public class AllContracts extends AppCompatActivity {
                     }
                     b.setVisibility(View.GONE);
                     loader.setVisibility(View.VISIBLE);
-                    allContractsViewModel.addContract(address.getText().toString().trim(), name.getText().toString().trim())
-                            .observe(AllContracts.this, new Observer<ObjectModel>() {
-                                @Override
-                                public void onChanged(ObjectModel objectModel) {
-                                    if (objectModel.isStatus()) {
-                                        mList.add(0, (ContractModel) objectModel.getObj());
-                                        adapter.notifyDataSetChanged();
-                                        dialog.dismiss();
-                                    } else {
-                                        Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
-                                        loader.setVisibility(View.GONE);
-                                        b.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                            });
+                    taskRunner.executeAsync(new checkIsUser(address.getText().toString().trim()), (result) -> {
+                        if (result.isStatus()) {
+                            if (!result.getData().isEmpty() && ((boolean)result.getData().get(0).getValue())) {
+                                allContractsViewModel.addContract(address.getText().toString().trim(), name.getText().toString().trim())
+                                        .observe(AllContracts.this, new Observer<ObjectModel>() {
+                                            @Override
+                                            public void onChanged(ObjectModel objectModel) {
+                                                if (objectModel.isStatus()) {
+                                                    mList.add(0, (ContractModel) objectModel.getObj());
+                                                    adapter.notifyDataSetChanged();
+                                                    dialog.dismiss();
+                                                } else {
+                                                    Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                                                }
+                                                loader.setVisibility(View.GONE);
+                                                b.setVisibility(View.VISIBLE);
+                                            }
+                                        });
+                            } else {
+                                dialog.dismiss();
+                                Toast.makeText(AllContracts.this, "Ask someone to add you because you don't have access to this Smart-Contract! ", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(AllContracts.this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             });
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -187,6 +212,7 @@ public class AllContracts extends AppCompatActivity {
         MaterialDialog mDialog = new MaterialDialog.Builder(AllContracts.this)
                 .setTitle("Confirmation")
                 .setMessage("Are you sure you want to log out?")
+                .setCancelable(true)
                 .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
@@ -236,7 +262,6 @@ public class AllContracts extends AppCompatActivity {
                     return true;
                 }
             });
-            TaskRunner taskRunner = new TaskRunner();
             taskRunner.executeAsync(new getAccBal(), (result) -> {
                 balance.setText(result);
                 balLoader.setVisibility(View.GONE);
@@ -297,9 +322,7 @@ public class AllContracts extends AppCompatActivity {
                                     Intent intent = new Intent(AllContracts.this, MapActivity.class);
                                     intent.putExtra("contractAddress", contractAddress);
                                     intent.putExtra("productId", productId.getText().toString().trim());
-                                    intent.putExtra("publicAddress", Data.publicKey);
                                     startActivity(intent);
-
                                 } else {
                                     Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
@@ -309,7 +332,7 @@ public class AllContracts extends AppCompatActivity {
                         });
                     } else if (!lotId.getText().toString().trim().isEmpty()) {
                         trackLoader.setVisibility(View.VISIBLE);
-                        productLotViewModel.getAddress(productId.getText().toString().trim()).observe(AllContracts.this, new Observer<ObjectModel>() {
+                        productLotViewModel.getAddress(lotId.getText().toString().trim()).observe(AllContracts.this, new Observer<ObjectModel>() {
                             @Override
                             public void onChanged(ObjectModel objectModel) {
                                 if (objectModel.isStatus()) {
@@ -317,7 +340,6 @@ public class AllContracts extends AppCompatActivity {
                                     Intent intent = new Intent(AllContracts.this, MapActivity.class);
                                     intent.putExtra("contractAddress", contractAddress);
                                     intent.putExtra("lotId", lotId.getText().toString().trim().isEmpty());
-                                    intent.putExtra("publicAddress", Data.publicKey);
                                     startActivity(intent);
 
                                 } else {
@@ -363,6 +385,94 @@ public class AllContracts extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    class checkIsUser implements Callable<Object> {
+        String contractAddress;
+
+        public checkIsUser(String contractAddress) {
+            this.contractAddress = contractAddress;
+        }
+
+        @Override
+        public Object call() {
+            Object result = new Object();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+                String pk = Data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                inputAsync.add(new Address(Data.publicKey));
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+                outputAsync.add(new TypeReference<Bool>() {
+                });
+                Function function = new Function("checkIsUser", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String encodedFunction = FunctionEncoder.encode(function);
+                EthCall ethCall = web3j.ethCall(
+                        Transaction.createEthCallTransaction(credentials.getAddress(), contractAddress, encodedFunction),
+                        DefaultBlockParameterName.LATEST)
+                        .sendAsync().get();
+                if (!ethCall.isReverted()) {
+                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
+                } else {
+                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
+                }
+            } catch (Exception e) {
+                Toast.makeText(AllContracts.this, e.toString(), Toast.LENGTH_SHORT).show();
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class Object {
+        private List<Type> data;
+        private boolean status;
+
+        public boolean isStatus() {
+            return status;
+        }
+
+        public void setStatus(boolean status) {
+            this.status = status;
+        }
+
+        public Object() {
+        }
+
+        public List<Type> getData() {
+            return data;
+        }
+
+        public void setData(List<Type> data) {
+            this.data = data;
+        }
+
+        public Object(boolean status, List<Type> data, String errorMsg) {
+            this.data = data;
+            this.status = status;
+            this.errorMsg = errorMsg;
+        }
+
+        public String getErrorMsg() {
+            return errorMsg;
+        }
+
+        public void setErrorMsg(String errorMsg) {
+            this.errorMsg = errorMsg;
+        }
+
+        private String errorMsg;
     }
 
     class getAccBal implements Callable<String> {

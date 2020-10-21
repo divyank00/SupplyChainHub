@@ -28,6 +28,7 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
@@ -133,6 +134,9 @@ public class callFunction extends AppCompatActivity {
                                     case "uint256":
                                         inputAsync.add(new Uint256((long) Double.parseDouble(text)));
                                         break;
+                                    case "bool":
+                                        inputAsync.add(new Bool(Boolean.parseBoolean(text)));
+                                        break;
                                     case "string[]":
                                         List<Utf8String> list = new ArrayList<>();
                                         String[] arr = text.split(",");
@@ -160,6 +164,10 @@ public class callFunction extends AppCompatActivity {
                                     break;
                                 case "int256":
                                     outputAsync.add(new TypeReference<Int256>() {
+                                    });
+                                    break;
+                                case "bool":
+                                    outputAsync.add(new TypeReference<Bool>() {
                                     });
                                     break;
                                 case "string[]":

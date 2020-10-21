@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -42,14 +44,20 @@ import com.example.smartcontract.functions.MakePackLot;
 import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ListenerModel;
 import com.example.smartcontract.models.ObjectModel;
+import com.example.smartcontract.models.SingleContractModel;
+import com.example.smartcontract.oldCode.Adapter;
 import com.example.smartcontract.oldCode.AllFunctions;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
+import com.example.smartcontract.viewModel.SingleContractViewModel;
 import com.google.android.gms.maps.model.Dash;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -101,13 +109,18 @@ public class Dashboard extends AppCompatActivity {
     IntentIntegrator qrScanLotId, qrScanProductId;
     EditText productId, lotId;
 
+    String abi;
+
+    boolean trackByProductId = false;
+    boolean trackByLotId = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         Intent intent = getIntent();
         setGlobal(intent);
-        executeGetUserRolesArray();
+        getContract();
     }
 
     private void setGlobal(Intent intent) {
@@ -136,6 +149,40 @@ public class Dashboard extends AppCompatActivity {
         userFunctions.setAdapter(dashboardAdapter);
         userFunctions.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         userFunctions.showShimmerAdapter();
+    }
+
+    private void getContract() {
+        SingleContractViewModel singleContractViewModel = new SingleContractViewModel();
+        singleContractViewModel.getContract(contractAddress).observe(this, new Observer<ObjectModel>() {
+            @Override
+            public void onChanged(ObjectModel objectModel) {
+                if (objectModel.isStatus()) {
+                    if (objectModel.getObj() != null) {
+                        try {
+                            abi = ((SingleContractModel) objectModel.getObj()).getAbi();
+                            JSONArray obj = new JSONArray(abi);
+                            List<JSONObject> functions = new ArrayList<>();
+                            for (int i = 0; i < obj.length(); i++) {
+                                if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
+                                    if(((JSONObject) obj.get(i)).optString("name").equals("trackProductByProductId"))
+                                        trackByProductId = true;
+                                    if(((JSONObject) obj.get(i)).optString("name").equals("trackProductByLotId"))
+                                        trackByLotId = true;
+                                    functions.add((JSONObject) obj.get(i));
+                                }
+                            }
+                            executeGetUserRolesArray();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Toast.makeText(Dashboard.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(Dashboard.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void executeGetUserRolesArray() {
@@ -233,11 +280,12 @@ public class Dashboard extends AppCompatActivity {
                         }
                     } else {
                         userRole.setText("You are a " + Data.userRoles.get(userRoleInt) + "!");
+                        currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
                         if (userRoleInt == 1) {
                             parentClick.setVisibility(View.GONE);
                         } else {
                             userParent.setText("Your " + Data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
-                            currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
+                            parentClick.setVisibility(View.VISIBLE);
                             parentClick.setOnLongClickListener(new View.OnLongClickListener() {
                                 @Override
                                 public boolean onLongClick(View v) {
@@ -270,7 +318,6 @@ public class Dashboard extends AppCompatActivity {
                     }
                     userDetailsLoader.setVisibility(View.GONE);
                     userDetails.setVisibility(View.VISIBLE);
-                    userFunctions.hideShimmerAdapter();
                     if (userRoleInt < Data.userRoles.size() - 1) {
                         listenerModelList.add(new ListenerModel("Add User", "You can add user in the Smart-Contract!", new View.OnClickListener() {
                             @Override
@@ -300,6 +347,8 @@ public class Dashboard extends AppCompatActivity {
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), MakePackLot.class);
                                 intent.putExtra("contractAddress", contractAddress);
+                                intent.putExtra("trackByProductId",trackByProductId);
+                                intent.putExtra("trackByLotId",trackByLotId);
                                 startActivity(intent);
                             }
                         }));
@@ -309,9 +358,11 @@ public class Dashboard extends AppCompatActivity {
                         public void onClick(View v) {
                             Intent intent = new Intent(v.getContext(), AllFunctions.class);
                             intent.putExtra("contractAddress", contractAddress);
+                            intent.putExtra("abi", abi);
                             startActivity(intent);
                         }
                     }));
+                    userFunctions.hideShimmerAdapter();
                     dashboardAdapter.notifyDataSetChanged();
                 }
             } else {
@@ -368,6 +419,15 @@ public class Dashboard extends AppCompatActivity {
         taskRunner.executeAsync(new makeOwnerAsNextRole(), (result) -> {
             progressHUD.dismiss();
             if (result.isStatus()) {
+                listenerModelList.add(2, new ListenerModel("Add & Pack Lots", "You have to add the lots which have just been made and update once they are packed!", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(v.getContext(), MakePackLot.class);
+                        intent.putExtra("contractAddress", contractAddress);
+                        startActivity(intent);
+                    }
+                }));
+                dashboardAdapter.notifyDataSetChanged();
                 toggleFlag = false;
                 ownerRole.setEnabled(false);
                 ownerRole.setChecked(true);
@@ -1002,6 +1062,7 @@ public class Dashboard extends AppCompatActivity {
         MaterialDialog mDialog = new MaterialDialog.Builder(Dashboard.this)
                 .setTitle("Confirmation")
                 .setMessage("Are you sure you want to log out?")
+                .setCancelable(true)
                 .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
@@ -1031,7 +1092,36 @@ public class Dashboard extends AppCompatActivity {
             ImageView scanLotId = dialog.findViewById(R.id.scanLotId);
             productId = dialog.findViewById(R.id.productId);
             lotId = dialog.findViewById(R.id.lotId);
+            LinearLayout productTrack = dialog.findViewById(R.id.productTrack);
+            LinearLayout lotTrack = dialog.findViewById(R.id.lotTrack);
+            ProgressBar mainLoader = dialog.findViewById(R.id.mainLoader);
+            RelativeLayout orLayout = dialog.findViewById(R.id.orLayout);
             Button track = dialog.findViewById(R.id.button);
+            if(!trackByLotId && !trackByProductId){
+                productTrack.setVisibility(View.GONE);
+                lotTrack.setVisibility(View.GONE);
+                orLayout.setVisibility(View.GONE);
+                mainLoader.setVisibility(View.VISIBLE);
+                track.setVisibility(View.GONE);
+            }else if(trackByLotId && trackByProductId){
+                productTrack.setVisibility(View.VISIBLE);
+                lotTrack.setVisibility(View.VISIBLE);
+                orLayout.setVisibility(View.VISIBLE);
+                mainLoader.setVisibility(View.GONE);
+                track.setVisibility(View.VISIBLE);
+            }else if(trackByProductId){
+                productTrack.setVisibility(View.VISIBLE);
+                lotTrack.setVisibility(View.GONE);
+                orLayout.setVisibility(View.GONE);
+                mainLoader.setVisibility(View.GONE);
+                track.setVisibility(View.VISIBLE);
+            }else{
+                productTrack.setVisibility(View.GONE);
+                lotTrack.setVisibility(View.VISIBLE);
+                orLayout.setVisibility(View.GONE);
+                mainLoader.setVisibility(View.GONE);
+                track.setVisibility(View.VISIBLE);
+            }
             ProgressBar trackLoader = dialog.findViewById(R.id.trackLoader);
             qrScanProductId = new IntentIntegrator(this).setRequestCode(8);
             qrScanLotId = new IntentIntegrator(this).setRequestCode(9);
@@ -1055,6 +1145,7 @@ public class Dashboard extends AppCompatActivity {
                     lotId.setError(null);
                     if (productId.getText().toString().trim().isEmpty() && lotId.getText().toString().trim().isEmpty()) {
                         productId.setError("Mandatory Field!");
+                        lotId.setError("Mandatory Field!");
                     } else if (!productId.getText().toString().trim().isEmpty()) {
                         track.setVisibility(View.GONE);
                         trackLoader.setVisibility(View.VISIBLE);
@@ -1067,7 +1158,6 @@ public class Dashboard extends AppCompatActivity {
                                         Intent intent = new Intent(Dashboard.this, MapActivity.class);
                                         intent.putExtra("contractAddress", contractAddress);
                                         intent.putExtra("productId", productId.getText().toString().trim());
-                                        intent.putExtra("publicAddress", Data.publicKey);
                                         startActivity(intent);
                                     } else {
                                         Toast.makeText(Dashboard.this, "Product doesn't belong to this Smart-Contract!", Toast.LENGTH_SHORT).show();
@@ -1082,7 +1172,7 @@ public class Dashboard extends AppCompatActivity {
                     } else {
                         track.setVisibility(View.GONE);
                         trackLoader.setVisibility(View.VISIBLE);
-                        productLotViewModel.getAddress(productId.getText().toString().trim()).observe(Dashboard.this, new Observer<ObjectModel>() {
+                        productLotViewModel.getAddress(lotId.getText().toString().trim()).observe(Dashboard.this, new Observer<ObjectModel>() {
                             @Override
                             public void onChanged(ObjectModel objectModel) {
                                 if (objectModel.isStatus()) {
@@ -1091,7 +1181,6 @@ public class Dashboard extends AppCompatActivity {
                                         Intent intent = new Intent(Dashboard.this, MapActivity.class);
                                         intent.putExtra("contractAddress", contractAddress);
                                         intent.putExtra("productId", productId.getText().toString().trim());
-                                        intent.putExtra("publicAddress", Data.publicKey);
                                         startActivity(intent);
                                     } else {
                                         Toast.makeText(Dashboard.this, "Lot doesn't belong to this Smart-Contract!", Toast.LENGTH_SHORT).show();
@@ -1146,7 +1235,7 @@ public class Dashboard extends AppCompatActivity {
                     return true;
                 }
             });
-            AllContracts.TaskRunner taskRunner = new AllContracts.TaskRunner();
+            TaskRunner taskRunner = new TaskRunner();
             taskRunner.executeAsync(new getAccBal(), (result) -> {
                 balance.setText(result);
                 balLoader.setVisibility(View.GONE);

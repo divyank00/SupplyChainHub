@@ -41,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
 
     EditText pk, seed;
     Button btn;
-    ImageView scan;
-    EditText barcode,customerAddress;
+    ImageView scan, scanLot;
+    EditText barcode, barcodeLot;
     Button track;
-    private IntentIntegrator qrScan;
+    private IntentIntegrator qrScan, qrScanLot;
     ProductLotViewModel productLotViewModel;
     ProgressBar loader;
 
@@ -84,13 +84,21 @@ public class MainActivity extends AppCompatActivity {
         track = findViewById(R.id.track);
         barcode = findViewById(R.id.barcode);
         loader = findViewById(R.id.loader);
-        customerAddress = findViewById(R.id.customerAddress);
         productLotViewModel = new ProductLotViewModel();
         qrScan = new IntentIntegrator(this).setRequestCode(1);
+        scanLot = findViewById(R.id.scanLot);
+        barcodeLot = findViewById(R.id.barcodeLot);
+        qrScanLot = new IntentIntegrator(this).setRequestCode(2);
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 qrScan.initiateScan();
+            }
+        });
+        scanLot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                qrScanLot.initiateScan();
             }
         });
         btn.setOnClickListener(new View.OnClickListener() {
@@ -158,38 +166,50 @@ public class MainActivity extends AppCompatActivity {
         track.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String productId = barcode.getText().toString().trim();
-                String cus_address = customerAddress.getText().toString().trim();
                 barcode.setError(null);
-                customerAddress.setError(null);
-                if (productId.isEmpty()) {
+               if (barcode.getText().toString().trim().isEmpty() && barcodeLot.getText().toString().trim().isEmpty()) {
                     barcode.setError("Mandatory Field");
-                    return;
-                }
-                if(cus_address.isEmpty()){
-                    customerAddress.setError("Mandatory Field");
-                    return;
-                }
-                track.setVisibility(View.GONE);
-                loader.setVisibility(View.VISIBLE);
-                productLotViewModel.getAddress(productId).observe(MainActivity.this, new Observer<ObjectModel>() {
-                    @Override
-                    public void onChanged(ObjectModel objectModel) {
-                        if (objectModel.isStatus()) {
-                            String contractAddress = (String) objectModel.getObj();
-                            Intent intent = new Intent(MainActivity.this, MapActivity.class);
-                            intent.putExtra("contractAddress",contractAddress);
-                            intent.putExtra("productId",productId);
-                            intent.putExtra("publicAddress",cus_address);
-                            startActivity(intent);
+                } else if(!barcode.getText().toString().trim().isEmpty()){
+                    track.setVisibility(View.GONE);
+                    loader.setVisibility(View.VISIBLE);
+                    productLotViewModel.getAddress(barcode.getText().toString().trim()).observe(MainActivity.this, new Observer<ObjectModel>() {
+                        @Override
+                        public void onChanged(ObjectModel objectModel) {
+                            if (objectModel.isStatus()) {
+                                String contractAddress = (String) objectModel.getObj();
+                                Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                                intent.putExtra("contractAddress", contractAddress);
+                                intent.putExtra("productId", barcode.getText().toString().trim());
+                                startActivity(intent);
 
-                        } else {
-                            Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            loader.setVisibility(View.GONE);
+                            track.setVisibility(View.VISIBLE);
                         }
-                        loader.setVisibility(View.GONE);
-                        track.setVisibility(View.VISIBLE);
-                    }
-                });
+                    });
+                }else if(!barcodeLot.getText().toString().trim().isEmpty()){
+                    track.setVisibility(View.GONE);
+                    loader.setVisibility(View.VISIBLE);
+                    productLotViewModel.getAddress(barcodeLot.getText().toString().trim()).observe(MainActivity.this, new Observer<ObjectModel>() {
+                        @Override
+                        public void onChanged(ObjectModel objectModel) {
+                            if (objectModel.isStatus()) {
+                                String contractAddress = (String) objectModel.getObj();
+                                Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                                intent.putExtra("contractAddress", contractAddress);
+                                intent.putExtra("lotId", barcodeLot.getText().toString().trim());
+                                startActivity(intent);
+
+                            } else {
+                                Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            loader.setVisibility(View.GONE);
+                            track.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
             }
         });
     }
@@ -200,6 +220,16 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 String contents = data.getStringExtra("SCAN_RESULT");
                 barcode.setText(contents);
+                barcode.setSelection(barcode.getText().length());
+            } else {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            }
+        }
+        if (requestCode == 2) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                barcodeLot.setText(contents);
+                barcodeLot.setSelection(barcodeLot.getText().length());
             } else {
                 Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
             }

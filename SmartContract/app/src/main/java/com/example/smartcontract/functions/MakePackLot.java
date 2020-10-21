@@ -73,6 +73,7 @@ public class MakePackLot extends AppCompatActivity {
     Button made, pack;
     ImageView lotIdIV, productIdsIV, lotIdPackIV;
     private IntentIntegrator qrScanLotId, qrScanProductIds, qrScanLotIdPack;
+    boolean trackByProductId, trackByLotId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,8 @@ public class MakePackLot extends AppCompatActivity {
         setContentView(R.layout.activity_make_lot);
         Intent intent = getIntent();
         contractAddress = intent.getStringExtra("contractAddress");
+        trackByProductId = intent.getBooleanExtra("trackByProductId", true);
+        trackByLotId = intent.getBooleanExtra("trackByLotId", true);
         taskRunner = new TaskRunner();
         lotIdMade = findViewById(R.id.lotId);
         productIds = findViewById(R.id.productIds);
@@ -403,11 +406,14 @@ public class MakePackLot extends AppCompatActivity {
                 List<TypeReference<?>> outputAsync = new ArrayList<>();
 
                 Map<String, String> map = new HashMap<>();
-                map.put(lotId, contractAddress);
-                for (String prodId : firebaseList) {
-                    map.put(prodId, contractAddress);
+                if (trackByLotId)
+                    map.put(lotId, contractAddress);
+                if (trackByProductId) {
+                    for (String prodId : firebaseList) {
+                        map.put(prodId, contractAddress);
+                    }
                 }
-
+                
                 Function function = new Function("makeLot", // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters

@@ -59,7 +59,7 @@ public class MapActivity extends AppCompatActivity {
     ArrayList<String> names = new ArrayList<>();
     LinearLayout linear;
     TaskRunner taskRunner = new TaskRunner();
-    String contractAddress, productId, cusAddress;
+    String contractAddress, productId;
     List<Address> userAddress;
 
     @Override
@@ -69,7 +69,6 @@ public class MapActivity extends AppCompatActivity {
         Intent intent = getIntent();
         contractAddress = intent.getStringExtra("contractAddress");
         productId = intent.getStringExtra("productId");
-        cusAddress = intent.getStringExtra("publicAddress");
         userAddress = new ArrayList<>();
         linear = findViewById(R.id.linear);
         executeTrackProductByProductId();
@@ -241,7 +240,7 @@ public class MapActivity extends AppCompatActivity {
                 Log.d("Address Output: ", outputAsync.size() + "");
                 String encodedFunction = FunctionEncoder.encode(function);
                 EthCall ethCall = web3j.ethCall(
-                        Transaction.createEthCallTransaction(cusAddress, contractAddress, encodedFunction),
+                        Transaction.createEthCallTransaction("", contractAddress, encodedFunction),
                         DefaultBlockParameterName.LATEST)
                         .sendAsync().get();
                 if (!ethCall.isReverted()) {
@@ -303,7 +302,7 @@ public class MapActivity extends AppCompatActivity {
                 Log.d("Address Output: ", outputAsync.size() + "");
                 String encodedFunction = FunctionEncoder.encode(function);
                 EthCall ethCall = web3j.ethCall(
-                        Transaction.createEthCallTransaction(cusAddress, contractAddress, encodedFunction),
+                        Transaction.createEthCallTransaction("", contractAddress, encodedFunction),
                         DefaultBlockParameterName.LATEST)
                         .sendAsync().get();
                 if (!ethCall.isReverted()) {

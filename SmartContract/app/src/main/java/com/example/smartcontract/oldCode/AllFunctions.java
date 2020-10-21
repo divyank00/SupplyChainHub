@@ -28,9 +28,10 @@ public class AllFunctions extends AppCompatActivity {
     RecyclerView rV;
     Adapter adapter;
     String address;
-    SingleContractViewModel singleContractViewModel;
+    //    SingleContractViewModel singleContractViewModel;
     ProgressBar loader;
     List<String> usedFunctions;
+    String abi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +40,9 @@ public class AllFunctions extends AppCompatActivity {
         rV = findViewById(R.id.rV);
         loader = findViewById(R.id.loader);
         Intent intent = getIntent();
+        abi = intent.getStringExtra("abi");
         address = intent.getStringExtra("contractAddress");
-        singleContractViewModel = new SingleContractViewModel();
+//        singleContractViewModel = new SingleContractViewModel();
         usedFunctions = new ArrayList<>();
         setUsedFunctions();
         getContract();
@@ -60,40 +62,41 @@ public class AllFunctions extends AppCompatActivity {
         usedFunctions.add("getUserRole");
         usedFunctions.add("trackProductByLotId");
         usedFunctions.add("trackProductByProductId");
+        usedFunctions.add("checkIsUser");
     }
 
     void getContract() {
-        singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
-            @Override
-            public void onChanged(ObjectModel objectModel) {
-                if (objectModel.isStatus()) {
-                    if (objectModel.getObj() != null) {
-                        try {
-                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
-                            JSONArray obj = new JSONArray(abi);
-                            List<JSONObject> functions = new ArrayList<>();
-                            for (int i = 0; i < obj.length(); i++) {
-                                if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
-                                    if (!usedFunctions.contains(((JSONObject) obj.get(i)).optString("name")))
-                                        functions.add((JSONObject) obj.get(i));
-                                }
-                            }
-                            loader.setVisibility(View.GONE);
-                            adapter = new Adapter(AllFunctions.this, functions, address);
-                            rV.setAdapter(adapter);
-                            rV.setLayoutManager(new LinearLayoutManager(AllFunctions.this));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        loader.setVisibility(View.GONE);
-                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    loader.setVisibility(View.GONE);
-                    Toast.makeText(AllFunctions.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+//        singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
+//            @Override
+//            public void onChanged(ObjectModel objectModel) {
+//                if (objectModel.isStatus()) {
+//                    if (objectModel.getObj() != null) {
+        try {
+//                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
+            JSONArray obj = new JSONArray(abi);
+            List<JSONObject> functions = new ArrayList<>();
+            for (int i = 0; i < obj.length(); i++) {
+                if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
+                    if (!usedFunctions.contains(((JSONObject) obj.get(i)).optString("name")))
+                        functions.add((JSONObject) obj.get(i));
                 }
             }
-        });
+            loader.setVisibility(View.GONE);
+            adapter = new Adapter(AllFunctions.this, functions, address);
+            rV.setAdapter(adapter);
+            rV.setLayoutManager(new LinearLayoutManager(AllFunctions.this));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+//                    } else {
+//                        loader.setVisibility(View.GONE);
+//                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
+//                    }
+//                } else {
+//                    loader.setVisibility(View.GONE);
+//                    Toast.makeText(AllFunctions.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
     }
 }

@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:background="@drawable/profile_dialog"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/profile_dialog">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,41 +11,50 @@
         android:layout_margin="20dp"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Product Id: "
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/productTrack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/scanProductId"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="5dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:padding="5dp"
-                android:src="@drawable/barcode"
-                android:tooltipText="Scan QR" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Product Id: "
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/productId"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_toStartOf="@id/scanProductId"
-                android:textSize="16sp" />
+                android:orientation="horizontal">
 
-        </RelativeLayout>
+                <ImageView
+                    android:id="@+id/scanProductId"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:padding="5dp"
+                    android:src="@drawable/barcode"
+                    android:tooltipText="Scan QR" />
+
+                <EditText
+                    android:id="@+id/productId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:layout_toStartOf="@id/scanProductId"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
 
         <RelativeLayout
+            android:id="@+id/orLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
@@ -79,40 +88,49 @@
                 android:background="@color/colorPrimary" />
         </RelativeLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lot Id:"
-            android:textSize="18sp"
-            android:textStyle="bold" />
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/lotTrack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/scanLotId"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="5dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:padding="5dp"
-                android:src="@drawable/barcode"
-                android:tooltipText="Scan QR" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lot Id:"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/lotId"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_toStartOf="@id/scanLotId"
-                android:inputType="textMultiLine"
-                android:textSize="16sp" />
+                android:orientation="horizontal">
 
-        </RelativeLayout>
+                <ImageView
+                    android:id="@+id/scanLotId"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="5dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:padding="5dp"
+                    android:src="@drawable/barcode"
+                    android:tooltipText="Scan QR" />
+
+                <EditText
+                    android:id="@+id/lotId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:layout_toStartOf="@id/scanLotId"
+                    android:inputType="textMultiLine"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/button"
@@ -126,9 +144,18 @@
 
         <ProgressBar
             android:id="@+id/trackLoader"
-            android:layout_marginVertical="10dp"
             android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="center_horizontal"
-            android:layout_height="40dp" />
+            android:layout_marginVertical="10dp"
+            android:visibility="gone" />
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/mainLoader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="50dp"
+        android:visibility="gone" />
 </RelativeLayout>

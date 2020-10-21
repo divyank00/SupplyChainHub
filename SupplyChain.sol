@@ -196,7 +196,7 @@ contract SupplyChain{
         return contractOwner;
     }
     
-    function checkIsUser(address account) internal view returns(bool){
+    function checkIsUser(address account) public view returns(bool){
         
         return isUser[account];
     }
