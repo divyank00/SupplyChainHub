@@ -358,13 +358,13 @@ contract SupplyChain{
         lots[_lotId].sellingPrices.push(0);
         lots[_lotId].trackTxn.push("");
         lots[_lotId].trackTxn.push("");
+        users[msg.sender].currentQuantity=users[msg.sender].currentQuantity+1;
         emit LotMade(_lotId);
     }
     
     function packLot(string memory _lotId) public onlyManufacturer made(_lotId){
         
         lots[_lotId].productState = State.Packed;
-        users[msg.sender].currentQuantity=users[msg.sender].currentQuantity+1;
         emit Packed();
     }
     

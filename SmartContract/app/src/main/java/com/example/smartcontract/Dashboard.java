@@ -289,14 +289,6 @@ public class Dashboard extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         }));
-                        listenerModelList.add(new ListenerModel("Pack Lots & Products", "You have to update the status of the packed lots & products to 'Packed'!", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(v.getContext(), MakePackLot.class);
-                                intent.putExtra("contractAddress", contractAddress);
-                                startActivity(intent);
-                            }
-                        }));
                     }
                     dashboardAdapter.notifyDataSetChanged();
                 }
