@@ -1,18 +1,11 @@
 package com.example.smartcontract.functions;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
-import com.example.smartcontract.Data;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.smartcontract.R;
-
-import org.angmarch.views.NiceSpinner;
-import org.angmarch.views.OnSpinnerItemSelectedListener;
-
-import java.util.List;
 
 public class MakeLot extends AppCompatActivity {
 

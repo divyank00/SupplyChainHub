@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
+import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     EditText pk, seed;
     Button btn;
     ImageView scan;
-    EditText barcode;
+    EditText barcode,cus_address1;
     Button track;
     private IntentIntegrator qrScan;
     ProductLotViewModel productLotViewModel;
@@ -82,7 +83,11 @@ public class MainActivity extends AppCompatActivity {
         track = findViewById(R.id.track);
         barcode = findViewById(R.id.barcode);
         loader = findViewById(R.id.loader);
+        cus_address1 = findViewById(R.id.cut_address);
         productLotViewModel = new ProductLotViewModel();
+
+
+
         qrScan = new IntentIntegrator(this);
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,8 +161,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String productId = barcode.getText().toString().trim();
+                String cus_address = cus_address1.getText().toString().trim();
+
                 if (productId.isEmpty()) {
                     barcode.setError("Enter a ProductId");
+                    return;
+                }
+                if(cus_address.isEmpty()){
+                    cus_address1.setError("Please specify your address");
                     return;
                 }
                 track.setVisibility(View.GONE);
@@ -166,10 +177,16 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onChanged(ObjectModel objectModel) {
                         if (objectModel.isStatus()) {
-                            String lotId = (String) objectModel.getObj();
-                            Toast.makeText(MainActivity.this, lotId, Toast.LENGTH_SHORT).show();
+                            String contractAddress = (String) objectModel.getObj();
+                            Toast.makeText(MainActivity.this, contractAddress, Toast.LENGTH_SHORT).show();
                             loader.setVisibility(View.GONE);
                             track.setVisibility(View.VISIBLE);
+                            Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                            intent.putExtra("contractAddress",contractAddress);
+                            intent.putExtra("productId",productId);
+                            intent.putExtra("cusAddress",cus_address);
+                            startActivity(intent);
+
                         } else {
                             Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                             loader.setVisibility(View.GONE);

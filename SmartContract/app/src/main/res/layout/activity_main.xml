@@ -138,6 +138,15 @@
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
+                    <EditText
+                        android:id="@+id/cut_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:hint="Enter your public address here"
+                        android:textSize="16sp" />
+
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
