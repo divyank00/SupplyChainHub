@@ -9,6 +9,9 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -72,12 +75,13 @@ public class MapActivity extends AppCompatActivity {
 
        executetrackProductByProductId();
 
-       for(int i=0;i<userAddress.size();i++){
+       if(userAddress.size() != 0) {
+           for (int i = 0; i < userAddress.size(); i++) {
 
-           executegetUserDetails(userAddress.get(i).toString());
+               executegetUserDetails(userAddress.get(i).toString());
 
+           }
        }
-
 
        // linear1 = findViewById(R.id.linear1);
 
@@ -164,6 +168,9 @@ public class MapActivity extends AppCompatActivity {
             text.setLayoutParams(new ViewGroup.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             text.setText(arr.get(i));
             text.setGravity(Gravity.CENTER_VERTICAL);
+
+            text.setClickable(true);
+            text.setAutoLinkMask(Linkify.WEB_URLS);
 
             linear1.addView(text);
 
