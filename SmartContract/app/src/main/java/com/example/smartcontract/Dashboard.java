@@ -282,7 +282,7 @@ public class Dashboard extends AppCompatActivity {
                         }
                     }));
                     if (userRoleInt == 1) {
-                        listenerModelList.add(new ListenerModel("Add & Pack Lots & Products", "You have to add the lots & products which have just been made and update once they are packed!", new View.OnClickListener() {
+                        listenerModelList.add(new ListenerModel("Add & Pack Lots", "You have to add the lots which have just been made and update once they are packed!", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), MakePackLot.class);
@@ -291,7 +291,7 @@ public class Dashboard extends AppCompatActivity {
                             }
                         }));
                     }
-                    listenerModelList.add(new ListenerModel("Other Functions", "You can call rest of the available functions!", new View.OnClickListener() {
+                    listenerModelList.add(new ListenerModel("Other Functions", "You can call rest of the available functions from here!", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(v.getContext(), AllFunctions.class);
