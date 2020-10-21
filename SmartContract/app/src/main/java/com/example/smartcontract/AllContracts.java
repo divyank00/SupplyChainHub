@@ -1,5 +1,6 @@
 package com.example.smartcontract;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -19,19 +20,23 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ContractModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.AllContractsViewModel;
+import com.google.zxing.integration.android.IntentIntegrator;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
 
@@ -58,6 +63,9 @@ public class AllContracts extends AppCompatActivity {
     List<ContractModel> mList;
     ProgressBar loader;
     AllContractsViewModel allContractsViewModel;
+
+    IntentIntegrator qrScanLotId, qrScanProductId;
+    EditText productId,lotId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +174,9 @@ public class AllContracts extends AppCompatActivity {
             case R.id.profile:
                 showProfileDialog();
                 return true;
+            case R.id.scan:
+                showBarcodeDialog();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -241,6 +252,61 @@ public class AllContracts extends AppCompatActivity {
         }
     }
 
+    void showBarcodeDialog() {
+        try {
+            final Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.scan_dialog);
+            ImageView scanProductId = dialog.findViewById(R.id.scanProductId);
+            ImageView scanLotId = dialog.findViewById(R.id.scanLotId);
+            productId = dialog.findViewById(R.id.productId);
+            lotId = dialog.findViewById(R.id.lotId);
+            Button track = dialog.findViewById(R.id.button);
+            qrScanProductId = new IntentIntegrator(this).setRequestCode(8);
+            qrScanLotId = new IntentIntegrator(this).setRequestCode(9);
+            scanProductId.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    qrScanProductId.initiateScan();
+                }
+            });
+            scanLotId.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    qrScanLotId.initiateScan();
+                }
+            });
+            track.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    productId.setError(null);
+                    lotId.setError(null);
+                    if(productId.getText().toString().trim().isEmpty() && lotId.getText().toString().trim().isEmpty()){
+                        productId.setError("Mandatory Field!");
+                    }else if(!productId.getText().toString().trim().isEmpty()){
+                        Intent intent = new Intent(AllContracts.this, MapActivity.class);
+                        intent.putExtra("productId",productId.getText().toString().trim().isEmpty());
+                        intent.putExtra("publicAddress",Data.publicKey);
+                        startActivity(intent);
+                    }else{
+                        Intent intent = new Intent(AllContracts.this, MapActivity.class);
+                        intent.putExtra("lotId",lotId.getText().toString().trim().isEmpty());
+                        intent.putExtra("publicAddress",Data.publicKey);
+                        startActivity(intent);
+                    }
+                }
+            });
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.show();
+            dialog.getWindow().setAttributes(lp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static class TaskRunner {
         //        private final Executor executor = Executors.newSingleThreadExecutor(); // change according to your requirements
         private final Executor executor = new ThreadPoolExecutor(5, 128, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -291,4 +357,28 @@ public class AllContracts extends AppCompatActivity {
         editor.clear();
         editor.apply();
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 8) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                productId.setText(contents);
+                productId.setSelection(productId.getText().length());
+            } else {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            }
+        }
+        if (requestCode == 9) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                lotId.setText(contents);
+                lotId.setSelection(productId.getText().length());
+            } else {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
 }

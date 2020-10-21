@@ -59,82 +59,60 @@ public class MapActivity extends AppCompatActivity {
     ArrayList<String> names = new ArrayList<>();
     LinearLayout linear;
     TaskRunner taskRunner = new TaskRunner();
-    String contractAddress,productId,cusAddress;
+    String contractAddress, productId, cusAddress;
     List<Address> userAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        linear = findViewById(R.id.linear);
-
         Intent intent = getIntent();
         contractAddress = intent.getStringExtra("contractAddress");
         productId = intent.getStringExtra("productId");
-        cusAddress = intent.getStringExtra("cusAddress");
+        cusAddress = intent.getStringExtra("publicAddress");
+        userAddress = new ArrayList<>();
+        linear = findViewById(R.id.linear);
 
-       executetrackProductByProductId();
-
-       if(userAddress.size() != 0) {
-           for (int i = 0; i < userAddress.size(); i++) {
-
-               executegetUserDetails(userAddress.get(i).toString());
-
-           }
-       }
-
-       // linear1 = findViewById(R.id.linear1);
-
-        createUI();
-
+        executeTrackProductByProductId();
     }
 
-    private void executetrackProductByProductId(){
-
-
-        taskRunner.executeAsync(new trackProductByProductId(),result -> {
-
-            if(result.isStatus()){
-
-                if(!result.getData().isEmpty()){
-
-                     userAddress = (List<Address>)result.getData().get(3).getValue();
+    private void executeTrackProductByProductId() {
+        taskRunner.executeAsync(new trackProductByProductId(), result -> {
+            if (result.isStatus()) {
+                if (!result.getData().isEmpty()) {
+                    userAddress = (List<Address>) result.getData().get(3).getValue();
+                    for (int i = 0; i < userAddress.size(); i++) {
+                        executeGetUserDetails(userAddress.get(i).toString());
+                    }
                 }
-                else{
-                    Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
-                }
-
+                createUI();
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
             }
-
         });
     }
 
-    private void executegetUserDetails(String trackAddress){
-
-        taskRunner.executeAsync(new getUserDetails(trackAddress),result -> {
-
-            if(result.isStatus()){
-                if(!result.getData().isEmpty()){
+    private void executeGetUserDetails(String trackAddress) {
+        taskRunner.executeAsync(new getUserDetails(trackAddress), result -> {
+            if (result.isStatus()) {
+                if (!result.getData().isEmpty()) {
                     String name = result.getData().get(1).toString();
                     String lon = result.getData().get(2).toString();
                     String lat = result.getData().get(3).toString();
-                    String url =    "http://www.google.com/maps/place/" + lat + "," + lon + "/@" + lat + "," + lon +",17z/data=!3m1!1e3";
+                    String url = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lon;
                     names.add(name);
                     arr.add(url);
                 }
-            }
-            else{
+            } else {
                 Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
             }
-
         });
 
     }
 
-    public void createUI(){
-
+    public void createUI() {
         //linear.removeAllViews();
-        for(int i=0;i<arr.size();i++){
+        for (int i = 0; i < arr.size(); i++) {
 
             LinearLayout linear1 = new LinearLayout(this);
             linear1.setOrientation(LinearLayout.HORIZONTAL);
@@ -143,8 +121,8 @@ public class MapActivity extends AppCompatActivity {
 
 
             ImageView image = new ImageView(this);
-            LinearLayout.LayoutParams l = new LinearLayout.LayoutParams(140,140);
-            l.setMargins(150,0,30,10);
+            LinearLayout.LayoutParams l = new LinearLayout.LayoutParams(140, 140);
+            l.setMargins(150, 0, 30, 10);
             image.setLayoutParams(l);
 
             int strokeWidth = 5;
@@ -227,7 +205,7 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
-    class trackProductByProductId implements Callable<Object>{
+    class trackProductByProductId implements Callable<Object> {
 
         @Override
         public Object call() throws Exception {
@@ -238,7 +216,7 @@ public class MapActivity extends AppCompatActivity {
                 Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
 
                 // Load an account
-               // String pk = Data.privateKey;
+                // String pk = Data.privateKey;
                 //Credentials credentials = Credentials.create(pk);
 
                 // Contract and functions
@@ -282,11 +260,11 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
-    class getUserDetails implements Callable<Object>{
+    class getUserDetails implements Callable<Object> {
 
         String addressTemp;
 
-        getUserDetails(String add){
+        getUserDetails(String add) {
             addressTemp = add;
         }
 

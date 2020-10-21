@@ -19,9 +19,7 @@ import androidx.lifecycle.Observer;
 import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
-import com.google.zxing.client.android.Intents;
 import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import org.web3j.crypto.Bip32ECKeyPair;
 import org.web3j.crypto.Credentials;
@@ -44,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     EditText pk, seed;
     Button btn;
     ImageView scan;
-    EditText barcode,cus_address1;
+    EditText barcode,customerAddress;
     Button track;
     private IntentIntegrator qrScan;
     ProductLotViewModel productLotViewModel;
@@ -86,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         track = findViewById(R.id.track);
         barcode = findViewById(R.id.barcode);
         loader = findViewById(R.id.loader);
-        cus_address1 = findViewById(R.id.cut_address);
+        customerAddress = findViewById(R.id.customerAddress);
         productLotViewModel = new ProductLotViewModel();
         qrScan = new IntentIntegrator(this).setRequestCode(1);
         scan.setOnClickListener(new View.OnClickListener() {
@@ -161,14 +159,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String productId = barcode.getText().toString().trim();
-                String cus_address = cus_address1.getText().toString().trim();
-
+                String cus_address = customerAddress.getText().toString().trim();
+                barcode.setError(null);
+                customerAddress.setError(null);
                 if (productId.isEmpty()) {
-                    barcode.setError("Enter a ProductId or LotId");
+                    barcode.setError("Mandatory Field");
                     return;
                 }
                 if(cus_address.isEmpty()){
-                    cus_address1.setError("Please specify your address");
+                    customerAddress.setError("Mandatory Field");
                     return;
                 }
                 track.setVisibility(View.GONE);
@@ -178,13 +177,10 @@ public class MainActivity extends AppCompatActivity {
                     public void onChanged(ObjectModel objectModel) {
                         if (objectModel.isStatus()) {
                             String contractAddress = (String) objectModel.getObj();
-                            Toast.makeText(MainActivity.this, contractAddress, Toast.LENGTH_SHORT).show();
-                            loader.setVisibility(View.GONE);
-                            track.setVisibility(View.VISIBLE);
                             Intent intent = new Intent(MainActivity.this, MapActivity.class);
                             intent.putExtra("contractAddress",contractAddress);
                             intent.putExtra("productId",productId);
-                            intent.putExtra("cusAddress",cus_address);
+                            intent.putExtra("publicAddress",cus_address);
                             startActivity(intent);
 
                         } else {

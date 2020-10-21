@@ -1,5 +1,6 @@
 package com.example.smartcontract;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,6 +28,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -35,8 +38,10 @@ import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.example.smartcontract.functions.AddUser;
 import com.example.smartcontract.functions.GetUserDetails;
 import com.example.smartcontract.functions.MakePackLot;
+import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ListenerModel;
 import com.example.smartcontract.oldCode.AllFunctions;
+import com.google.zxing.integration.android.IntentIntegrator;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
@@ -87,6 +92,10 @@ public class Dashboard extends AppCompatActivity {
     List<ListenerModel> listenerModelList;
     ShimmerRecyclerView userFunctions;
     int userRoleInt;
+    boolean toggleFlag = true;
+
+    IntentIntegrator qrScanLotId, qrScanProductId;
+    EditText productId,lotId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,7 +219,7 @@ public class Dashboard extends AppCompatActivity {
                             ownerRole.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                                 @Override
                                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                    if (isChecked) {
+                                    if (isChecked && toggleFlag) {
                                         ownerRole.setChecked(false);
                                         executeMakeOwnerAsNextRoleGas();
                                     }
@@ -355,8 +364,9 @@ public class Dashboard extends AppCompatActivity {
         taskRunner.executeAsync(new makeOwnerAsNextRole(), (result) -> {
             progressHUD.dismiss();
             if (result.isStatus()) {
-                ownerRole.setChecked(true);
+                toggleFlag = false;
                 ownerRole.setEnabled(false);
+                ownerRole.setChecked(true);
                 showTransactionDialog(true, result.getData(), null);
             } else {
                 showTransactionDialog(false, result.getData(), result.getErrorMsg());
@@ -976,6 +986,9 @@ public class Dashboard extends AppCompatActivity {
             case R.id.profile:
                 showProfileDialog();
                 return true;
+            case R.id.scan:
+                showBarcodeDialog();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -993,7 +1006,8 @@ public class Dashboard extends AppCompatActivity {
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         clearSharedPref();
-                        finish();                    }
+                        finish();
+                    }
                 })
                 .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
                     @Override
@@ -1003,6 +1017,63 @@ public class Dashboard extends AppCompatActivity {
                 })
                 .build();
         mDialog.show();
+    }
+
+    void showBarcodeDialog() {
+        try {
+            final Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.scan_dialog);
+            ImageView scanProductId = dialog.findViewById(R.id.scanProductId);
+            ImageView scanLotId = dialog.findViewById(R.id.scanLotId);
+            productId = dialog.findViewById(R.id.productId);
+            lotId = dialog.findViewById(R.id.lotId);
+            Button track = dialog.findViewById(R.id.button);
+            qrScanProductId = new IntentIntegrator(this).setRequestCode(8);
+            qrScanLotId = new IntentIntegrator(this).setRequestCode(9);
+            scanProductId.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    qrScanProductId.initiateScan();
+                }
+            });
+            scanLotId.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    qrScanLotId.initiateScan();
+                }
+            });
+            track.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    productId.setError(null);
+                    lotId.setError(null);
+                    if(productId.getText().toString().trim().isEmpty() && lotId.getText().toString().trim().isEmpty()){
+                        productId.setError("Mandatory Field!");
+                    }else if(!productId.getText().toString().trim().isEmpty()){
+                        Intent intent = new Intent(Dashboard.this, MapActivity.class);
+                        intent.putExtra("contractAddress",contractAddress);
+                        intent.putExtra("productId",productId.getText().toString().trim().isEmpty());
+                        intent.putExtra("publicAddress",Data.publicKey);
+                        startActivity(intent);
+                    }else{
+                        Intent intent = new Intent(Dashboard.this, MapActivity.class);
+                        intent.putExtra("contractAddress",contractAddress);
+                        intent.putExtra("lotId",lotId.getText().toString().trim().isEmpty());
+                        intent.putExtra("publicAddress",Data.publicKey);
+                        startActivity(intent);
+                    }
+                }
+            });
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.show();
+            dialog.getWindow().setAttributes(lp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     void showProfileDialog() {
@@ -1077,5 +1148,28 @@ public class Dashboard extends AppCompatActivity {
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();
         editor.apply();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 8) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                productId.setText(contents);
+                productId.setSelection(productId.getText().length());
+            } else {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            }
+        }
+        if (requestCode == 9) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                lotId.setText(contents);
+                lotId.setSelection(productId.getText().length());
+            } else {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
