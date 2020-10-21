@@ -36,6 +36,7 @@ import com.example.smartcontract.functions.AddUser;
 import com.example.smartcontract.functions.GetUserDetails;
 import com.example.smartcontract.functions.MakePackLot;
 import com.example.smartcontract.models.ListenerModel;
+import com.example.smartcontract.oldCode.AllFunctions;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
 import com.shreyaspatil.MaterialDialog.interfaces.DialogInterface;
@@ -290,6 +291,14 @@ public class Dashboard extends AppCompatActivity {
                             }
                         }));
                     }
+                    listenerModelList.add(new ListenerModel("Other Functions", "You can call rest of the available functions!", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(v.getContext(), AllFunctions.class);
+                            intent.putExtra("contractAddress", contractAddress);
+                            startActivity(intent);
+                        }
+                    }));
                     dashboardAdapter.notifyDataSetChanged();
                 }
             } else {

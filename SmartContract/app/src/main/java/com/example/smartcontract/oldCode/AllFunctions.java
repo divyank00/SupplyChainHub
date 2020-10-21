@@ -30,6 +30,7 @@ public class AllFunctions extends AppCompatActivity {
     String address;
     SingleContractViewModel singleContractViewModel;
     ProgressBar loader;
+    List<String> usedFunctions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,25 +38,44 @@ public class AllFunctions extends AppCompatActivity {
         setContentView(R.layout.activity_all_functions);
         rV = findViewById(R.id.rV);
         loader = findViewById(R.id.loader);
-        Intent intent =getIntent();
+        Intent intent = getIntent();
         address = intent.getStringExtra("contractAddress");
         singleContractViewModel = new SingleContractViewModel();
+        usedFunctions = new ArrayList<>();
+        setUsedFunctions();
         getContract();
     }
 
-    void getContract(){
+    private void setUsedFunctions() {
+        usedFunctions.add("getUserRolesArray");
+        usedFunctions.add("getSmartContractDetails");
+        usedFunctions.add("getUserDetails");
+        usedFunctions.add("setUserDetails");
+        usedFunctions.add("makeOwnerAsNextRole");
+        usedFunctions.add("makeLot");
+        usedFunctions.add("packLot");
+        usedFunctions.add("addChildUser");
+        usedFunctions.add("addOtherUser");
+        usedFunctions.add("getOwner");
+        usedFunctions.add("getUserRole");
+        usedFunctions.add("trackProductByLotId");
+        usedFunctions.add("trackProductByProductId");
+    }
+
+    void getContract() {
         singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
             @Override
             public void onChanged(ObjectModel objectModel) {
-                if(objectModel.isStatus()){
-                    if(objectModel.getObj()!=null) {
+                if (objectModel.isStatus()) {
+                    if (objectModel.getObj() != null) {
                         try {
                             String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
                             JSONArray obj = new JSONArray(abi);
                             List<JSONObject> functions = new ArrayList<>();
                             for (int i = 0; i < obj.length(); i++) {
                                 if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
-                                    functions.add((JSONObject) obj.get(i));
+                                    if (!usedFunctions.contains(((JSONObject) obj.get(i)).optString("name")))
+                                        functions.add((JSONObject) obj.get(i));
                                 }
                             }
                             loader.setVisibility(View.GONE);
@@ -65,11 +85,11 @@ public class AllFunctions extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                    }else{
+                    } else {
                         loader.setVisibility(View.GONE);
                         Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
                     }
-                }else{
+                } else {
                     loader.setVisibility(View.GONE);
                     Toast.makeText(AllFunctions.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                 }
