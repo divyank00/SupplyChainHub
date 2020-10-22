@@ -165,9 +165,9 @@ public class Dashboard extends AppCompatActivity {
                             List<JSONObject> functions = new ArrayList<>();
                             for (int i = 0; i < obj.length(); i++) {
                                 if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
-                                    if(((JSONObject) obj.get(i)).optString("name").equals("trackProductByProductId"))
+                                    if (((JSONObject) obj.get(i)).optString("name").equals("trackProductByProductId"))
                                         trackByProductId = true;
-                                    if(((JSONObject) obj.get(i)).optString("name").equals("trackProductByLotId"))
+                                    if (((JSONObject) obj.get(i)).optString("name").equals("trackProductByLotId"))
                                         trackByLotId = true;
                                     functions.add((JSONObject) obj.get(i));
                                 }
@@ -329,7 +329,7 @@ public class Dashboard extends AppCompatActivity {
                                 } else {
                                     intent.putExtra("userRole", userRoleInt);
                                 }
-                                intent.putStringArrayListExtra("userRoles",userRoles);
+                                intent.putStringArrayListExtra("userRoles", userRoles);
                                 intent.putExtra("contractAddress", contractAddress);
                                 startActivity(intent);
                             }
@@ -339,7 +339,7 @@ public class Dashboard extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(v.getContext(), GetUserDetails.class);
-                            intent.putStringArrayListExtra("userRoles",userRoles);
+                            intent.putStringArrayListExtra("userRoles", userRoles);
                             intent.putExtra("contractAddress", contractAddress);
                             startActivity(intent);
                         }
@@ -350,8 +350,8 @@ public class Dashboard extends AppCompatActivity {
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), MakePackLot.class);
                                 intent.putExtra("contractAddress", contractAddress);
-                                intent.putExtra("trackByProductId",trackByProductId);
-                                intent.putExtra("trackByLotId",trackByLotId);
+                                intent.putExtra("trackByProductId", trackByProductId);
+                                intent.putExtra("trackByLotId", trackByLotId);
                                 startActivity(intent);
                             }
                         }));
@@ -1103,25 +1103,25 @@ public class Dashboard extends AppCompatActivity {
             ProgressBar mainLoader = dialog.findViewById(R.id.mainLoader);
             RelativeLayout orLayout = dialog.findViewById(R.id.orLayout);
             Button track = dialog.findViewById(R.id.button);
-            if(!trackByLotId && !trackByProductId){
+            if (!trackByLotId && !trackByProductId) {
                 productTrack.setVisibility(View.GONE);
                 lotTrack.setVisibility(View.GONE);
                 orLayout.setVisibility(View.GONE);
                 mainLoader.setVisibility(View.VISIBLE);
                 track.setVisibility(View.GONE);
-            }else if(trackByLotId && trackByProductId){
+            } else if (trackByLotId && trackByProductId) {
                 productTrack.setVisibility(View.VISIBLE);
                 lotTrack.setVisibility(View.VISIBLE);
                 orLayout.setVisibility(View.VISIBLE);
                 mainLoader.setVisibility(View.GONE);
                 track.setVisibility(View.VISIBLE);
-            }else if(trackByProductId){
+            } else if (trackByProductId) {
                 productTrack.setVisibility(View.VISIBLE);
                 lotTrack.setVisibility(View.GONE);
                 orLayout.setVisibility(View.GONE);
                 mainLoader.setVisibility(View.GONE);
                 track.setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 productTrack.setVisibility(View.GONE);
                 lotTrack.setVisibility(View.VISIBLE);
                 orLayout.setVisibility(View.GONE);
