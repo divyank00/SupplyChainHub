@@ -17,7 +17,7 @@
             android:layout_marginBottom="10dp"
             android:gravity="center_horizontal"
             android:text="PROFILE SET UP"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="@color/colorPrimary"
             android:textSize="20sp"
             android:textStyle="bold" />
 

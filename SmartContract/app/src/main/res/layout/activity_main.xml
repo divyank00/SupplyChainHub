@@ -40,7 +40,7 @@
                         android:layout_marginBottom="10dp"
                         android:gravity="center_horizontal"
                         android:text="LOGIN"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
@@ -146,7 +146,7 @@
                         android:layout_marginBottom="10dp"
                         android:gravity="center_horizontal"
                         android:text="TRACK PRODUCT"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="24sp"
                         android:textStyle="bold" />
 

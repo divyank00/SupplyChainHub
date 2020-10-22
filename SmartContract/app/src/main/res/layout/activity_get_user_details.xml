@@ -39,7 +39,7 @@
                         android:layout_marginBottom="10dp"
                         android:gravity="center_horizontal"
                         android:text="GET USER DETAILS"
-                        android:textColor="@color/colorPrimaryDark"
+                        android:textColor="@color/colorPrimary"
                         android:textSize="24sp"
                         android:textStyle="bold" />
 
