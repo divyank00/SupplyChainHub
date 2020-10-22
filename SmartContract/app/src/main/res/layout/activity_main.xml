@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/background"
     tools:context=".MainActivity">
 
     <ScrollView
@@ -18,6 +19,7 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
+                app:cardBackgroundColor="@color/card"
                 app:cardUseCompatPadding="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -43,6 +45,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Private Key: "
@@ -50,6 +53,8 @@
                         android:textStyle="bold" />
 
                     <EditText
+                        app:backgroundTint="@color/white"
+                        android:textColor="@color/white"
                         android:id="@+id/privateKey"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -70,6 +75,7 @@
                             android:background="@color/colorPrimary" />
 
                         <TextView
+                            android:textColor="@color/white"
                             android:id="@+id/or"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -90,6 +96,7 @@
                     </RelativeLayout>
 
                     <TextView
+                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Metamask Seed Phrase: "
@@ -97,6 +104,8 @@
                         android:textStyle="bold" />
 
                     <EditText
+                        app:backgroundTint="@color/white"
+                        android:textColor="@color/white"
                         android:id="@+id/seed"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -116,6 +125,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
+                app:cardBackgroundColor="@color/card"
                 app:cardUseCompatPadding="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -141,6 +151,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Product Id: "
@@ -165,6 +176,8 @@
                             android:tooltipText="Scan QR" />
 
                         <EditText
+                            app:backgroundTint="@color/white"
+                            android:textColor="@color/white"
                             android:id="@+id/barcode"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -189,6 +202,7 @@
                             android:background="@color/colorPrimary" />
 
                         <TextView
+                            android:textColor="@color/white"
                             android:id="@+id/or1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -209,6 +223,7 @@
                     </RelativeLayout>
 
                     <TextView
+                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Lot Id: "
@@ -233,6 +248,8 @@
                             android:tooltipText="Scan QR" />
 
                         <EditText
+                            app:backgroundTint="@color/white"
+                            android:textColor="@color/white"
                             android:id="@+id/barcodeLot"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     tools:context=".Dashboard">
 
     <androidx.core.widget.NestedScrollView
@@ -17,6 +18,7 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
+                app:cardBackgroundColor="@color/card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -45,7 +47,7 @@
                             android:layout_gravity="center_horizontal"
                             android:gravity="center_horizontal"
                             android:text="Company Name"
-                            android:textColor="#000"
+                            android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -57,7 +59,7 @@
                             android:layout_marginTop="5dp"
                             android:gravity="center_horizontal"
                             android:text="Product Name"
-                            android:textColor="#000"
+                            android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -68,7 +70,7 @@
                             android:layout_gravity="center_horizontal"
                             android:gravity="center_horizontal"
                             android:text="(Category)"
-                            android:textColor="#000"
+                            android:textColor="@color/white"
                             android:textSize="14sp" />
 
                         <LinearLayout
@@ -82,6 +84,7 @@
                             android:padding="5dp">
 
                             <TextView
+                                android:textColor="@color/white"
                                 android:id="@+id/owner"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -102,6 +105,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
+                app:cardBackgroundColor="@color/card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -130,11 +134,12 @@
                             android:layout_gravity="center_horizontal"
                             android:gravity="center_horizontal"
                             android:text="You are the owner!"
-                            android:textColor="#000"
+                            android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:textColor="@color/white"
                             android:id="@+id/ownerText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -153,6 +158,7 @@
                             android:visibility="gone">
 
                             <TextView
+                                android:textColor="@color/white"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
@@ -166,6 +172,7 @@
                                 android:layout_gravity="center_horizontal" />
 
                             <TextView
+                                android:textColor="@color/white"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
@@ -183,6 +190,7 @@
                             android:padding="5dp">
 
                             <TextView
+                                android:textColor="@color/white"
                                 android:id="@+id/userParent"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -192,6 +200,7 @@
                         </LinearLayout>
 
                         <TextView
+                            android:textColor="@color/white"
                             android:gravity="center_horizontal"
                             android:textIsSelectable="true"
                             android:id="@+id/userChildren"
@@ -202,6 +211,7 @@
                             android:textSize="14sp" />
 
                         <TextView
+                            android:textColor="@color/white"
                             android:id="@+id/currentQuantity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -232,6 +242,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:shimmer_demo_angle="45"
+                    app:shimmer_demo_shimmer_color="@color/background"
                     app:shimmer_demo_child_count="10"
                     app:shimmer_demo_layout="@layout/shimmer_dashboard"
                     app:shimmer_demo_layout_manager_type="grid" />

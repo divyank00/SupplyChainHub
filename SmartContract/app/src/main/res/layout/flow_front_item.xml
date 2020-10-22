@@ -6,6 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.cardview.widget.CardView
+        app:cardBackgroundColor="@color/card"
         android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="0x"
-                android:textColor="#000"
+                android:textColor="@color/white"
                 android:textSize="14sp"/>
 
             <TextView
@@ -41,6 +42,7 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
                 android:text="(Role)"
+                android:textColor="@color/white"
                 android:textSize="12sp" />
 
             <TextView
@@ -51,7 +53,7 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
                 android:text="Selling Price: "
-                android:textColor="#000"
+                android:textColor="@color/white"
                 android:textSize="14sp"/>
 
             <TextView
@@ -61,7 +63,7 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
                 android:text="Sold At: "
-                android:textColor="#000"
+                android:textColor="@color/white"
                 android:textSize="14sp"/>
 
             <TextView
@@ -73,7 +75,7 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
                 android:text="TxnHash: "
-                android:textColor="#000"
+                android:textColor="@color/white"
                 android:textSize="14sp"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

@@ -75,6 +75,7 @@ public class AllContracts extends AppCompatActivity {
     ProgressBar loader;
     AllContractsViewModel allContractsViewModel;
     TaskRunner taskRunner;
+    ImageView empty;
 
     IntentIntegrator qrScanLotId, qrScanProductId;
     EditText productId, lotId;
@@ -87,6 +88,7 @@ public class AllContracts extends AppCompatActivity {
         taskRunner = new TaskRunner();
         rV = findViewById(R.id.rV);
         button = findViewById(R.id.button);
+        empty = findViewById(R.id.empty);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -138,6 +140,7 @@ public class AllContracts extends AppCompatActivity {
                                             public void onChanged(ObjectModel objectModel) {
                                                 if (objectModel.isStatus()) {
                                                     mList.add(0, (ContractModel) objectModel.getObj());
+                                                    empty.setVisibility(View.GONE);
                                                     adapter.notifyDataSetChanged();
                                                     dialog.dismiss();
                                                 } else {
@@ -176,6 +179,10 @@ public class AllContracts extends AppCompatActivity {
                 if (objectModel.isStatus()) {
                     loader.setVisibility(View.GONE);
                     mList.addAll((Collection<? extends ContractModel>) objectModel.getObj());
+                    if(mList.isEmpty()){
+                        empty.setVisibility(View.VISIBLE);
+                    }
+                    adapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                 }

@@ -6,6 +6,7 @@
     android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
+        app:cardBackgroundColor="@color/card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
@@ -34,7 +35,7 @@
                     android:layout_gravity="center_horizontal"
                     android:gravity="center_horizontal"
                     android:text="Name: "
-                    android:textColor="#000"
+                    android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -46,7 +47,7 @@
                     android:autoLink="web"
                     android:gravity="center_horizontal"
                     android:text="Location: "
-                    android:textColor="#000"
+                    android:textColor="@color/white"
                     android:textColorLink="@color/colorPrimaryDark"
                     android:textIsSelectable="true"
                     android:textSize="14sp" />
