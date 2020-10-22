@@ -50,6 +50,7 @@ public class GetUserDetails extends AppCompatActivity {
     Button button;
     CardView resultCard;
     TextView userRole, name, location, parentAddress, childAddresses, currentQuantity, error;
+    String ownerAddress;
     List<String> userRoles;
 
     @Override
@@ -60,6 +61,7 @@ public class GetUserDetails extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
         userRoles = new ArrayList<>();
+        ownerAddress = intent.getStringExtra("ownerAddress");
         userRoles = intent.getStringArrayListExtra("userRoles");
         contractAddress = intent.getStringExtra("contractAddress");
         taskRunner = new TaskRunner();

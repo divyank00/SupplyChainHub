@@ -339,6 +339,7 @@ public class Dashboard extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(v.getContext(), GetUserDetails.class);
+                            intent.putExtra("ownerAddress", contractOwnerAddress);
                             intent.putStringArrayListExtra("userRoles", userRoles);
                             intent.putExtra("contractAddress", contractAddress);
                             startActivity(intent);

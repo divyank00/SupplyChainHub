@@ -244,6 +244,7 @@ public class MapActivity extends AppCompatActivity {
                     if (!isPermitted) {
                         additionInfo.setVisibility(View.VISIBLE);
                     }
+                    executeGetUserDetails(userAddresses);
                 }
             } else {
                 detailsError.setText("Error: " + result.getErrorMsg());
@@ -334,6 +335,9 @@ public class MapActivity extends AppCompatActivity {
                         productDetailsLoader.setVisibility(View.GONE);
                         detailsError.setVisibility(View.GONE);
                         productDetails.setVisibility(View.VISIBLE);
+                        if (!isPermitted) {
+                            additionInfo.setVisibility(View.VISIBLE);
+                        }
                         executeGetUserDetails(userAddresses);
                     }
                 }
@@ -348,6 +352,7 @@ public class MapActivity extends AppCompatActivity {
 
     private void executeGetUserDetails(List<Address> userAddress) {
         for (int i = 0; i < userAddress.size(); i++) {
+            Log.d("Address index", userAddress.get(i)+"");
             taskRunner.executeAsync(new getUserDetails(userAddress.get(i), i), result -> {
                 if (result.isStatus()) {
                     if (!result.getData().isEmpty()) {
