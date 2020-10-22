@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,7 +64,8 @@ public class callFunction extends AppCompatActivity {
     Button call;
     AdapterInput adapterInput;
     TextView outputResult;
-    TextView inputTV, outputTV;
+    TextView outputTV;
+    CardView inputCard, outputCard;
     JSONObject obj = null;
     List<Type> inputAsync;
     List<TypeReference<?>> outputAsync;
@@ -77,7 +79,8 @@ public class callFunction extends AppCompatActivity {
         input = findViewById(R.id.input);
         outputResult = findViewById(R.id.output);
         call = findViewById(R.id.call);
-        inputTV = findViewById(R.id.inputTV);
+        inputCard = findViewById(R.id.inputCard);
+        outputCard = findViewById(R.id.outputCard);
         outputTV = findViewById(R.id.outputTV);
         animationView = findViewById(R.id.animationView);
         inputAsync = new ArrayList<>();
@@ -100,7 +103,7 @@ public class callFunction extends AppCompatActivity {
                 inputs.add((JSONObject) obj.optJSONArray("inputs").get(i));
             }
             if (inputs.isEmpty()) {
-                inputTV.setVisibility(View.GONE);
+                inputCard.setVisibility(View.GONE);
             }
             adapterInput = new AdapterInput(this, inputs);
             input.setAdapter(adapterInput);
@@ -111,8 +114,7 @@ public class callFunction extends AppCompatActivity {
                 outputs.add((JSONObject) obj.optJSONArray("outputs").get(i));
             }
             if (outputs.size() == 0) {
-                outputTV.setVisibility(View.GONE);
-                outputResult.setVisibility(View.GONE);
+                outputCard.setVisibility(View.GONE);
             }
             call.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -444,6 +446,7 @@ public class callFunction extends AppCompatActivity {
                 outputResult.setText(result + "\n\nhttps://rinkeby.etherscan.io/tx/" + result);
                 outputTV.setVisibility(View.VISIBLE);
                 outputResult.setVisibility(View.VISIBLE);
+                outputCard.setVisibility(View.VISIBLE);
             }
         }
     }

@@ -17,15 +17,18 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/inputCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
                 app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="6dp">
 
                 <LinearLayout
+                    android:padding="20dp"
                     android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
@@ -34,8 +37,6 @@
                         android:id="@+id/inputTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="5dp"
-                        android:padding="10dp"
                         android:text="Input"
                         android:textColor="@color/white"
                         android:textSize="18sp"
@@ -51,37 +52,38 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/outputCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
                 app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="6dp">
 
                 <LinearLayout
+                    android:padding="20dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <TextView
+                        android:layout_marginHorizontal="10dp"
                         android:id="@+id/outputTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="5dp"
-                        android:padding="10dp"
                         android:text="Output"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <TextView
+                        android:layout_marginHorizontal="10dp"
                         android:id="@+id/output"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="5dp"
                         android:autoLink="web"
-                        android:padding="10dp"
                         android:textColor="@color/white"
                         android:textColorLink="#3F51B5" />
                 </LinearLayout>
@@ -92,7 +94,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginVertical="10dp"
+                android:layout_marginVertical="20dp"
                 android:text="Read" />
 
             <com.airbnb.lottie.LottieAnimationView
