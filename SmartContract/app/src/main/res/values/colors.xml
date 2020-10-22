@@ -3,4 +3,9 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
+    <color name="background">#121418</color>
+    <color name="white">#fff</color>
+    <color name="card">#202225</color>
+    <color name="purple">#7e89fd</color>
+    <color name="black">#000</color>
 </resources>

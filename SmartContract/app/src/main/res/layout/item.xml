@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView android:layout_marginHorizontal="10dp"
+<androidx.cardview.widget.CardView
+    android:layout_marginHorizontal="10dp"
     app:cardCornerRadius="6dp"
     android:id="@+id/cardView"
     android:layout_marginVertical="10dp"

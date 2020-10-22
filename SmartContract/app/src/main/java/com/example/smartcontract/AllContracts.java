@@ -105,7 +105,7 @@ public class AllContracts extends AppCompatActivity {
     void showDialog() {
         try {
             final Dialog dialog = new Dialog(this);
-            dialog.setContentView(R.layout.activity_add_contract);
+            dialog.setContentView(R.layout.add_contract_dialog);
             EditText address = dialog.findViewById(R.id.contractAddress);
             EditText name = dialog.findViewById(R.id.name);
             Button b = dialog.findViewById(R.id.button);
