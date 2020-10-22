@@ -56,7 +56,7 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
         if (nodes.get(position).getTransactionHash().isEmpty() || nodes.get(position).getTransactionHash().equals("null")) {
             holder.txnHash.setVisibility(View.GONE);
         } else {
-            holder.txnHash.setText("https://rinkeby.etherscan.io/tx/" + nodes.get(position).getTransactionHash());
+            holder.txnHash.setText(mContext.getResources().getString(R.string.txnEndpoint) + nodes.get(position).getTransactionHash());
             holder.txnHash.setVisibility(View.VISIBLE);
         }
         if (position == nodes.size() - 1) {

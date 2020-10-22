@@ -443,7 +443,7 @@ public class callFunction extends AppCompatActivity {
             progressHUD.dismiss();
             if (!result.isEmpty()) {
                 outputTV.setText("Transaction Hash: ");
-                outputResult.setText(result + "\n\nhttps://rinkeby.etherscan.io/tx/" + result);
+                outputResult.setText(result + "\n\n" + getResources().getString(R.string.txnEndpoint) + result);
                 outputTV.setVisibility(View.VISIBLE);
                 outputResult.setVisibility(View.VISIBLE);
                 outputCard.setVisibility(View.VISIBLE);

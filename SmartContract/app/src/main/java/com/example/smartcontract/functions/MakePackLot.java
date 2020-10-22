@@ -620,7 +620,7 @@ public class MakePackLot extends AppCompatActivity {
             LottieAnimationView animationView = dialog.findViewById(R.id.animationView);
             if (txnHash != null && !txnHash.isEmpty()) {
                 txnHashTV.setText(txnHash);
-                txnUrl.setText("https://rinkeby.etherscan.io/tx/" + txnHash);
+                txnUrl.setText(getResources().getString(R.string.txnEndpoint) + txnHash);
             } else {
                 txnHashCopy.setVisibility(View.GONE);
                 txnHashTV.setVisibility(View.GONE);
