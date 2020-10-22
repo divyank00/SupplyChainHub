@@ -459,14 +459,17 @@ contract SupplyChain{
     //     products[_productId].finalBuyingPrice = buyingPrice;
     // }
 
-    function trackProductByProductId(string memory _productId) public view returns(string memory, uint, address[] memory){
+    function trackProductByProductId(string memory _productId) public view returns(string memory, uint, address[] memory, uint[] memory,uint[] memory, string[] memory){
         
         string storage _lotId = products[_productId].lotId;
         require(bytes(_lotId).length!=0, "Product is unidentified!");
         return (
             _lotId,
             uint(lots[_lotId].productState),
-            lots[_lotId].trackUser
+            lots[_lotId].trackUser,
+            lots[_lotId].buyingPrices,
+            lots[_lotId].sellingPrices,
+            lots[_lotId].trackTxn
         );
     }
 

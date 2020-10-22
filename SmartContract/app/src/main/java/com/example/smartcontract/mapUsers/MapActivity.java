@@ -285,7 +285,7 @@ public class MapActivity extends AppCompatActivity {
                         Log.d("Address Sell", sellingPrices.toString());
                         List<Utf8String> txnHashes = (List<Utf8String>) result.getData().get(5).getValue();
                         for (int i = 0; i < userAddresses.size(); i++) {
-                            TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), "100", "100", "cd");
+                            TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), "", "", "");
                             models.add(model);
                         }
                         for (int i = 0; i < buyingPrices.size(); i++) {
