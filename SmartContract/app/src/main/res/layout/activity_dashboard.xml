@@ -18,7 +18,6 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -26,6 +25,7 @@
                 android:layout_marginTop="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
+                app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="6dp">
 
                 <RelativeLayout
@@ -84,29 +84,28 @@
                             android:padding="5dp">
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/owner"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
                                 android:gravity="center_horizontal"
                                 android:text="Owner: Name\n(Address)"
+                                android:textColor="@color/white"
                                 android:textSize="14sp" />
                         </LinearLayout>
                     </LinearLayout>
 
                     <ProgressBar
-                        android:indeterminateTint="@color/colorPrimary"
                         android:id="@+id/productDetailsLoader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
+                        android:indeterminateTint="@color/colorPrimary"
                         android:padding="50dp" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -114,6 +113,7 @@
                 android:layout_marginTop="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
+                app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="6dp">
 
                 <RelativeLayout
@@ -125,7 +125,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="10dp"
+                        android:padding="20dp"
                         android:visibility="gone">
 
                         <TextView
@@ -140,13 +140,13 @@
                             android:textStyle="bold" />
 
                         <TextView
-                            android:textColor="@color/white"
                             android:id="@+id/ownerText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:gravity="center_horizontal"
                             android:text="Are you a Manufacturer also?"
+                            android:textColor="@color/white"
                             android:textSize="16sp"
                             android:visibility="gone" />
 
@@ -159,25 +159,26 @@
                             android:visibility="gone">
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="NO"
+                                android:textColor="@color/white"
                                 android:textSize="16sp" />
 
                             <androidx.appcompat.widget.SwitchCompat
                                 android:id="@+id/ownerRole"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal" />
+                                android:layout_gravity="center_horizontal"
+                                app:trackTint="@color/white" />
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:text="YES"
+                                android:textColor="@color/white"
                                 android:textSize="16sp" />
                         </LinearLayout>
 
@@ -191,43 +192,43 @@
                             android:padding="5dp">
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/userParent"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center_horizontal"
                                 android:text="Address"
+                                android:textColor="@color/white"
                                 android:textSize="14sp" />
                         </LinearLayout>
 
                         <TextView
-                            android:textColor="@color/white"
-                            android:gravity="center_horizontal"
-                            android:textIsSelectable="true"
                             android:id="@+id/userChildren"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
+                            android:gravity="center_horizontal"
                             android:text="Child Address"
+                            android:textColor="@color/white"
+                            android:textIsSelectable="true"
                             android:textSize="14sp" />
 
                         <TextView
-                            android:textColor="@color/white"
                             android:id="@+id/currentQuantity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:gravity="center_horizontal"
                             android:text="Quantity: 0"
+                            android:textColor="@color/white"
                             android:textSize="14sp" />
                     </LinearLayout>
 
                     <ProgressBar
-                        android:indeterminateTint="@color/colorPrimary"
                         android:id="@+id/userDetailsLoader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
+                        android:indeterminateTint="@color/colorPrimary"
                         android:padding="30dp" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
@@ -235,19 +236,19 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal">
 
                 <com.cooltechworks.views.shimmer.ShimmerRecyclerView
-                    android:overScrollMode="never"
                     android:id="@+id/userFunctions"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:overScrollMode="never"
                     app:shimmer_demo_angle="45"
-                    app:shimmer_demo_shimmer_color="@color/background"
                     app:shimmer_demo_child_count="10"
                     app:shimmer_demo_layout="@layout/shimmer_dashboard"
-                    app:shimmer_demo_layout_manager_type="grid" />
+                    app:shimmer_demo_layout_manager_type="grid"
+                    app:shimmer_demo_shimmer_color="@color/background" />
 
             </LinearLayout>
         </LinearLayout>

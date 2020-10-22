@@ -11,7 +11,7 @@
         android:layout_marginHorizontal="10dp"
         android:elevation="6dp"
         android:translationZ="6dp"
-        app:cardBackgroundColor="@color/card"
+        app:cardBackgroundColor="@color/background"
         app:cardCornerRadius="6dp"
         app:cardUseCompatPadding="true">
 

@@ -164,8 +164,8 @@
                             android:overScrollMode="never"
                             app:shimmer_demo_angle="45"
                             app:shimmer_demo_child_count="4"
-                            app:shimmer_demo_shimmer_color="@color/background"
-                            app:shimmer_demo_layout="@layout/shimmer_dashboard"
+                            app:shimmer_demo_shimmer_color="@color/card"
+                            app:shimmer_demo_layout="@layout/shimmer_flow"
                             app:shimmer_demo_layout_manager_type="linear_vertical" />
 
                     </LinearLayout>
