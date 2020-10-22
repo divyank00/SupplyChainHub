@@ -41,16 +41,16 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.publicAddress.setText(nodes.get(position).getUserAddress());
         holder.role.setText("(" + userRoles.get(position) + ")");
-        if (nodes.get(position).getBuyingPrice().isEmpty() || nodes.get(position).getBuyingPrice().equals("0")) {
+        if (nodes.get(position).getSellingPrice().isEmpty() || nodes.get(position).getSellingPrice().equals("0")) {
             holder.sellPrice.setVisibility(View.GONE);
         } else {
-            holder.sellPrice.setText("Selling Price:" + nodes.get(position).getBuyingPrice());
+            holder.sellPrice.setText("Initial Selling Price:"  + nodes.get(position).getSellingPrice());
             holder.sellPrice.setVisibility(View.VISIBLE);
         }
-        if (nodes.get(position).getSellingPrice().isEmpty() || nodes.get(position).getSellingPrice().equals("0")) {
+        if (nodes.get(position).getBuyingPrice().isEmpty() || nodes.get(position).getBuyingPrice().equals("0")) {
             holder.soldPrice.setVisibility(View.GONE);
         } else {
-            holder.soldPrice.setText("Sold At:" + nodes.get(position).getSellingPrice());
+            holder.soldPrice.setText("Sold At: " + nodes.get(position).getBuyingPrice());
             holder.soldPrice.setVisibility(View.VISIBLE);
         }
         if (nodes.get(position).getTransactionHash().isEmpty() || nodes.get(position).getTransactionHash().equals("null")) {
