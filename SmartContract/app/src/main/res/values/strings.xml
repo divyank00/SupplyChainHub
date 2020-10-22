@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">SmartContract</string>
+    <string name="app_name">SupplyChainHub</string>
+    <string name="endpoint">https://rpc-mumbai.maticvigil.com/v1/0347a803f1af9508f06d5bd4159ff12c9291fd68</string>
+<!--    <string name="endpoint">https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08</string>-->
 </resources>

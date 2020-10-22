@@ -99,7 +99,7 @@ public class GetUserDetails extends AppCompatActivity {
             if (result.isStatus() && !result.getData().isEmpty()) {
                 int userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
                 if (userRoleInt == userRoles.size() - 1) {
-                    error.setText("User not a member of this Smart-Contract!");
+                    error.setText("User not a member of this Supply Chain!");
                     error.setVisibility(View.VISIBLE);
                     userRole.setVisibility(View.GONE);
                     name.setVisibility(View.GONE);
@@ -199,7 +199,7 @@ public class GetUserDetails extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;

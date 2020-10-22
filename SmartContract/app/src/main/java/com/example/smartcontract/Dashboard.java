@@ -177,7 +177,7 @@ public class Dashboard extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     } else {
-                        Toast.makeText(Dashboard.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Dashboard.this, "Supply Chain doesn't exist!", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(Dashboard.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
@@ -320,7 +320,7 @@ public class Dashboard extends AppCompatActivity {
                     userDetailsLoader.setVisibility(View.GONE);
                     userDetails.setVisibility(View.VISIBLE);
                     if (userRoleInt < userRoles.size() - 1) {
-                        listenerModelList.add(new ListenerModel("Add User", "You can add user in the Smart-Contract!", new View.OnClickListener() {
+                        listenerModelList.add(new ListenerModel("Add User", "You can add user in this Supply Chain!", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), AddUser.class);
@@ -335,7 +335,7 @@ public class Dashboard extends AppCompatActivity {
                             }
                         }));
                     }
-                    listenerModelList.add(new ListenerModel("Get User Details", "You can get details of any user in the Smart-Contract!", new View.OnClickListener() {
+                    listenerModelList.add(new ListenerModel("Get User Details", "You can get details of any user in this Supply Chain!", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(v.getContext(), GetUserDetails.class);
@@ -527,7 +527,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -569,7 +569,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -619,7 +619,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -674,7 +674,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -715,7 +715,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -773,7 +773,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -825,7 +825,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -1167,7 +1167,7 @@ public class Dashboard extends AppCompatActivity {
                                         intent.putExtra("isPermitted", true);
                                         startActivity(intent);
                                     } else {
-                                        Toast.makeText(Dashboard.this, "Product doesn't belong to this Smart-Contract!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(Dashboard.this, "Product doesn't belong to this Supply Chain!", Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
                                     Toast.makeText(Dashboard.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1191,7 +1191,7 @@ public class Dashboard extends AppCompatActivity {
                                         intent.putExtra("isPermitted", true);
                                         startActivity(intent);
                                     } else {
-                                        Toast.makeText(Dashboard.this, "Lot doesn't belong to this Smart-Contract!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(Dashboard.this, "Lot doesn't belong to this Supply Chain!", Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
                                     Toast.makeText(Dashboard.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1269,7 +1269,7 @@ public class Dashboard extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 EthGetBalance balanceResult = web3j.ethGetBalance(Data.publicKey, DefaultBlockParameterName.LATEST).send();
                 BigInteger wei = balanceResult.getBalance();

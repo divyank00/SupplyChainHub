@@ -93,7 +93,7 @@ public class AllFunctions extends AppCompatActivity {
         }
 //                    } else {
 //                        loader.setVisibility(View.GONE);
-//                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(AllFunctions.this, "Supply Chain doesn't exist!", Toast.LENGTH_SHORT).show();
 //                    }
 //                } else {
 //                    loader.setVisibility(View.GONE);

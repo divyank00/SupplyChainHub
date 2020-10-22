@@ -271,7 +271,7 @@ public class AddUser extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -319,7 +319,7 @@ public class AddUser extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -379,7 +379,7 @@ public class AddUser extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -432,7 +432,7 @@ public class AddUser extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;

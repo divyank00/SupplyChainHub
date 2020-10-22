@@ -149,7 +149,7 @@ public class AllContracts extends AppCompatActivity {
                                         });
                             } else {
                                 dialog.dismiss();
-                                Toast.makeText(AllContracts.this, "Ask someone to add you because you don't have access to this Smart-Contract! ", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AllContracts.this, "Ask someone to add you because you don't have access to this Supply Chain! ", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Toast.makeText(AllContracts.this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
@@ -402,7 +402,7 @@ public class AllContracts extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 // Load an account
                 String pk = Data.privateKey;
@@ -485,7 +485,7 @@ public class AllContracts extends AppCompatActivity {
             try {
                 // Connect to the node
                 System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
 
                 EthGetBalance balanceResult = web3j.ethGetBalance(Data.publicKey, DefaultBlockParameterName.LATEST).send();
                 BigInteger wei = balanceResult.getBalance();
