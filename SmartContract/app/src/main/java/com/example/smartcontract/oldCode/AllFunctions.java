@@ -28,7 +28,7 @@ public class AllFunctions extends AppCompatActivity {
     RecyclerView rV;
     Adapter adapter;
     String address;
-    //    SingleContractViewModel singleContractViewModel;
+//        SingleContractViewModel singleContractViewModel;
     ProgressBar loader;
     List<String> usedFunctions;
     String abi;
@@ -64,6 +64,7 @@ public class AllFunctions extends AppCompatActivity {
         usedFunctions.add("trackProductByProductId");
         usedFunctions.add("checkIsUser");
         usedFunctions.add("setProductFinalSellingPrice");
+        usedFunctions.add("trackPrices");
     }
 
     void getContract() {
@@ -78,7 +79,7 @@ public class AllFunctions extends AppCompatActivity {
             List<JSONObject> functions = new ArrayList<>();
             for (int i = 0; i < obj.length(); i++) {
                 if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
-                    if (!usedFunctions.contains(((JSONObject) obj.get(i)).optString("name")))
+//                    if (!usedFunctions.contains(((JSONObject) obj.get(i)).optString("name")))
                         functions.add((JSONObject) obj.get(i));
                 }
             }

@@ -52,20 +52,23 @@ public class AllContractsViewModel extends ViewModel {
         firebaseFirestore.collection("Contracts").document(contractAddress).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful() && task.getResult()!=null && task.getResult().exists()){
-                    firebaseFirestore.collection("User").document(Data.privateKey).collection("Contracts").add(model).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentReference> task) {
-                            if (task.isSuccessful()) {
-                                userLiveData.postValue(new ObjectModel(true, model, null));
-                            } else {
-                                userLiveData.postValue(new ObjectModel(false, null, task.getException().getMessage()));
+                if(task.isSuccessful() && task.getResult()!=null) {
+                    if (task.getResult().exists()) {
+                        firebaseFirestore.collection("User").document(Data.privateKey).collection("Contracts").add(model).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentReference> task) {
+                                if (task.isSuccessful()) {
+                                    userLiveData.postValue(new ObjectModel(true, model, null));
+                                } else {
+                                    userLiveData.postValue(new ObjectModel(false, null, task.getException().getMessage()));
+                                }
                             }
-                        }
-                    });
-                }
-                else{
-                    userLiveData.postValue(new ObjectModel(false, null, "No such Supply-Chain with given address exists!"));
+                        });
+                    } else {
+                        userLiveData.postValue(new ObjectModel(false, null, "No such Supply-Chain with given address exists!"));
+                    }
+                }else{
+                    userLiveData.postValue(new ObjectModel(false, null, task.getException().getMessage()!=null?task.getException().getMessage():"Something went wrong!"));
                 }
             }
         });

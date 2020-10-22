@@ -167,9 +167,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 barcode.setError(null);
-               if (barcode.getText().toString().trim().isEmpty() && barcodeLot.getText().toString().trim().isEmpty()) {
+                if (barcode.getText().toString().trim().isEmpty() && barcodeLot.getText().toString().trim().isEmpty()) {
                     barcode.setError("Mandatory Field");
-                } else if(!barcode.getText().toString().trim().isEmpty()){
+                } else if (!barcode.getText().toString().trim().isEmpty()) {
                     track.setVisibility(View.GONE);
                     loader.setVisibility(View.VISIBLE);
                     productLotViewModel.getAddress(barcode.getText().toString().trim()).observe(MainActivity.this, new Observer<ObjectModel>() {
@@ -180,8 +180,8 @@ public class MainActivity extends AppCompatActivity {
                                 Intent intent = new Intent(MainActivity.this, MapActivity.class);
                                 intent.putExtra("contractAddress", contractAddress);
                                 intent.putExtra("productId", barcode.getText().toString().trim());
+                                intent.putExtra("isPermitted", false);
                                 startActivity(intent);
-
                             } else {
                                 Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                             }
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                             track.setVisibility(View.VISIBLE);
                         }
                     });
-                }else if(!barcodeLot.getText().toString().trim().isEmpty()){
+                } else if (!barcodeLot.getText().toString().trim().isEmpty()) {
                     track.setVisibility(View.GONE);
                     loader.setVisibility(View.VISIBLE);
                     productLotViewModel.getAddress(barcodeLot.getText().toString().trim()).observe(MainActivity.this, new Observer<ObjectModel>() {
@@ -200,8 +200,8 @@ public class MainActivity extends AppCompatActivity {
                                 Intent intent = new Intent(MainActivity.this, MapActivity.class);
                                 intent.putExtra("contractAddress", contractAddress);
                                 intent.putExtra("lotId", barcodeLot.getText().toString().trim());
+                                intent.putExtra("isPermitted", false);
                                 startActivity(intent);
-
                             } else {
                                 Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                             }

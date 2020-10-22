@@ -30,6 +30,7 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.DynamicStruct;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
@@ -148,7 +149,9 @@ public class callFunction extends AppCompatActivity {
                                 }
                             }
                         }
+                        Log.d("Address Output::", outputs.size() + "");
                         for (int i = 0; i < outputs.size(); i++) {
+                            Log.d("Address Output::", outputs.get(i).optString("type"));
                             switch (outputs.get(i).optString("type")) {
                                 case "string":
                                     outputAsync.add(new TypeReference<Utf8String>() {
@@ -174,12 +177,16 @@ public class callFunction extends AppCompatActivity {
                                     outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {
                                     });
                                     break;
+                                case "uint256[]":
+                                    outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
+                                    });
+                                    break;
                                 case "address[]":
                                     outputAsync.add(new TypeReference<DynamicArray<Address>>() {
                                     });
                                     break;
                                 case "tuple":
-                                    outputAsync.add(new TypeReference<org.web3j.abi.datatypes.DynamicStruct>() {
+                                    outputAsync.add(new TypeReference<DynamicStruct>() {
                                     });
                                     break;
                             }

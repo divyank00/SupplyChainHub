@@ -67,6 +67,8 @@ dependencies {
 
     implementation "com.airbnb.android:lottie:3.4.0"
 
+    implementation 'com.wajahatkarim3.EasyFlipView:EasyFlipView:3.0.0'
+
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
 
 }

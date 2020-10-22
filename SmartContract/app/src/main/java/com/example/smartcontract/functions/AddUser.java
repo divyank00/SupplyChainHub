@@ -114,7 +114,7 @@ public class AddUser extends AppCompatActivity {
                     } else if (parentAddress.getText().toString().trim().isEmpty()) {
                         parentAddress.setError("Mandatory Field!");
                     } else {
-                        executeAddOtherUserGas(userAddress.getText().toString().trim(), parentAddress.getText().toString().trim(), userRole + 1 + spinner.getSelectedIndex());
+                        executeAddOtherUserGas(parentAddress.getText().toString().trim(), userAddress.getText().toString().trim(), userRole + 1 + spinner.getSelectedIndex());
                     }
                 }
             }

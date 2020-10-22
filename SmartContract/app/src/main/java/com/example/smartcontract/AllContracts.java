@@ -46,10 +46,8 @@ import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -322,6 +320,7 @@ public class AllContracts extends AppCompatActivity {
                                     Intent intent = new Intent(AllContracts.this, MapActivity.class);
                                     intent.putExtra("contractAddress", contractAddress);
                                     intent.putExtra("productId", productId.getText().toString().trim());
+                                    intent.putExtra("isPermitted", true);
                                     startActivity(intent);
                                 } else {
                                     Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
@@ -339,7 +338,8 @@ public class AllContracts extends AppCompatActivity {
                                     String contractAddress = (String) objectModel.getObj();
                                     Intent intent = new Intent(AllContracts.this, MapActivity.class);
                                     intent.putExtra("contractAddress", contractAddress);
-                                    intent.putExtra("lotId", lotId.getText().toString().trim().isEmpty());
+                                    intent.putExtra("lotId", lotId.getText().toString().trim());
+                                    intent.putExtra("isPermitted", true);
                                     startActivity(intent);
 
                                 } else {

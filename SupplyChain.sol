@@ -459,30 +459,29 @@ contract SupplyChain{
     //     products[_productId].finalBuyingPrice = buyingPrice;
     // }
 
-    function trackProductByProductId(string memory _productId) public view returns(string memory, uint, address, address[] memory, uint[] memory, uint[] memory, string[] memory){
+    function trackProductByProductId(string memory _productId) public view returns(string memory, uint, address[] memory, uint[] memory, uint[] memory, string[] memory){
         
         string storage _lotId = products[_productId].lotId;
+        require(bytes(_lotId).length!=0, "Product is unidentified!");
         return (
             _lotId,
             uint(lots[_lotId].productState),
-            lots[_lotId].currentOwner,
             lots[_lotId].trackUser,
             lots[_lotId].buyingPrices,
             lots[_lotId].sellingPrices,
-            lots[_lotId].trackTxn
+            lots[_lotId].txnHash
         );
     }
 
-    function trackProductByLotId(string memory _lotId) public view returns(string[] memory, uint, address, address[] memory, uint[] memory, uint[] memory, string[] memory){
+    function trackProductByLotId(string memory _lotId) public view returns(string[] memory, uint, address[] memory, uint[] memory, uint[] memory, string[] memory){
         
         return (
             lots[_lotId].productIds,
             uint(lots[_lotId].productState),
-            lots[_lotId].currentOwner,
             lots[_lotId].trackUser,
             lots[_lotId].buyingPrices,
             lots[_lotId].sellingPrices,
-            lots[_lotId].trackTxn
+            lots[_lotId].txnHash
         );
     }
 }

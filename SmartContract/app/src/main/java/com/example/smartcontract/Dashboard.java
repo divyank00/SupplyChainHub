@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,7 +32,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.lifecycle.Observer;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -45,11 +43,9 @@ import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ListenerModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.models.SingleContractModel;
-import com.example.smartcontract.oldCode.Adapter;
 import com.example.smartcontract.oldCode.AllFunctions;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
 import com.example.smartcontract.viewModel.SingleContractViewModel;
-import com.google.android.gms.maps.model.Dash;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.shreyaspatil.MaterialDialog.MaterialDialog;
@@ -1158,6 +1154,7 @@ public class Dashboard extends AppCompatActivity {
                                         Intent intent = new Intent(Dashboard.this, MapActivity.class);
                                         intent.putExtra("contractAddress", contractAddress);
                                         intent.putExtra("productId", productId.getText().toString().trim());
+                                        intent.putExtra("isPermitted", true);
                                         startActivity(intent);
                                     } else {
                                         Toast.makeText(Dashboard.this, "Product doesn't belong to this Smart-Contract!", Toast.LENGTH_SHORT).show();
@@ -1180,7 +1177,8 @@ public class Dashboard extends AppCompatActivity {
                                     if (_contractAddress.equals(contractAddress)) {
                                         Intent intent = new Intent(Dashboard.this, MapActivity.class);
                                         intent.putExtra("contractAddress", contractAddress);
-                                        intent.putExtra("productId", productId.getText().toString().trim());
+                                        intent.putExtra("lotId", lotId.getText().toString().trim());
+                                        intent.putExtra("isPermitted", true);
                                         startActivity(intent);
                                     } else {
                                         Toast.makeText(Dashboard.this, "Lot doesn't belong to this Smart-Contract!", Toast.LENGTH_SHORT).show();
