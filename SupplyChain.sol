@@ -9,7 +9,7 @@ contract SupplyChain{
     mapping(address => user) users;         //mapping of userAddress with struct of user
     mapping(address => bool) isUser;        // checks if he is part of supplychain
     mapping(string => deal) deals;          //mapping of txnHash with struct of deal
-    address[] AllUserAddress;
+    address[] allUserAddress;
 
     enum State{
         Assembling,
@@ -247,6 +247,7 @@ contract SupplyChain{
     function setUser(address account) internal{
         
         isUser[account]=true;
+        allUserAddress.push(account);
     }
 
   /*  function removeUser(address account) internal{
@@ -283,7 +284,6 @@ contract SupplyChain{
         users[_userAccount] = child;
         users[msg.sender].childIds.push(_userAccount);
         setUser(_userAccount);
-        AllUserAddress.push(_userAccount);
         emit UserAdded(_userAccount);
     }
     
@@ -312,7 +312,6 @@ contract SupplyChain{
         users[_userAccount] = child;
         users[_parentAccount].childIds.push(_userAccount);
         setUser(_userAccount);
-        AllUserAddress.push(_userAccount);
         emit UserAdded(_userAccount);
     }
     
@@ -490,7 +489,7 @@ contract SupplyChain{
 
     function returnAllUsers() public view returns(address[] memory){
         return (
-            AllUserAddress
+            allUserAddress
         );
     }
     
