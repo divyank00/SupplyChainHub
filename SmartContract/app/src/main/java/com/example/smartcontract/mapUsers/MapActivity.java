@@ -95,7 +95,6 @@ public class MapActivity extends AppCompatActivity {
     TextView detailsError, trackError, pathTV;
     CardView pathCard;
     List<String> userRoles;
-    boolean trackTxnFinished = false, trackPricesFinished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,10 +205,10 @@ public class MapActivity extends AppCompatActivity {
                         models.add(model);
                     }
                     for (int i = 0; i < buyingPrices.size(); i++) {
-                        models.get(i).setBuyingPrice(buyingPrices.get(i).toString());
+                        models.get(i).setBuyingPrice(buyingPrices.get(i).getValue().toString());
                     }
                     for (int i = 0; i < sellingPrices.size(); i++) {
-                        models.get(i).setSellingPrice(sellingPrices.get(i).toString());
+                        models.get(i).setSellingPrice(sellingPrices.get(i).getValue().toString());
                     }
                     for (int i = 0; i < txnHashes.size(); i++) {
                         if (i == 0) {
@@ -290,10 +289,10 @@ public class MapActivity extends AppCompatActivity {
                             models.add(model);
                         }
                         for (int i = 0; i < buyingPrices.size(); i++) {
-                            models.get(i).setBuyingPrice(buyingPrices.get(i).toString());
+                            models.get(i).setBuyingPrice(buyingPrices.get(i).getValue().toString());
                         }
                         for (int i = 0; i < sellingPrices.size(); i++) {
-                            models.get(i).setSellingPrice(sellingPrices.get(i).toString());
+                            models.get(i).setSellingPrice(sellingPrices.get(i).getValue().toString());
                         }
                         for (int i = 0; i < txnHashes.size(); i++) {
                             if (i == 0) {
@@ -335,6 +334,7 @@ public class MapActivity extends AppCompatActivity {
                         productDetailsLoader.setVisibility(View.GONE);
                         detailsError.setVisibility(View.GONE);
                         productDetails.setVisibility(View.VISIBLE);
+                        executeGetUserDetails(userAddresses);
                     }
                 }
             } else {
@@ -346,17 +346,22 @@ public class MapActivity extends AppCompatActivity {
         });
     }
 
-    private void executeGetUserDetails(String trackAddress) {
-        taskRunner.executeAsync(new getUserDetails(trackAddress), result -> {
-            if (result.isStatus()) {
-                if (!result.getData().isEmpty()) {
-
+    private void executeGetUserDetails(List<Address> userAddress) {
+        for (int i = 0; i < userAddress.size(); i++) {
+            taskRunner.executeAsync(new getUserDetails(userAddress.get(i), i), result -> {
+                if (result.isStatus()) {
+                    if (!result.getData().isEmpty()) {
+                        int index = Integer.parseInt(result.getErrorMsg());
+                        models.get(index).setName(result.getData().get(1).getValue().toString());
+                        models.get(index).setLon(result.getData().get(2).getValue().toString());
+                        models.get(index).setLat(result.getData().get(3).getValue().toString());
+                        adapter.notifyItemChanged(index);
+                    }
+                } else {
+                    Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
+            });
+        }
     }
 
     private void executeSetProductFinalSellingPriceGas(String productId, String privateAddress, String amount) {
@@ -577,10 +582,12 @@ public class MapActivity extends AppCompatActivity {
 
     class getUserDetails implements Callable<Object> {
 
-        String addressTemp;
+        Address userAddress;
+        int pos;
 
-        getUserDetails(String add) {
-            addressTemp = add;
+        getUserDetails(Address userAddress, int pos) {
+            this.userAddress = userAddress;
+            this.pos = pos;
         }
 
         @Override
@@ -594,7 +601,7 @@ public class MapActivity extends AppCompatActivity {
 
                 // Contract and functions
                 List<Type> inputAsync = new ArrayList<>();
-                inputAsync.add(new Address(addressTemp));
+                inputAsync.add(userAddress);
                 List<TypeReference<?>> outputAsync = new ArrayList<>();
                 outputAsync.add(new TypeReference<Uint256>() {
                 });
@@ -620,7 +627,7 @@ public class MapActivity extends AppCompatActivity {
                         DefaultBlockParameterName.LATEST)
                         .sendAsync().get();
                 if (!ethCall.isReverted()) {
-                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
+                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), String.valueOf(pos));
                 } else {
                     result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
                 }
@@ -738,7 +745,6 @@ public class MapActivity extends AppCompatActivity {
             return result;
         }
     }
-
 
     class Object {
         private List<Type> data;

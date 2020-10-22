@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -61,6 +62,16 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
         if (position == nodes.size() - 1) {
             holder.downArrow.setVisibility(View.GONE);
         }
+        if(nodes.get(position).getName()!=null && !nodes.get(position).getName().isEmpty()){
+            holder.userName.setText("Name: " + nodes.get(position).getName());
+            holder.userLocation.setText("Location: https://www.google.com/maps/search/?api=1&query=" + nodes.get(position).getLat()+","+nodes.get(position).getLon());
+            holder.backLL.setVisibility(View.VISIBLE);
+            holder.loader.setVisibility(View.GONE);
+        }
+        else{
+            holder.backLL.setVisibility(View.GONE);
+            holder.loader.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -71,21 +82,25 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
     class ViewHolder extends RecyclerView.ViewHolder {
         View parent;
         EasyFlipView cardView;
-        LinearLayout clickCard;
-        TextView publicAddress, role, sellPrice, soldPrice, txnHash;
+        TextView publicAddress, role, sellPrice, soldPrice, txnHash, userName, userLocation;
         ImageView downArrow;
+        ProgressBar loader;
+        LinearLayout backLL;
 
         public ViewHolder(View itemView) {
             super(itemView);
             parent = itemView;
-            cardView = itemView.findViewById(R.id.cardView);
-            clickCard = itemView.findViewById(R.id.clickCard);
+            cardView = itemView.findViewById(R.id.card);
             publicAddress = itemView.findViewById(R.id.publicAddress);
             role = itemView.findViewById(R.id.role);
             sellPrice = itemView.findViewById(R.id.sellPrice);
             soldPrice = itemView.findViewById(R.id.soldPrice);
             txnHash = itemView.findViewById(R.id.txnHash);
             downArrow = itemView.findViewById(R.id.downwArrow);
+            userName = itemView.findViewById(R.id.userName);
+            userLocation = itemView.findViewById(R.id.location);
+            loader =itemView.findViewById(R.id.loader);
+            backLL = itemView.findViewById(R.id.backLL);
         }
     }
 }
