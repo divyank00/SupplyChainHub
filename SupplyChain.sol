@@ -358,7 +358,6 @@ contract SupplyChain{
         lots[_lotId].sellingPrices.push(0);
         lots[_lotId].trackTxn.push("null");
         lots[_lotId].trackTxn.push("null");
-        users[msg.sender].currentQuantity=users[msg.sender].currentQuantity+1;
         emit LotMade(_lotId);
     }
     
@@ -368,19 +367,19 @@ contract SupplyChain{
         emit Packed();
     }
     
-    function forSaleLotByManufacturer(string[] memory _lotId, uint _price) public onlyManufacturer packed(_lotId){
+    function forSaleLotByManufacturer(string[] memory _lotId, uint _unitPrice) public onlyManufacturer packed(_lotId){
         
         for(uint i = 0;i<_lotId.length;i++){
-            lots[_lotId[i]].sellingPrices.push(_price/_lotId.length);
+            lots[_lotId[i]].sellingPrices.push(_unitPrice);
             lots[_lotId[i]].productState = State.ForSale;
         }
         users[msg.sender].currentQuantity+=_lotId.length;
         emit ForSale();
     }
     
-    function payFromYToX( string memory _txnHash, uint _quantity, uint _totalBuyingPrice, address _Y) public{
+    function payFromYToX( string memory _txnHash, uint _quantity, uint _totalBuyingPrice, address _X_Address) public{
         
-        require(getActualUserRole(msg.sender)-getActualUserRole(_Y)==1,"You haven't paid your parent user!");
+        require(getUserRole(msg.sender)-getUserRole(_X_Address)==1,"You haven't paid your parent user!");
         require(_quantity<=users[users[msg.sender].parentId].currentQuantity, "Seller doesn't have enough quantity to satisfy your needs!");
         users[msg.sender].currentQuantity+=_quantity;
         users[users[msg.sender].parentId].currentQuantity-=_quantity;
