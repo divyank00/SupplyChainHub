@@ -94,6 +94,7 @@ public class MapActivity extends AppCompatActivity {
     TextView detailsError, trackError, pathTV;
     CardView pathCard;
     List<String> userRoles;
+    boolean trackTxnFinished = false, trackPricesFinished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,13 +195,29 @@ public class MapActivity extends AppCompatActivity {
                 if (!result.getData().isEmpty()) {
                     lotIdTV.setText("Lot Id: " + result.getData().get(0).getValue());
                     List<Address> userAddresses = (List<Address>) result.getData().get(2).getValue();
+                    List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(3).getValue();
+                    Log.d("Address Buy", buyingPrices.toString());
+                    List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(4).getValue();
+                    Log.d("Address Sell", sellingPrices.toString());
+                    List<Utf8String> txnHashes = (List<Utf8String>) result.getData().get(5).getValue();
                     for (int i = 0; i < userAddresses.size(); i++) {
-                        TrackModel model = new TrackModel(userAddresses.get(i).toString().trim());
+                        TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), "", "", "");
                         models.add(model);
                     }
-                    executeTrackPrices(result.getData().get(0).getValue().toString());
-//                    adapter.notifyDataSetChanged();
-//                    flow.hideShimmerAdapter();
+                    for (int i = 0; i < buyingPrices.size(); i++) {
+                        models.get(i).setBuyingPrice(buyingPrices.get(i).toString());
+                    }
+                    for (int i = 0; i < sellingPrices.size(); i++) {
+                        models.get(i).setSellingPrice(sellingPrices.get(i).toString());
+                    }
+                    for (int i = 0; i < txnHashes.size(); i++) {
+                        if (i == 0) {
+                            models.get(i).setTransactionHash("null");
+                        } else
+                            models.get(i).setTransactionHash(txnHashes.get(i).toString());
+                    }
+                    adapter.notifyDataSetChanged();
+                    flow.hideShimmerAdapter();
                     if (userAddresses.isEmpty()) {
                         owner.setVisibility(View.GONE);
                     } else {
@@ -247,7 +264,7 @@ public class MapActivity extends AppCompatActivity {
                         detailsError.setVisibility(View.VISIBLE);
                         pathCard.setVisibility(View.GONE);
                     } else {
-                        if(isPermitted) {
+                        if (isPermitted) {
                             String prodIds = "";
                             List<Utf8String> productIds = (List<Utf8String>) result.getData().get(0).getValue();
                             for (int i = 1; i < productIds.size() - 1; i++) {
@@ -258,13 +275,30 @@ public class MapActivity extends AppCompatActivity {
                             prodIds += productIds.get(productIds.size() - 1).toString();
                             lotIdTV.setText("Products Ids: " + prodIds);
                             lotIdTV.setVisibility(View.VISIBLE);
-                        }else{
+                        } else {
                             lotIdTV.setVisibility(View.GONE);
                         }
                         List<Address> userAddresses = (List<Address>) result.getData().get(2).getValue();
+                        List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(3).getValue();
+                        Log.d("Address Buy", buyingPrices.toString());
+                        List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(4).getValue();
+                        Log.d("Address Sell", sellingPrices.toString());
+                        List<Utf8String> txnHashes = (List<Utf8String>) result.getData().get(5).getValue();
                         for (int i = 0; i < userAddresses.size(); i++) {
                             TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), "100", "100", "cd");
                             models.add(model);
+                        }
+                        for (int i = 0; i < buyingPrices.size(); i++) {
+                            models.get(i).setBuyingPrice(buyingPrices.get(i).toString());
+                        }
+                        for (int i = 0; i < sellingPrices.size(); i++) {
+                            models.get(i).setSellingPrice(sellingPrices.get(i).toString());
+                        }
+                        for (int i = 0; i < txnHashes.size(); i++) {
+                            if (i == 0) {
+                                models.get(i).setTransactionHash("null");
+                            } else
+                                models.get(i).setTransactionHash(txnHashes.get(i).toString());
                         }
                         adapter.notifyDataSetChanged();
                         flow.hideShimmerAdapter();
@@ -300,7 +334,6 @@ public class MapActivity extends AppCompatActivity {
                         productDetailsLoader.setVisibility(View.GONE);
                         detailsError.setVisibility(View.GONE);
                         productDetails.setVisibility(View.VISIBLE);
-                        executeTrackPrices(lotId);
                     }
                 }
             } else {
@@ -308,35 +341,6 @@ public class MapActivity extends AppCompatActivity {
                 productDetailsLoader.setVisibility(View.GONE);
                 detailsError.setVisibility(View.VISIBLE);
                 pathCard.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void executeTrackPrices(String lotId) {
-        taskRunner.executeAsync(new trackPrices(lotId), (result) -> {
-            if (result.isStatus()) {
-                if (!result.getData().isEmpty()) {
-                    List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(0).getValue();
-                    List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(1).getValue();
-//                    List<Utf8String> txns = (List<Utf8String>) result.getData().get(2).getValue();
-                    for (int i = 0; i < buyingPrices.size(); i++) {
-                        models.get(i).setBuyingPrice(buyingPrices.get(i).toString());
-                    }
-                    for (int i = 0; i < sellingPrices.size(); i++) {
-                        models.get(i).setSellingPrice(sellingPrices.get(i).toString());
-//                        models.get(i).setTransactionHash(txns.get(i).getValue());
-                    }
-                    for(TrackModel model: models){
-                        model.setTransactionHash("a");
-                    }
-                    adapter.notifyDataSetChanged();
-                    flow.hideShimmerAdapter();
-                }
-            } else {
-                trackError.setText("Error: " + result.getErrorMsg());
-                trackError.setVisibility(View.VISIBLE);
-                flow.setVisibility(View.GONE);
-                pathTV.setVisibility(View.GONE);
             }
         });
     }
@@ -451,6 +455,12 @@ public class MapActivity extends AppCompatActivity {
                 });
                 outputAsync.add(new TypeReference<DynamicArray<Address>>() {
                 });
+                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
+                });
+                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
+                });
+                outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {
+                });
                 Function function = new Function("trackProductByProductId", // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters
@@ -493,6 +503,12 @@ public class MapActivity extends AppCompatActivity {
                 outputAsync.add(new TypeReference<Uint256>() {
                 });
                 outputAsync.add(new TypeReference<DynamicArray<Address>>() {
+                });
+                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
+                });
+                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
+                });
+                outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {
                 });
                 Function function = new Function("trackProductByLotId", // Function name
                         inputAsync,  // Function input parameters
@@ -551,53 +567,6 @@ public class MapActivity extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 Toast.makeText(MapActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
-                Log.d("Address Error: ", e.toString());
-                e.printStackTrace();
-            }
-            return result;
-        }
-    }
-
-    class trackPrices implements Callable<Object> {
-
-        String lotId;
-
-        public trackPrices(String lotId) {
-            this.lotId = lotId;
-        }
-
-        @Override
-        public Object call() throws Exception {
-            Object result = new Object();
-            try {
-                // Connect to the node
-                System.out.println("Connecting to Ethereum ...");
-                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
-
-                // Contract and functions
-                List<Type> inputAsync = new ArrayList<>();
-                inputAsync.add(new Utf8String(lotId));
-                List<TypeReference<?>> outputAsync = new ArrayList<>();
-                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
-                });
-                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
-                });
-                Function function = new Function("trackPrices", // Function name
-                        inputAsync,  // Function input parameters
-                        outputAsync); // Function returned parameters
-                Log.d("Address Output: ", outputAsync.size() + "");
-                String encodedFunction = FunctionEncoder.encode(function);
-                EthCall ethCall = web3j.ethCall(
-                        Transaction.createEthCallTransaction(Address.DEFAULT.toString(), contractAddress, encodedFunction),
-                        DefaultBlockParameterName.LATEST)
-                        .sendAsync().get();
-                if (!ethCall.isReverted()) {
-                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
-                } else {
-                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
-                }
-            } catch (Exception e) {
-                result = new Object(false, null, e.toString());
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }
@@ -768,6 +737,7 @@ public class MapActivity extends AppCompatActivity {
             return result;
         }
     }
+
 
     class Object {
         private List<Type> data;

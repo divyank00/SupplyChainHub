@@ -28,7 +28,7 @@ public class AllFunctions extends AppCompatActivity {
     RecyclerView rV;
     Adapter adapter;
     String address;
-        SingleContractViewModel singleContractViewModel;
+//        SingleContractViewModel singleContractViewModel;
     ProgressBar loader;
     List<String> usedFunctions;
     String abi;
@@ -44,7 +44,7 @@ public class AllFunctions extends AppCompatActivity {
         Intent intent = getIntent();
         abi = intent.getStringExtra("abi");
         address = intent.getStringExtra("contractAddress");
-        singleContractViewModel = new SingleContractViewModel();
+//        singleContractViewModel = new SingleContractViewModel();
         usedFunctions = new ArrayList<>();
         setUsedFunctions();
         getContract();
@@ -70,18 +70,18 @@ public class AllFunctions extends AppCompatActivity {
     }
 
     void getContract() {
-        singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
-            @Override
-            public void onChanged(ObjectModel objectModel) {
-                if (objectModel.isStatus()) {
-                    if (objectModel.getObj() != null) {
+//        singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
+//            @Override
+//            public void onChanged(ObjectModel objectModel) {
+//                if (objectModel.isStatus()) {
+//                    if (objectModel.getObj() != null) {
         try {
-                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
+//                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
             JSONArray obj = new JSONArray(abi);
             List<JSONObject> functions = new ArrayList<>();
             for (int i = 0; i < obj.length(); i++) {
                 if (((JSONObject) obj.get(i)).optString("type").equals("function")) {
-//                    if (!usedFunctions.contains(((JSONObject) obj.get(i)).optString("name")))
+                    if (!usedFunctions.contains(((JSONObject) obj.get(i)).optString("name")))
                         functions.add((JSONObject) obj.get(i));
                 }
             }
@@ -92,16 +92,16 @@ public class AllFunctions extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-                    } else {
-                        loader.setVisibility(View.GONE);
-                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    loader.setVisibility(View.GONE);
-                    Toast.makeText(AllFunctions.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+//                    } else {
+//                        loader.setVisibility(View.GONE);
+//                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
+//                    }
+//                } else {
+//                    loader.setVisibility(View.GONE);
+//                    Toast.makeText(AllFunctions.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
     }
 
     @Override

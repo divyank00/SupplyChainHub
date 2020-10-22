@@ -28,7 +28,7 @@ public class AllContractsViewModel extends ViewModel {
 
     public LiveData<ObjectModel> getContracts() {
         userLiveData = new MutableLiveData<>();
-        firebaseFirestore.collection("User").document(Data.privateKey).collection("Contracts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firebaseFirestore.collection("User").document(Data.publicKey).collection("Contracts").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful() && task.getResult() != null) {
@@ -54,7 +54,7 @@ public class AllContractsViewModel extends ViewModel {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful() && task.getResult()!=null) {
                     if (task.getResult().exists()) {
-                        firebaseFirestore.collection("User").document(Data.privateKey).collection("Contracts").add(model).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                        firebaseFirestore.collection("User").document(Data.publicKey).collection("Contracts").add(model).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentReference> task) {
                                 if (task.isSuccessful()) {

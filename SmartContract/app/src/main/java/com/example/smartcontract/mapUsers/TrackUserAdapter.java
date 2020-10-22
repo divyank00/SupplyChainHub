@@ -46,13 +46,13 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
             holder.sellPrice.setText("Selling Price:" + nodes.get(position).getBuyingPrice());
             holder.sellPrice.setVisibility(View.VISIBLE);
         }
-        if (nodes.get(position).getBuyingPrice().isEmpty() || nodes.get(position).getBuyingPrice().equals("0")) {
+        if (nodes.get(position).getSellingPrice().isEmpty() || nodes.get(position).getSellingPrice().equals("0")) {
             holder.soldPrice.setVisibility(View.GONE);
         } else {
             holder.soldPrice.setText("Sold At:" + nodes.get(position).getSellingPrice());
             holder.soldPrice.setVisibility(View.VISIBLE);
         }
-        if (nodes.get(position).getTransactionHash().isEmpty()) {
+        if (nodes.get(position).getTransactionHash().isEmpty() || nodes.get(position).getTransactionHash().equals("null")) {
             holder.txnHash.setVisibility(View.GONE);
         } else {
             holder.txnHash.setText("https://rinkeby.etherscan.io/tx/" + nodes.get(position).getTransactionHash());

@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smartcontract.models.ContractModel;
-import com.example.smartcontract.oldCode.AllFunctions;
 
 import java.util.List;
 
@@ -45,7 +44,7 @@ public class AllContractsAdapter extends RecyclerView.Adapter<AllContractsAdapte
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(mContext, AllFunctions.class);
+                Intent i = new Intent(mContext, Dashboard.class);
                 i.putExtra("contractName",contracts.get(holder.getAdapterPosition()).getName());
                 i.putExtra("contractAddress",contracts.get(holder.getAdapterPosition()).getAddress());
                 mContext.startActivity(i);

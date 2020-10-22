@@ -356,8 +356,8 @@ contract SupplyChain{
         lots[_lotId].buyingPrices.push(0);
         lots[_lotId].buyingPrices.push(0);
         lots[_lotId].sellingPrices.push(0);
-        lots[_lotId].trackTxn.push("");
-        lots[_lotId].trackTxn.push("");
+        lots[_lotId].trackTxn.push("null");
+        lots[_lotId].trackTxn.push("null");
         users[msg.sender].currentQuantity=users[msg.sender].currentQuantity+1;
         emit LotMade(_lotId);
     }
@@ -470,28 +470,30 @@ contract SupplyChain{
         );
     }
 
-    function trackProductByLotId(string memory _lotId) public view returns(string[] memory, uint, address[] memory){
+    function trackProductByLotId(string memory _lotId) public view returns(string[] memory, uint, address[] memory, uint[] memory,uint[] memory, string[] memory){
         
         return (
             lots[_lotId].productIds,
             uint(lots[_lotId].productState),
-            lots[_lotId].trackUser
+            lots[_lotId].trackUser,
+            lots[_lotId].buyingPrices,
+            lots[_lotId].sellingPrices,
+            lots[_lotId].trackTxn
         );
     }
     
-    function trackPrices(string memory _lotId) public view returns(uint[] memory,uint[] memory){
+    // function trackPrices(string memory _lotId) public view returns(uint[] memory,uint[] memory){
         
-        return (
-            lots[_lotId].buyingPrices,
-            lots[_lotId].sellingPrices
-        );    
-    }
+    //     return (
+    //         lots[_lotId].buyingPrices,
+    //         lots[_lotId].sellingPrices
+    //     );    
+    // }
     
-        function trackTxns(string memory _lotId) public view returns(string[] memory){
+    //     function trackTxns(string memory _lotId) public view returns(string[] memory){
         
-        return (
-            lots[_lotId].trackTxn
-        );    
-    }
+    //     return (
+    //         lots[_lotId].trackTxn
+    //     );    
+    // }
 }
-

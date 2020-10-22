@@ -40,6 +40,14 @@ public class ProductLotViewModel extends ViewModel {
 
                             }
                         });
+                    }else{
+                        ProductModel model = new ProductModel(newMap);
+                        firebaseFirestore.collection("Products").document("AllProducts").set(model).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+
+                            }
+                        });
                     }
                 } else {
                     userLiveData.postValue(new ObjectModel(false, null, task.getException().getMessage()));
