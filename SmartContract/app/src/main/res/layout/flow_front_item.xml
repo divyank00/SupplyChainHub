@@ -68,7 +68,7 @@
 
             <TextView
                 android:autoLink="web"
-                android:textColorLink="@color/colorPrimary"
+                android:textColorLink="@color/linkColor"
                 android:id="@+id/txnHash"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

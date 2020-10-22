@@ -12,4 +12,5 @@
     <color name="black">#000</color>
     <color name="blue">#3D9FD6</color>
     <color name="green">#61BA87</color>
+    <color name="linkColor">#3F51B5</color>
 </resources>

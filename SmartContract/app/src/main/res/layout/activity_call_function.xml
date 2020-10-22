@@ -85,7 +85,7 @@
                         android:layout_height="wrap_content"
                         android:autoLink="web"
                         android:textColor="@color/white"
-                        android:textColorLink="#3F51B5" />
+                        android:textColorLink="@color/linkColor" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

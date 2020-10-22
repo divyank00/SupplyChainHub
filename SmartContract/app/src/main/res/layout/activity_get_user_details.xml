@@ -128,7 +128,7 @@
                                 android:singleLine="true"
                                 android:text="Location: "
                                 android:textColor="@color/white"
-                                android:textColorLink="@color/colorPrimary"
+                                android:textColorLink="@color/linkColor"
                                 android:textIsSelectable="true"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />

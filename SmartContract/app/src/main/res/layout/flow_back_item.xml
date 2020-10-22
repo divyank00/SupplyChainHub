@@ -48,7 +48,7 @@
                     android:gravity="center_horizontal"
                     android:text="Location: "
                     android:textColor="@color/white"
-                    android:textColorLink="@color/colorPrimary"
+                    android:textColorLink="@color/linkColor"
                     android:textIsSelectable="true"
                     android:textSize="14sp" />
             </LinearLayout>

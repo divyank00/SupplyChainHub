@@ -113,7 +113,7 @@
                     android:autoLink="web"
                     android:text="Txn Url"
                     android:textColor="@color/black"
-                    android:textColorLink="@color/colorPrimary"
+                    android:textColorLink="@color/linkColor"
                     android:textIsSelectable="true"
                     android:textSize="14sp" />
             </LinearLayout>
