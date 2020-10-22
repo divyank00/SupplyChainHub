@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/background"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <ScrollView
@@ -19,13 +19,13 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
-                app:cardUseCompatPadding="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
+                app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="12dp">
 
                 <LinearLayout
@@ -45,20 +45,20 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Private Key: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <EditText
-                        app:backgroundTint="@color/white"
-                        android:textColor="@color/white"
                         android:id="@+id/privateKey"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp" />
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/white" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -75,7 +75,6 @@
                             android:background="@color/colorPrimary" />
 
                         <TextView
-                            android:textColor="@color/white"
                             android:id="@+id/or"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -84,6 +83,7 @@
                             android:layout_margin="10dp"
                             android:paddingHorizontal="5dp"
                             android:text="OR"
+                            android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -96,21 +96,21 @@
                     </RelativeLayout>
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Metamask Seed Phrase: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <EditText
-                        app:backgroundTint="@color/white"
-                        android:textColor="@color/white"
                         android:id="@+id/seed"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textMultiLine"
-                        android:textSize="16sp" />
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/white" />
 
                     <Button
                         android:id="@+id/button"
@@ -125,13 +125,12 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
-                app:cardUseCompatPadding="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
+                app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="12dp">
 
                 <LinearLayout
@@ -151,10 +150,10 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Product Id: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
@@ -176,14 +175,14 @@
                             android:tooltipText="Scan QR" />
 
                         <EditText
-                            app:backgroundTint="@color/white"
-                            android:textColor="@color/white"
                             android:id="@+id/barcode"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
                             android:layout_toStartOf="@id/scan"
-                            android:textSize="16sp" />
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            app:backgroundTint="@color/white" />
 
                     </RelativeLayout>
 
@@ -202,7 +201,6 @@
                             android:background="@color/colorPrimary" />
 
                         <TextView
-                            android:textColor="@color/white"
                             android:id="@+id/or1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -211,6 +209,7 @@
                             android:layout_margin="10dp"
                             android:paddingHorizontal="5dp"
                             android:text="OR"
+                            android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -223,10 +222,10 @@
                     </RelativeLayout>
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Lot Id: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
@@ -248,14 +247,14 @@
                             android:tooltipText="Scan QR" />
 
                         <EditText
-                            app:backgroundTint="@color/white"
-                            android:textColor="@color/white"
                             android:id="@+id/barcodeLot"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="10dp"
                             android:layout_toStartOf="@id/scanLot"
-                            android:textSize="16sp" />
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            app:backgroundTint="@color/white" />
 
                     </RelativeLayout>
 
@@ -270,12 +269,12 @@
                         android:translationZ="12dp" />
 
                     <ProgressBar
-                        android:indeterminateTint="@color/colorPrimary"
                         android:id="@+id/loader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginVertical="10dp"
+                        android:indeterminateTint="@color/colorPrimary"
                         android:visibility="gone" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

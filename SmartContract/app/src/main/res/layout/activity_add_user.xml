@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/background"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <ScrollView
-        android:fillViewport="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -19,18 +19,18 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
+                app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="10dp"
+                    android:layout_margin="20dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -44,69 +44,71 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="User's Public Address: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <EditText
-                        app:backgroundTint="@color/white"
-                        android:textColor="@color/white"
                         android:id="@+id/userAddress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp" />
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/white" />
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="User's Role: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <org.angmarch.views.NiceSpinner
-                        app:backgroundSelector="@drawable/nice_spinner_back"
-                        app:arrowTint="@color/white"
-                        app:textTint="@color/white"
-                        app:backgroundTint="@color/background"
-                        android:textSize="16sp"
+                        android:layout_marginTop="5dp"
                         android:id="@+id/nice_spinner"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        app:arrowTint="@color/white"
+                        app:backgroundSelector="@drawable/nice_spinner_back"
+                        app:backgroundTint="@color/background"
+                        app:textTint="@color/white" />
 
                     <TextView
-                        android:textColor="@color/white"
+                        android:layout_marginTop="5dp"
                         android:id="@+id/parentAddressTV"
-                        android:visibility="gone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Parent Public Address: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <EditText
-                        app:backgroundTint="@color/white"
-                        android:textColor="@color/white"
-                        android:visibility="gone"
                         android:id="@+id/parentAddress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textMultiLine"
-                        android:textSize="16sp" />
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        app:backgroundTint="@color/white" />
 
                     <Button
-                        android:textColor="@color/white"
-                        android:elevation="12dp"
-                        android:translationZ="12dp"
                         android:id="@+id/button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginVertical="10dp"
-                        android:text="Add" />
+                        android:elevation="12dp"
+                        android:text="Add"
+                        android:textColor="@color/white"
+                        android:translationZ="12dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

@@ -309,10 +309,10 @@ public class Dashboard extends AppCompatActivity {
                         } else {
                             String text = userRoles.get(userRoleInt + 1) + "s: ";
                             String[] arr = childAdd.split(",");
-                            for (int i = 0; i < arr.length - 1; i++) {
-                                text += arr[i].trim() + ",\n";
+                            for (int i = 0; i < arr.length; i++) {
+                                text += arr[i].trim() + "\n";
                             }
-                            text += arr[arr.length - 1];
+//                            text += arr[arr.length - 1];
                             userChildren.setText(text);
                             userChildren.setVisibility(View.VISIBLE);
                         }

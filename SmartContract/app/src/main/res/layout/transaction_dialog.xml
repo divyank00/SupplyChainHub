@@ -24,9 +24,10 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
             android:elevation="12dp"
             android:translationZ="12dp"
-            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="@color/lightGrey"
             app:cardCornerRadius="6dp">
 
             <LinearLayout
@@ -42,26 +43,26 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginHorizontal="10dp"
+                    android:layout_marginBottom="5dp"
                     android:text="Error: "
-                    android:textColor="#000"
+                    android:textColor="@color/white"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="5dp"
                     android:visibility="gone" />
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:layout_gravity="center_horizontal"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:layout_marginHorizontal="10dp"
                     android:gravity="center_horizontal"
-                    android:text="Transaction Hash:"
-                    android:textColor="#000"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:text="Transaction Hash"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="347dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:orientation="horizontal">
@@ -76,7 +77,7 @@
                         android:gravity="center_horizontal"
                         android:singleLine="true"
                         android:text="Txn Hash"
-                        android:textColor="#000"
+                        android:textColor="@color/black"
                         android:textSize="16sp"
                         app:layout_constrainedWidth="true"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -86,7 +87,6 @@
                         app:layout_constraintWidth_default="wrap" />
 
                     <ImageView
-                        android:tooltipText="Copy"
                         android:id="@+id/txnHashCopy"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -96,13 +96,14 @@
                         android:clickable="true"
                         android:padding="5dp"
                         android:src="@drawable/ic_baseline_file_copy_24"
+                        android:tooltipText="Copy"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/txnHash"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
-                    android:textIsSelectable="true"
+                    android:layout_marginBottom="5dp"
                     android:id="@+id/txnUrl"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -111,8 +112,9 @@
                     android:layout_marginTop="5dp"
                     android:autoLink="web"
                     android:text="Txn Url"
-                    android:textColor="#000"
-                    android:textColorLink="@color/colorPrimaryDark"
+                    android:textColor="@color/black"
+                    android:textColorLink="@color/colorPrimary"
+                    android:textIsSelectable="true"
                     android:textSize="14sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>

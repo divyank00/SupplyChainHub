@@ -213,6 +213,7 @@
                             android:textSize="14sp" />
 
                         <TextView
+                            android:textStyle="bold"
                             android:id="@+id/currentQuantity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

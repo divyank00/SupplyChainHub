@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/background"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <ScrollView
@@ -19,18 +19,18 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="20dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
+                app:cardBackgroundColor="@color/card"
                 app:cardCornerRadius="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="10dp"
+                    android:layout_margin="20dp"
                     android:orientation="vertical">
 
                     <TextView
@@ -44,23 +44,22 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="User's Public Address: "
+                        android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <EditText
-                        app:backgroundTint="@color/white"
-                        android:textColor="@color/white"
                         android:id="@+id/userAddress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp" />
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/white" />
 
                     <androidx.cardview.widget.CardView
-                        app:cardBackgroundColor="@color/background"
                         android:id="@+id/result"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -68,12 +67,14 @@
                         android:elevation="12dp"
                         android:translationZ="12dp"
                         android:visibility="gone"
+                        app:cardBackgroundColor="@color/background"
                         app:cardCornerRadius="12dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_margin="10dp"
+                            android:paddingBottom="10dp"
                             android:orientation="vertical">
 
                             <TextView
@@ -87,76 +88,77 @@
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/error"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Error: "
                                 android:layout_gravity="center_horizontal"
                                 android:gravity="center_horizontal"
+                                android:text="Error: "
+                                android:layout_marginBottom="10dp"
+                                android:textColor="@color/white"
                                 android:textSize="16sp"
-                                android:visibility="gone"
-                                android:textStyle="bold" />
+                                android:textStyle="bold"
+                                android:visibility="gone" />
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/userRole"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Role: "
+                                android:textColor="@color/white"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Name: "
+                                android:textColor="@color/white"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:textColor="@color/white"
-                                android:autoLink="web"
-                                android:singleLine="true"
-                                android:maxLines="1"
-                                android:ellipsize="end"
-                                android:textIsSelectable="true"
-                                android:textColorLink="@color/colorPrimaryDark"
                                 android:id="@+id/location"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:autoLink="web"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:singleLine="true"
                                 android:text="Location: "
+                                android:textColor="@color/white"
+                                android:textColorLink="@color/colorPrimary"
+                                android:textIsSelectable="true"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/parentAddress"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Parent: "
+                                android:textColor="@color/white"
                                 android:textIsSelectable="true"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/childAddresses"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Child: "
+                                android:textColor="@color/white"
                                 android:textIsSelectable="true"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:textColor="@color/white"
                                 android:id="@+id/currentQuantity"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Quantity: "
+                                android:textColor="@color/white"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
