@@ -79,6 +79,8 @@ public class MakePackLot extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_lot);
+        getSupportActionBar().setTitle("New Lots");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
         contractAddress = intent.getStringExtra("contractAddress");
         trackByProductId = intent.getBooleanExtra("trackByProductId", true);
@@ -338,6 +340,7 @@ public class MakePackLot extends AppCompatActivity {
                 List<Type> inputAsync = new ArrayList<>();
                 inputAsync.add(new Utf8String(lotId));
                 List<Utf8String> list = new ArrayList<>();
+                list.add(new Utf8String("Garbage"));
                 String[] arr = productIds.split(",");
                 for (int j = 0; j < arr.length; j++) {
                     if (!arr[j].trim().isEmpty())
@@ -394,6 +397,7 @@ public class MakePackLot extends AppCompatActivity {
                 List<Type> inputAsync = new ArrayList<>();
                 inputAsync.add(new Utf8String(lotId));
                 List<Utf8String> list = new ArrayList<>();
+                list.add(new Utf8String("Garbage"));
                 List<String> firebaseList = new ArrayList<>();
                 String[] arr = productIds.split(",");
                 for (int j = 0; j < arr.length; j++) {
@@ -652,5 +656,11 @@ public class MakePackLot extends AppCompatActivity {
             Log.d("Address Error", e.toString());
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        this.onBackPressed();
+        return true;
     }
 }

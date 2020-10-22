@@ -28,7 +28,7 @@ public class AllFunctions extends AppCompatActivity {
     RecyclerView rV;
     Adapter adapter;
     String address;
-//        SingleContractViewModel singleContractViewModel;
+        SingleContractViewModel singleContractViewModel;
     ProgressBar loader;
     List<String> usedFunctions;
     String abi;
@@ -37,12 +37,14 @@ public class AllFunctions extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_functions);
+        getSupportActionBar().setTitle("Other Functions");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         rV = findViewById(R.id.rV);
         loader = findViewById(R.id.loader);
         Intent intent = getIntent();
         abi = intent.getStringExtra("abi");
         address = intent.getStringExtra("contractAddress");
-//        singleContractViewModel = new SingleContractViewModel();
+        singleContractViewModel = new SingleContractViewModel();
         usedFunctions = new ArrayList<>();
         setUsedFunctions();
         getContract();
@@ -68,13 +70,13 @@ public class AllFunctions extends AppCompatActivity {
     }
 
     void getContract() {
-//        singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
-//            @Override
-//            public void onChanged(ObjectModel objectModel) {
-//                if (objectModel.isStatus()) {
-//                    if (objectModel.getObj() != null) {
+        singleContractViewModel.getContract(address).observe(this, new Observer<ObjectModel>() {
+            @Override
+            public void onChanged(ObjectModel objectModel) {
+                if (objectModel.isStatus()) {
+                    if (objectModel.getObj() != null) {
         try {
-//                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
+                            String abi = ((SingleContractModel) objectModel.getObj()).getAbi();
             JSONArray obj = new JSONArray(abi);
             List<JSONObject> functions = new ArrayList<>();
             for (int i = 0; i < obj.length(); i++) {
@@ -90,15 +92,21 @@ public class AllFunctions extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-//                    } else {
-//                        loader.setVisibility(View.GONE);
-//                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    loader.setVisibility(View.GONE);
-//                    Toast.makeText(AllFunctions.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
+                    } else {
+                        loader.setVisibility(View.GONE);
+                        Toast.makeText(AllFunctions.this, "Smart-Contract doesn't exist!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    loader.setVisibility(View.GONE);
+                    Toast.makeText(AllFunctions.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        this.onBackPressed();
+        return true;
     }
 }

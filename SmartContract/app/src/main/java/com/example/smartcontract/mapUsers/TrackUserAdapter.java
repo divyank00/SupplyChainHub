@@ -1,7 +1,6 @@
 package com.example.smartcontract.mapUsers;
 
 import android.content.Context;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +9,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.smartcontract.Data;
 import com.example.smartcontract.R;
-import com.example.smartcontract.models.ListenerModel;
 import com.example.smartcontract.models.TrackModel;
 import com.wajahatkarim3.easyflipview.EasyFlipView;
 
@@ -25,10 +21,12 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
 
     Context mContext;
     List<TrackModel> nodes;
+    List<String> userRoles;
 
-    public TrackUserAdapter(Context mContext, List<TrackModel> nodes) {
+    public TrackUserAdapter(Context mContext, List<TrackModel> nodes, List<String> userRoles) {
         this.mContext = mContext;
         this.nodes = nodes;
+        this.userRoles = userRoles;
     }
 
     @NonNull
@@ -41,7 +39,7 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.publicAddress.setText(nodes.get(position).getUserAddress());
-        holder.role.setText("(" + Data.userRoles.get(position) + ")");
+        holder.role.setText("(" + userRoles.get(position) + ")");
         if (nodes.get(position).getBuyingPrice().isEmpty() || nodes.get(position).getBuyingPrice().equals("0")) {
             holder.sellPrice.setVisibility(View.GONE);
         } else {

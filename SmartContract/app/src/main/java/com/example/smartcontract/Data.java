@@ -17,5 +17,4 @@ public class Data {
         put(5, "Shipped");
         put(6, "Received");
     }};
-    public static List<String> userRoles = new ArrayList<>();
 }

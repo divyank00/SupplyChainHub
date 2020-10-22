@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.example.smartcontract.Dashboard;
 import com.example.smartcontract.Data;
 import com.example.smartcontract.R;
 import com.example.smartcontract.models.TrackModel;
@@ -58,8 +59,10 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +71,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static org.web3j.utils.Bytes.trimLeadingZeroes;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -88,6 +93,7 @@ public class MapActivity extends AppCompatActivity {
     TrackUserAdapter adapter;
     TextView detailsError, trackError, pathTV;
     CardView pathCard;
+    List<String> userRoles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +104,7 @@ public class MapActivity extends AppCompatActivity {
         contractAddress = intent.getStringExtra("contractAddress");
         productId = intent.getStringExtra("productId");
         lotId = intent.getStringExtra("lotId");
+        userRoles = new ArrayList<>();
         isPermitted = intent.getBooleanExtra("isPermitted", false);
         userAddress = new ArrayList<>();
         productDetails = findViewById(R.id.productDetails);
@@ -115,7 +122,7 @@ public class MapActivity extends AppCompatActivity {
         privateAddress = findViewById(R.id.privateAddress);
         submit = findViewById(R.id.button);
         models = new ArrayList<>();
-        adapter = new TrackUserAdapter(MapActivity.this, models);
+        adapter = new TrackUserAdapter(MapActivity.this, models, userRoles);
         flow.setLayoutManager(new LinearLayoutManager(MapActivity.this));
         flow.setAdapter(adapter);
         flow.showShimmerAdapter();
@@ -153,13 +160,32 @@ public class MapActivity extends AppCompatActivity {
                 }
             }
         });
-        if (productId != null) {
-            title.setText("PRODUCT DETAILS");
-            executeTrackProductByProductId();
-        } else {
-            title.setText("LOT DETAILS");
-            executeTrackProductByLotId();
-        }
+        executeGetUserRolesArray();
+    }
+
+    private void executeGetUserRolesArray() {
+        taskRunner.executeAsync(new getUserRolesArray(), (result) -> {
+            if (result.isStatus()) {
+                if (!result.getData().isEmpty()) {
+                    userRoles.clear();
+                    List<Utf8String> roles = (List<Utf8String>) result.getData().get(0).getValue();
+                    userRoles.add("Owner");
+                    for (int i = 1; i < roles.size(); i++) {
+                        userRoles.add(roles.get(i).toString());
+                    }
+                    Log.d("Address Roles", userRoles.toString() + "");
+                    if (productId != null) {
+                        title.setText("PRODUCT DETAILS");
+                        executeTrackProductByProductId();
+                    } else {
+                        title.setText("LOT DETAILS");
+                        executeTrackProductByLotId();
+                    }
+                }
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void executeTrackProductByProductId() {
@@ -168,15 +194,13 @@ public class MapActivity extends AppCompatActivity {
                 if (!result.getData().isEmpty()) {
                     lotIdTV.setText("Lot Id: " + result.getData().get(0).getValue());
                     List<Address> userAddresses = (List<Address>) result.getData().get(2).getValue();
-                    List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(3).getValue();
-                    List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(4).getValue();
-                    List<Utf8String> transactionHashes = (List<Utf8String>) result.getData().get(3).getValue();
                     for (int i = 0; i < userAddresses.size(); i++) {
-                        TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), buyingPrices.get(i).toString().trim(), sellingPrices.get(i).toString(), transactionHashes.get(i).toString());
+                        TrackModel model = new TrackModel(userAddresses.get(i).toString().trim());
                         models.add(model);
                     }
-                    adapter.notifyDataSetChanged();
-                    flow.hideShimmerAdapter();
+                    executeTrackPrices(result.getData().get(0).getValue().toString());
+//                    adapter.notifyDataSetChanged();
+//                    flow.hideShimmerAdapter();
                     if (userAddresses.isEmpty()) {
                         owner.setVisibility(View.GONE);
                     } else {
@@ -192,7 +216,7 @@ public class MapActivity extends AppCompatActivity {
                             }
                         });
                     }
-                    if (Data.userRoles.size() == userAddresses.size() && ((BigInteger) result.getData().get(1).getValue()).intValue() == Data.State.size() - 1) {
+                    if (userRoles.size() == userAddresses.size() && ((BigInteger) result.getData().get(1).getValue()).intValue() == Data.State.size() - 1) {
                         state.setText("(" + Data.State.get(((BigInteger) result.getData().get(1).getValue()).intValue()) + ")\nNote: This item can als0 be sold to a customer!");
                     } else {
                         state.setText("(" + Data.State.get(((BigInteger) result.getData().get(1).getValue()).intValue()) + ")");
@@ -203,7 +227,6 @@ public class MapActivity extends AppCompatActivity {
                     if (!isPermitted) {
                         additionInfo.setVisibility(View.VISIBLE);
                     }
-//                    executeTrackPrices(result.getData().get(0).getValue().toString());
                 }
             } else {
                 detailsError.setText("Error: " + result.getErrorMsg());
@@ -224,15 +247,23 @@ public class MapActivity extends AppCompatActivity {
                         detailsError.setVisibility(View.VISIBLE);
                         pathCard.setVisibility(View.GONE);
                     } else {
-                        String productIds = result.getData().get(0).getValue().toString();
-                        productIds = productIds.substring(1, productIds.length() - 1);
-                        lotIdTV.setText("Products Ids: " + productIds);
+                        if(isPermitted) {
+                            String prodIds = "";
+                            List<Utf8String> productIds = (List<Utf8String>) result.getData().get(0).getValue();
+                            for (int i = 1; i < productIds.size() - 1; i++) {
+                                Log.d("Address Prod", productIds.get(i).getValue());
+                                if (!productIds.get(i).getValue().isEmpty())
+                                    prodIds += productIds.get(i).getValue() + ", ";
+                            }
+                            prodIds += productIds.get(productIds.size() - 1).toString();
+                            lotIdTV.setText("Products Ids: " + prodIds);
+                            lotIdTV.setVisibility(View.VISIBLE);
+                        }else{
+                            lotIdTV.setVisibility(View.GONE);
+                        }
                         List<Address> userAddresses = (List<Address>) result.getData().get(2).getValue();
-                        List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(3).getValue();
-                        List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(4).getValue();
-                        List<Utf8String> transactionHashes = (List<Utf8String>) result.getData().get(3).getValue();
                         for (int i = 0; i < userAddresses.size(); i++) {
-                            TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), buyingPrices.get(i).toString().trim(), sellingPrices.get(i).toString(), transactionHashes.get(i).toString());
+                            TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), "100", "100", "cd");
                             models.add(model);
                         }
                         adapter.notifyDataSetChanged();
@@ -241,6 +272,15 @@ public class MapActivity extends AppCompatActivity {
                             owner.setVisibility(View.GONE);
                         } else {
                             owner.setText("Current Owner: " + userAddresses.get(userAddresses.size() - 1).toString());
+                            ownerClick.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                    ClipData clip = ClipData.newPlainText("PublicAddress", userAddresses.get(userAddresses.size() - 1).toString());
+                                    clipboard.setPrimaryClip(clip);
+                                    Toast.makeText(MapActivity.this, "Current Owner's Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                             ownerClick.setOnLongClickListener(new View.OnLongClickListener() {
                                 @Override
                                 public boolean onLongClick(View v) {
@@ -252,8 +292,7 @@ public class MapActivity extends AppCompatActivity {
                                 }
                             });
                         }
-                        Toast.makeText(this, result.getData().get(1).getValue().toString(), Toast.LENGTH_SHORT).show();
-                        if (Data.userRoles.size() == userAddresses.size() && ((int) result.getData().get(1).getValue()) == Data.State.size() - 1) {
+                        if (userRoles.size() == userAddresses.size() && ((int) result.getData().get(1).getValue()) == Data.State.size() - 1) {
                             state.setText("(" + Data.State.get(((BigInteger) result.getData().get(1).getValue()).intValue()) + ")\nNote: This item can be sold by now!");
                         } else {
                             state.setText("(" + Data.State.get(((BigInteger) result.getData().get(1).getValue()).intValue()) + ")");
@@ -261,7 +300,7 @@ public class MapActivity extends AppCompatActivity {
                         productDetailsLoader.setVisibility(View.GONE);
                         detailsError.setVisibility(View.GONE);
                         productDetails.setVisibility(View.VISIBLE);
-//                        executeTrackPrices(lotId);
+                        executeTrackPrices(lotId);
                     }
                 }
             } else {
@@ -273,27 +312,34 @@ public class MapActivity extends AppCompatActivity {
         });
     }
 
-//    private void executeTrackPrices(String lotId) {
-//        taskRunner.executeAsync(new trackPrices(lotId), (result) -> {
-//            if (result.isStatus()) {
-//                if (!result.getData().isEmpty()) {
-//                    List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(0).getValue();
-//                    List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(1).getValue();
-//                    for (int i = 0; i < models.size(); i++) {
-//                        models.get(i).setBuyingPrice(buyingPrices.get(i).toString());
-//                        models.get(i).setSellingPrice(sellingPrices.get(i).toString());
-//                    }
-//                    adapter.notifyDataSetChanged();
-//                    flow.hideShimmerAdapter();
-//                }
-//            } else {
-//                trackError.setText("Error: " + result.getErrorMsg());
-//                trackError.setVisibility(View.VISIBLE);
-//                flow.setVisibility(View.GONE);
-//                pathTV.setVisibility(View.GONE);
-//            }
-//        });
-//    }
+    private void executeTrackPrices(String lotId) {
+        taskRunner.executeAsync(new trackPrices(lotId), (result) -> {
+            if (result.isStatus()) {
+                if (!result.getData().isEmpty()) {
+                    List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(0).getValue();
+                    List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(1).getValue();
+//                    List<Utf8String> txns = (List<Utf8String>) result.getData().get(2).getValue();
+                    for (int i = 0; i < buyingPrices.size(); i++) {
+                        models.get(i).setBuyingPrice(buyingPrices.get(i).toString());
+                    }
+                    for (int i = 0; i < sellingPrices.size(); i++) {
+                        models.get(i).setSellingPrice(sellingPrices.get(i).toString());
+//                        models.get(i).setTransactionHash(txns.get(i).getValue());
+                    }
+                    for(TrackModel model: models){
+                        model.setTransactionHash("a");
+                    }
+                    adapter.notifyDataSetChanged();
+                    flow.hideShimmerAdapter();
+                }
+            } else {
+                trackError.setText("Error: " + result.getErrorMsg());
+                trackError.setVisibility(View.VISIBLE);
+                flow.setVisibility(View.GONE);
+                pathTV.setVisibility(View.GONE);
+            }
+        });
+    }
 
     private void executeGetUserDetails(String trackAddress) {
         taskRunner.executeAsync(new getUserDetails(trackAddress), result -> {
@@ -405,8 +451,6 @@ public class MapActivity extends AppCompatActivity {
                 });
                 outputAsync.add(new TypeReference<DynamicArray<Address>>() {
                 });
-                outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {
-                });
                 Function function = new Function("trackProductByProductId", // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters
@@ -450,8 +494,6 @@ public class MapActivity extends AppCompatActivity {
                 });
                 outputAsync.add(new TypeReference<DynamicArray<Address>>() {
                 });
-                outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {
-                });
                 Function function = new Function("trackProductByLotId", // Function name
                         inputAsync,  // Function input parameters
                         outputAsync); // Function returned parameters
@@ -476,53 +518,92 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
-//    class trackPrices implements Callable<Object> {
-//
-//        String lotId;
-//
-//        public trackPrices(String lotId) {
-//            this.lotId = lotId;
-//        }
-//
-//        @Override
-//        public Object call() throws Exception {
-//            Object result = new Object();
-//            try {
-//                // Connect to the node
-//                System.out.println("Connecting to Ethereum ...");
-//                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
-//
-//                // Contract and functions
-//                List<Type> inputAsync = new ArrayList<>();
-//                inputAsync.add(new Utf8String(lotId));
-//                List<TypeReference<?>> outputAsync = new ArrayList<>();
-//                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
-//                });
-//                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
-//                });
-//
-//                Function function = new Function("trackPrices", // Function name
-//                        inputAsync,  // Function input parameters
-//                        outputAsync); // Function returned parameters
-//                Log.d("Address Output: ", outputAsync.size() + "");
-//                String encodedFunction = FunctionEncoder.encode(function);
-//                EthCall ethCall = web3j.ethCall(
-//                        Transaction.createEthCallTransaction(Address.DEFAULT.toString(), contractAddress, encodedFunction),
-//                        DefaultBlockParameterName.LATEST)
-//                        .sendAsync().get();
-//                if (!ethCall.isReverted()) {
-//                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
-//                } else {
-//                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
-//                }
-//            } catch (Exception e) {
-//                result = new Object(false, null, e.toString());
-//                Log.d("Address Error: ", e.toString());
-//                e.printStackTrace();
-//            }
-//            return result;
-//        }
-//    }
+    class getUserRolesArray implements Callable<Object> {
+
+        @Override
+        public Object call() {
+            Object result = new Object();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Load an account
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+                outputAsync.add(new TypeReference<DynamicArray<Utf8String>>() {
+                });
+                Function function = new Function("getUserRolesArray", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String encodedFunction = FunctionEncoder.encode(function);
+                EthCall ethCall = web3j.ethCall(
+                        Transaction.createEthCallTransaction(String.valueOf(Address.DEFAULT), contractAddress, encodedFunction),
+                        DefaultBlockParameterName.LATEST)
+                        .sendAsync().get();
+                if (!ethCall.isReverted()) {
+                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
+                } else {
+                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
+                }
+            } catch (Exception e) {
+                Toast.makeText(MapActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class trackPrices implements Callable<Object> {
+
+        String lotId;
+
+        public trackPrices(String lotId) {
+            this.lotId = lotId;
+        }
+
+        @Override
+        public Object call() throws Exception {
+            Object result = new Object();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService("https://rinkeby.infura.io/v3/55697f31d7db4e0693f15732b7e10e08"));
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                inputAsync.add(new Utf8String(lotId));
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
+                });
+                outputAsync.add(new TypeReference<DynamicArray<Uint256>>() {
+                });
+                Function function = new Function("trackPrices", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String encodedFunction = FunctionEncoder.encode(function);
+                EthCall ethCall = web3j.ethCall(
+                        Transaction.createEthCallTransaction(Address.DEFAULT.toString(), contractAddress, encodedFunction),
+                        DefaultBlockParameterName.LATEST)
+                        .sendAsync().get();
+                if (!ethCall.isReverted()) {
+                    result = new Object(true, FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters()), null);
+                } else {
+                    result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
+                }
+            } catch (Exception e) {
+                result = new Object(false, null, e.toString());
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
 
     class getUserDetails implements Callable<Object> {
 

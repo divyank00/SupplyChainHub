@@ -110,17 +110,21 @@ public class Dashboard extends AppCompatActivity {
     boolean trackByProductId = false;
     boolean trackByLotId = false;
 
+    public ArrayList<String> userRoles;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        Intent intent = getIntent();
-        setGlobal(intent);
+        setGlobal();
         getContract();
     }
 
-    private void setGlobal(Intent intent) {
+    private void setGlobal() {
+        Intent intent = getIntent();
         taskRunner = new TaskRunner();
+        getSupportActionBar().setTitle(intent.getStringExtra("contractName"));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         contractAddress = intent.getStringExtra("contractAddress");
         productDetailsLoader = findViewById(R.id.productDetailsLoader);
         productDetails = findViewById(R.id.productDetails);
@@ -141,6 +145,7 @@ public class Dashboard extends AppCompatActivity {
         ownerRoleLinearLayout = findViewById(R.id.ownerRoleLinearLayout);
         userFunctions = findViewById(R.id.userFunctions);
         listenerModelList = new ArrayList<>();
+        userRoles = new ArrayList<>();
         dashboardAdapter = new DashboardAdapter(Dashboard.this, listenerModelList);
         userFunctions.setAdapter(dashboardAdapter);
         userFunctions.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
@@ -185,13 +190,13 @@ public class Dashboard extends AppCompatActivity {
         taskRunner.executeAsync(new getUserRolesArray(), (result) -> {
             if (result.isStatus()) {
                 if (!result.getData().isEmpty()) {
-                    Data.userRoles.clear();
+                    userRoles.clear();
                     List<Utf8String> roles = (List<Utf8String>) result.getData().get(0).getValue();
-                    Data.userRoles.add("Owner");
+                    userRoles.add("Owner");
                     for (int i = 1; i < roles.size(); i++) {
-                        Data.userRoles.add(roles.get(i).toString());
+                        userRoles.add(roles.get(i).toString());
                     }
-                    Log.d("Address Roles", Data.userRoles.toString() + "");
+                    Log.d("Address Roles", userRoles.toString() + "");
                     executeGetSmartContractDetails();
                 }
             } else {
@@ -253,7 +258,7 @@ public class Dashboard extends AppCompatActivity {
                     userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
                     if (contractOwnerAddress != null && contractOwnerAddress.equals(Data.publicKey)) {
                         userRole.setText("You are the owner!");
-                        ownerText.setText("Are you a " + Data.userRoles.get(1).toString() + " also?");
+                        ownerText.setText("Are you a " + userRoles.get(1).toString() + " also?");
                         ownerText.setVisibility(View.VISIBLE);
                         ownerRoleLinearLayout.setVisibility(View.VISIBLE);
                         parentClick.setVisibility(View.GONE);
@@ -275,12 +280,12 @@ public class Dashboard extends AppCompatActivity {
                             currentQuantity.setVisibility(View.GONE);
                         }
                     } else {
-                        userRole.setText("You are a " + Data.userRoles.get(userRoleInt) + "!");
+                        userRole.setText("You are a " + userRoles.get(userRoleInt) + "!");
                         currentQuantity.setText("Quantity: " + result.getData().get(6).getValue().toString());
                         if (userRoleInt == 1) {
                             parentClick.setVisibility(View.GONE);
                         } else {
-                            userParent.setText("Your " + Data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
+                            userParent.setText("Your " + userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
                             parentClick.setVisibility(View.VISIBLE);
                             parentClick.setOnLongClickListener(new View.OnLongClickListener() {
                                 @Override
@@ -288,13 +293,13 @@ public class Dashboard extends AppCompatActivity {
                                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                                     ClipData clip = ClipData.newPlainText("PublicAddress", result.getData().get(4).getValue().toString());
                                     clipboard.setPrimaryClip(clip);
-                                    Toast.makeText(Dashboard.this, Data.userRoles.get(userRoleInt - 1) + " Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(Dashboard.this, userRoles.get(userRoleInt - 1) + " Address copied to clipboard!", Toast.LENGTH_SHORT).show();
                                     return false;
                                 }
                             });
                         }
                     }
-                    if (userRoleInt == Data.userRoles.size() - 1) {
+                    if (userRoleInt == userRoles.size() - 1) {
                         userChildren.setVisibility(View.GONE);
                     } else {
                         String childAdd = result.getData().get(5).getValue().toString();
@@ -302,7 +307,7 @@ public class Dashboard extends AppCompatActivity {
                         if (childAdd.isEmpty()) {
                             userChildren.setVisibility(View.GONE);
                         } else {
-                            String text = Data.userRoles.get(userRoleInt + 1) + "s: ";
+                            String text = userRoles.get(userRoleInt + 1) + "s: ";
                             String[] arr = childAdd.split(",");
                             for (int i = 0; i < arr.length - 1; i++) {
                                 text += arr[i].trim() + ",\n";
@@ -314,7 +319,7 @@ public class Dashboard extends AppCompatActivity {
                     }
                     userDetailsLoader.setVisibility(View.GONE);
                     userDetails.setVisibility(View.VISIBLE);
-                    if (userRoleInt < Data.userRoles.size() - 1) {
+                    if (userRoleInt < userRoles.size() - 1) {
                         listenerModelList.add(new ListenerModel("Add User", "You can add user in the Smart-Contract!", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -324,6 +329,7 @@ public class Dashboard extends AppCompatActivity {
                                 } else {
                                     intent.putExtra("userRole", userRoleInt);
                                 }
+                                intent.putStringArrayListExtra("userRoles",userRoles);
                                 intent.putExtra("contractAddress", contractAddress);
                                 startActivity(intent);
                             }
@@ -333,6 +339,7 @@ public class Dashboard extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(v.getContext(), GetUserDetails.class);
+                            intent.putStringArrayListExtra("userRoles",userRoles);
                             intent.putExtra("contractAddress", contractAddress);
                             startActivity(intent);
                         }
@@ -1040,6 +1047,9 @@ public class Dashboard extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                this.onBackPressed();
+                return true;
             case R.id.logOut:
                 showLogoutDialog();
                 return true;

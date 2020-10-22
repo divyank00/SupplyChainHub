@@ -7,6 +7,10 @@ public class TrackModel {
     String buyingPrice;
     String transactionHash;
 
+    public TrackModel(String userAddress) {
+        this.userAddress = userAddress;
+    }
+
     public TrackModel(String userAddress, String sellingPrice, String buyingPrice, String transactionHash) {
         this.userAddress = userAddress;
         this.sellingPrice = sellingPrice;

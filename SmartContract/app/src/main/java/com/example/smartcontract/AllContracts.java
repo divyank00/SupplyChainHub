@@ -83,6 +83,7 @@ public class AllContracts extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_contracts);
+        getSupportActionBar().setTitle("Your Contracts");
         taskRunner = new TaskRunner();
         rV = findViewById(R.id.rV);
         button = findViewById(R.id.button);
@@ -330,6 +331,7 @@ public class AllContracts extends AppCompatActivity {
                             }
                         });
                     } else if (!lotId.getText().toString().trim().isEmpty()) {
+                        track.setVisibility(View.GONE);
                         trackLoader.setVisibility(View.VISIBLE);
                         productLotViewModel.getAddress(lotId.getText().toString().trim()).observe(AllContracts.this, new Observer<ObjectModel>() {
                             @Override
@@ -525,5 +527,4 @@ public class AllContracts extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-
 }

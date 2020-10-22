@@ -50,12 +50,17 @@ public class GetUserDetails extends AppCompatActivity {
     Button button;
     CardView resultCard;
     TextView userRole, name, location, parentAddress, childAddresses, currentQuantity, error;
+    List<String> userRoles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_user_details);
+        getSupportActionBar().setTitle("User Details");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
+        userRoles = new ArrayList<>();
+        userRoles = intent.getStringArrayListExtra("userRoles");
         contractAddress = intent.getStringExtra("contractAddress");
         taskRunner = new TaskRunner();
         userAddress = findViewById(R.id.userAddress);
@@ -93,7 +98,7 @@ public class GetUserDetails extends AppCompatActivity {
             progressHUD.dismiss();
             if (result.isStatus() && !result.getData().isEmpty()) {
                 int userRoleInt = Integer.parseInt(result.getData().get(0).getValue().toString());
-                if (userRoleInt == Data.userRoles.size() - 1) {
+                if (userRoleInt == userRoles.size() - 1) {
                     error.setText("User not a member of this Smart-Contract!");
                     error.setVisibility(View.VISIBLE);
                     userRole.setVisibility(View.GONE);
@@ -104,7 +109,7 @@ public class GetUserDetails extends AppCompatActivity {
                     currentQuantity.setVisibility(View.GONE);
                 } else {
                     error.setVisibility(View.GONE);
-                    userRole.setText("Role: " + Data.userRoles.get(userRoleInt));
+                    userRole.setText("Role: " + userRoles.get(userRoleInt));
                     userRole.setVisibility(View.VISIBLE);
                     if (result.getData().get(1).getValue().toString().isEmpty()) {
                         name.setVisibility(View.GONE);
@@ -122,9 +127,9 @@ public class GetUserDetails extends AppCompatActivity {
                         parentAddress.setVisibility(View.GONE);
                     } else {
                         parentAddress.setVisibility(View.VISIBLE);
-                        parentAddress.setText(Data.userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
+                        parentAddress.setText(userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
                     }
-                    if (userRoleInt == Data.userRoles.size() - 2) {
+                    if (userRoleInt == userRoles.size() - 2) {
                         childAddresses.setVisibility(View.GONE);
                     } else {
                         String childAdd = result.getData().get(5).getValue().toString();
@@ -132,7 +137,7 @@ public class GetUserDetails extends AppCompatActivity {
                         if (childAdd.isEmpty()) {
                             childAddresses.setVisibility(View.GONE);
                         } else {
-                            String text = Data.userRoles.get(userRoleInt + 1) + "s:\n";
+                            String text = userRoles.get(userRoleInt + 1) + "s:\n";
                             String[] arr = childAdd.split(",");
                             for (int i = 0; i < arr.length - 1; i++) {
                                 text += arr[i].trim() + ",\n";
@@ -279,5 +284,11 @@ public class GetUserDetails extends AppCompatActivity {
         }
 
         private String errorMsg;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        this.onBackPressed();
+        return true;
     }
 }

@@ -67,22 +67,27 @@ public class AddUser extends AppCompatActivity {
     EditText parentAddress, userAddress;
     TaskRunner taskRunner;
     Button button;
+    List<String> userRoles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_user);
         Intent intent = getIntent();
+        getSupportActionBar().setTitle("Add User");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         contractAddress = intent.getStringExtra("contractAddress");
         taskRunner = new TaskRunner();
-        userRole = intent.getIntExtra("userRole", Data.userRoles.size());
+        userRoles = new ArrayList<>();
+        userRoles = intent.getStringArrayListExtra("userRoles");
+        userRole = intent.getIntExtra("userRole", userRoles.size());
         parentAddressTV = findViewById(R.id.parentAddressTV);
         parentAddress = findViewById(R.id.parentAddress);
         userAddress = findViewById(R.id.userAddress);
         spinner = findViewById(R.id.nice_spinner);
         button = findViewById(R.id.button);
         button.setBackgroundColor(0xFF3366ff);
-        List<String> dataSet = Data.userRoles.subList(userRole + 1, Data.userRoles.size() - 1);
+        List<String> dataSet = userRoles.subList(userRole + 1, userRoles.size() - 1);
         spinner.attachDataSource(dataSet);
         spinner.setSelectedIndex(0);
         spinner.setOnSpinnerItemSelectedListener(new OnSpinnerItemSelectedListener() {
@@ -561,5 +566,11 @@ public class AddUser extends AppCompatActivity {
             Log.d("Address Error", e.toString());
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        this.onBackPressed();
+        return true;
     }
 }
