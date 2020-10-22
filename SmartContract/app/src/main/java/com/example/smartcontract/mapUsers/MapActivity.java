@@ -338,6 +338,7 @@ public class MapActivity extends AppCompatActivity {
                         if (!isPermitted) {
                             additionInfo.setVisibility(View.VISIBLE);
                         }
+
                         executeGetUserDetails(userAddresses);
                     }
                 }
