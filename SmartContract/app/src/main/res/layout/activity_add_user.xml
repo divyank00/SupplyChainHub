@@ -68,8 +68,10 @@
                         android:textStyle="bold" />
 
                     <org.angmarch.views.NiceSpinner
-                        android:textColor="@color/white"
-                        android:backgroundTint="@color/background"
+                        app:backgroundSelector="@drawable/nice_spinner_back"
+                        app:arrowTint="@color/white"
+                        app:textTint="@color/white"
+                        app:backgroundTint="@color/background"
                         android:textSize="16sp"
                         android:id="@+id/nice_spinner"
                         android:layout_width="match_parent"

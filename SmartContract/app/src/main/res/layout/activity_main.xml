@@ -270,6 +270,7 @@
                         android:translationZ="12dp" />
 
                     <ProgressBar
+                        android:indeterminateTint="@color/colorPrimary"
                         android:id="@+id/loader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

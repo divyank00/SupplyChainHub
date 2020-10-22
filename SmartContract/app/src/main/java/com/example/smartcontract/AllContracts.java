@@ -133,7 +133,7 @@ public class AllContracts extends AppCompatActivity {
                     loader.setVisibility(View.VISIBLE);
                     taskRunner.executeAsync(new checkIsUser(address.getText().toString().trim()), (result) -> {
                         if (result.isStatus()) {
-                            if (!result.getData().isEmpty() && ((boolean)result.getData().get(0).getValue())) {
+                            if (!result.getData().isEmpty() && ((boolean) result.getData().get(0).getValue())) {
                                 allContractsViewModel.addContract(address.getText().toString().trim(), name.getText().toString().trim())
                                         .observe(AllContracts.this, new Observer<ObjectModel>() {
                                             @Override
@@ -155,6 +155,8 @@ public class AllContracts extends AppCompatActivity {
                                 Toast.makeText(AllContracts.this, "Ask someone to add you because you don't have access to this Supply Chain! ", Toast.LENGTH_SHORT).show();
                             }
                         } else {
+                            loader.setVisibility(View.GONE);
+                            b.setVisibility(View.VISIBLE);
                             Toast.makeText(AllContracts.this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -179,7 +181,7 @@ public class AllContracts extends AppCompatActivity {
                 if (objectModel.isStatus()) {
                     loader.setVisibility(View.GONE);
                     mList.addAll((Collection<? extends ContractModel>) objectModel.getObj());
-                    if(mList.isEmpty()){
+                    if (mList.isEmpty()) {
                         empty.setVisibility(View.VISIBLE);
                     }
                     adapter.notifyDataSetChanged();
@@ -436,8 +438,7 @@ public class AllContracts extends AppCompatActivity {
                     result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
                 }
             } catch (Exception e) {
-                Toast.makeText(AllContracts.this, e.toString(), Toast.LENGTH_SHORT).show();
-                Log.d("Address Error: ", e.toString());
+                result = new Object(false, null, e.toString());
                 e.printStackTrace();
             }
             return result;

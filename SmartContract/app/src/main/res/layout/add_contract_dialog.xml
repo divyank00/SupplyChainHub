@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:background="@drawable/profile_dialog"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/profile_dialog">
 
     <LinearLayout
-        android:layout_margin="20dp"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
@@ -33,10 +33,10 @@
             android:textStyle="bold" />
 
         <EditText
-            android:hint="Ex. Parle-G"
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="Ex. Parle-G"
             android:textSize="16sp" />
 
         <Button
@@ -51,11 +51,12 @@
 
         <ProgressBar
             android:id="@+id/loader"
-            android:visibility="gone"
-            android:layout_marginVertical="10dp"
-            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="10dp"
+            android:indeterminateTint="@color/colorPrimary"
+            android:visibility="gone" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -19,6 +19,7 @@
         android:text="Add Contract" />
 
     <ProgressBar
+        android:indeterminateTint="@color/colorPrimary"
         android:id="@+id/loader"
         android:layout_gravity="center"
         android:layout_width="wrap_content"

@@ -96,6 +96,7 @@
                     </LinearLayout>
 
                     <ProgressBar
+                        android:indeterminateTint="@color/colorPrimary"
                         android:id="@+id/productDetailsLoader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -222,6 +223,7 @@
                     </LinearLayout>
 
                     <ProgressBar
+                        android:indeterminateTint="@color/colorPrimary"
                         android:id="@+id/userDetailsLoader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

@@ -19,15 +19,15 @@
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="10dp"
                 android:elevation="12dp"
-                app:cardUseCompatPadding="true"
                 android:translationZ="12dp"
-                app:cardCornerRadius="6dp">
+                app:cardBackgroundColor="@color/card"
+                app:cardCornerRadius="6dp"
+                app:cardUseCompatPadding="true">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -101,36 +101,38 @@
                     </LinearLayout>
 
                     <TextView
-                        android:textColor="@color/white"
-                        android:visibility="gone"
                         android:id="@+id/detailsError"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Error:"
-                        android:padding="20dp"
                         android:layout_centerInParent="true"
+                        android:padding="20dp"
+                        android:text="Error:"
+                        android:textColor="@color/white"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
                     <ProgressBar
                         android:id="@+id/productDetailsLoader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
+                        android:indeterminateTint="@color/colorPrimary"
                         android:padding="50dp" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
                 android:id="@+id/pathCard"
-                app:cardUseCompatPadding="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_margin="10dp"
                 android:elevation="12dp"
                 android:translationZ="12dp"
-                app:cardCornerRadius="6dp">
+                app:cardBackgroundColor="@color/card"
+                app:cardCornerRadius="6dp"
+                app:cardUseCompatPadding="true">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -144,12 +146,12 @@
                         android:visibility="visible">
 
                         <TextView
+                            android:id="@+id/pathTV"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
                             android:gravity="center_horizontal"
                             android:text="PATH TAKEN"
-                            android:id="@+id/pathTV"
                             android:textAllCaps="true"
                             android:textColor="@color/colorPrimaryDark"
                             android:textSize="24sp"
@@ -162,28 +164,27 @@
                             android:overScrollMode="never"
                             app:shimmer_demo_angle="45"
                             app:shimmer_demo_child_count="4"
+                            app:shimmer_demo_shimmer_color="@color/background"
                             app:shimmer_demo_layout="@layout/shimmer_dashboard"
                             app:shimmer_demo_layout_manager_type="linear_vertical" />
 
                     </LinearLayout>
 
                     <TextView
-                        android:textColor="@color/white"
-                        android:visibility="gone"
                         android:id="@+id/trackError"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Error:"
-                        android:padding="20dp"
                         android:layout_centerInParent="true"
+                        android:padding="20dp"
+                        android:text="Error:"
+                        android:textColor="@color/white"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:visibility="gone" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                app:cardBackgroundColor="@color/card"
-                app:cardUseCompatPadding="true"
                 android:id="@+id/additionInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -192,7 +193,9 @@
                 android:elevation="12dp"
                 android:translationZ="12dp"
                 android:visibility="gone"
-                app:cardCornerRadius="6dp">
+                app:cardBackgroundColor="@color/card"
+                app:cardCornerRadius="6dp"
+                app:cardUseCompatPadding="true">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -212,21 +215,21 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:textColor="@color/white"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
                         android:gravity="center_horizontal"
                         android:text="(Not Mandatory)"
                         android:textAllCaps="true"
+                        android:textColor="@color/white"
                         android:textSize="14sp" />
 
                     <CheckBox
-                        android:textColor="@color/white"
                         android:id="@+id/checkBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Did you buy this product?" />
+                        android:text="Did you buy this product?"
+                        android:textColor="@color/white" />
 
                     <LinearLayout
                         android:id="@+id/additionInfoLL"
@@ -236,37 +239,37 @@
                         android:visibility="gone">
 
                         <TextView
-                            android:textColor="@color/white"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="How much did you pay?"
+                            android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <EditText
-                            app:backgroundTint="@color/white"
-                            android:textColor="@color/white"
                             android:id="@+id/finalAmt"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="numberDecimal"
-                            android:textSize="14sp" />
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            app:backgroundTint="@color/white" />
 
                         <TextView
-                            android:textColor="@color/white"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Your Private Address:"
+                            android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <EditText
-                            app:backgroundTint="@color/white"
-                            android:textColor="@color/white"
                             android:id="@+id/privateAddress"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="14sp" />
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            app:backgroundTint="@color/white" />
 
                         <Button
                             android:id="@+id/button"

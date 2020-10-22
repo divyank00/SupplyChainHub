@@ -53,6 +53,7 @@
                 android:textStyle="bold" />
 
             <ProgressBar
+                android:indeterminateTint="@color/colorPrimary"
                 android:layout_marginTop="5dp"
                 android:id="@+id/balLoader"
                 android:layout_gravity="center_horizontal"
