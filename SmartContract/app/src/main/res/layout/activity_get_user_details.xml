@@ -82,7 +82,7 @@
                                 android:layout_marginBottom="10dp"
                                 android:gravity="center_horizontal"
                                 android:text="RESULT"
-                                android:textColor="#FF2eb82e"
+                                android:textColor="@color/green"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 

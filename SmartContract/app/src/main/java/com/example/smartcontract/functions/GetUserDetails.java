@@ -65,7 +65,7 @@ public class GetUserDetails extends AppCompatActivity {
         taskRunner = new TaskRunner();
         userAddress = findViewById(R.id.userAddress);
         button = findViewById(R.id.button);
-        button.setBackgroundColor(0xFF2eb82e);
+        button.setBackgroundColor(getResources().getColor(R.color.green));
         resultCard = findViewById(R.id.result);
         userRole = findViewById(R.id.userRole);
         name = findViewById(R.id.name);

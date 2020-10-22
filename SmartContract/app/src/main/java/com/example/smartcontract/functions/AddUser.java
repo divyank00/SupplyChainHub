@@ -86,7 +86,7 @@ public class AddUser extends AppCompatActivity {
         userAddress = findViewById(R.id.userAddress);
         spinner = findViewById(R.id.nice_spinner);
         button = findViewById(R.id.button);
-        button.setBackgroundColor(0xFF3366ff);
+        button.setBackgroundColor(getResources().getColor(R.color.blue));
         List<String> dataSet = userRoles.subList(userRole + 1, userRoles.size() - 1);
         spinner.attachDataSource(dataSet);
         spinner.setSelectedIndex(0);
