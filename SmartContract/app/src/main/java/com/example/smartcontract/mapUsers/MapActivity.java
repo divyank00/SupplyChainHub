@@ -197,18 +197,18 @@ public class MapActivity extends AppCompatActivity {
                     lotIdTV.setText("Lot Id: " + result.getData().get(0).getValue());
                     List<Address> userAddresses = (List<Address>) result.getData().get(2).getValue();
                     List<Uint256> buyingPrices = (List<Uint256>) result.getData().get(3).getValue();
-                    Log.d("Address Buy", buyingPrices.toString());
                     List<Uint256> sellingPrices = (List<Uint256>) result.getData().get(4).getValue();
-                    Log.d("Address Sell", sellingPrices.toString());
                     List<Utf8String> txnHashes = (List<Utf8String>) result.getData().get(5).getValue();
                     for (int i = 0; i < userAddresses.size(); i++) {
                         TrackModel model = new TrackModel(userAddresses.get(i).toString().trim(), "", "", "");
                         models.add(model);
                     }
                     for (int i = 0; i < buyingPrices.size(); i++) {
+                        Log.d("AddressBuy",buyingPrices.get(i).getValue().toString());
                         models.get(i).setBuyingPrice(buyingPrices.get(i).getValue().toString());
                     }
                     for (int i = 0; i < sellingPrices.size(); i++) {
+                        Log.d("AddressSell",sellingPrices.get(i).getValue().toString());
                         models.get(i).setSellingPrice(sellingPrices.get(i).getValue().toString());
                     }
                     for (int i = 0; i < txnHashes.size(); i++) {

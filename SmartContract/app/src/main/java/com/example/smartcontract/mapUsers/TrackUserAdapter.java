@@ -44,14 +44,18 @@ public class TrackUserAdapter extends RecyclerView.Adapter<TrackUserAdapter.View
         if (nodes.get(position).getSellingPrice().isEmpty() || nodes.get(position).getSellingPrice().equals("0")) {
             holder.sellPrice.setVisibility(View.GONE);
         } else {
-            holder.sellPrice.setText("Initial Selling Price:"  + nodes.get(position).getSellingPrice());
+            holder.sellPrice.setText("Initial Selling Price: "  + nodes.get(position).getSellingPrice());
             holder.sellPrice.setVisibility(View.VISIBLE);
         }
-        if (nodes.get(position).getBuyingPrice().isEmpty() || nodes.get(position).getBuyingPrice().equals("0")) {
+        if(position+1<nodes.size()) {
+            if (nodes.get(position + 1).getBuyingPrice().isEmpty() || nodes.get(position + 1).getBuyingPrice().equals("0")) {
+                holder.soldPrice.setVisibility(View.GONE);
+            } else {
+                holder.soldPrice.setText("Sold At: " + nodes.get(position + 1).getBuyingPrice());
+                holder.soldPrice.setVisibility(View.VISIBLE);
+            }
+        }else{
             holder.soldPrice.setVisibility(View.GONE);
-        } else {
-            holder.soldPrice.setText("Sold At: " + nodes.get(position).getBuyingPrice());
-            holder.soldPrice.setVisibility(View.VISIBLE);
         }
         if (nodes.get(position).getTransactionHash().isEmpty() || nodes.get(position).getTransactionHash().equals("null")) {
             holder.txnHash.setVisibility(View.GONE);

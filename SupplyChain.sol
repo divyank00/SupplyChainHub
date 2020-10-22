@@ -412,8 +412,8 @@ contract SupplyChain{
                 lots[_lotId[i]].currentOwner = activeDeal.buyerAddress;
                 lots[_lotId[i]].productState = State.Sold;
             }
-            users[msg.sender].currentQuantity-=_lotId.length;
-            users[activeDeal.buyerAddress].currentQuantity+=_quantity;
+            users[msg.sender].currentQuantity-=activeDeal.capacity;
+            users[activeDeal.buyerAddress].currentQuantity+=activeDeal.capacity;
             emit Sold();
         }
     }
@@ -442,7 +442,7 @@ contract SupplyChain{
                 
         require(users[msg.sender].currentQuantity>=_lotId.length);
         for(uint i = 0;i<_lotId.length;i++){
-            lots[_lotId[i]].sellingPrices.push(_price/_lotId.length);
+            lots[_lotId[i]].sellingPrices.push(_unitPrice);
             lots[_lotId[i]].productState = State.ForSale;
         }
         emit ForSale();
@@ -486,11 +486,9 @@ contract SupplyChain{
         );
     }
 
-
     function returnAllUsers() public view returns(address[] memory){
         return (
             allUserAddress
         );
-    }
-    
+    }    
 }
