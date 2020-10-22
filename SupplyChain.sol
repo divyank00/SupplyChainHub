@@ -487,24 +487,11 @@ contract SupplyChain{
         );
     }
 
+
     function returnAllUsers() public view returns(address[] memory){
         return (
             AllUserAddress
         );
     }
     
-    // function trackPrices(string memory _lotId) public view returns(uint[] memory,uint[] memory){
-        
-    //     return (
-    //         lots[_lotId].buyingPrices,
-    //         lots[_lotId].sellingPrices
-    //     );    
-    // }
-    
-    //     function trackTxns(string memory _lotId) public view returns(string[] memory){
-        
-    //     return (
-    //         lots[_lotId].trackTxn
-    //     );    
-    // }
 }
