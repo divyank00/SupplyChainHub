@@ -383,8 +383,6 @@ contract SupplyChain{
         
         require(getUserRole(msg.sender)-getUserRole(_X_Address)==1,"You haven't paid your parent user!");
         require(_quantity<=users[users[msg.sender].parentId].currentQuantity, "Seller doesn't have enough quantity to satisfy your needs!");
-        users[msg.sender].currentQuantity+=_quantity;
-        users[users[msg.sender].parentId].currentQuantity-=_quantity;
         deal memory dealDetails = deal({
             txnHash: _txnHash,
             capacity: _quantity,
@@ -414,6 +412,8 @@ contract SupplyChain{
                 lots[_lotId[i]].currentOwner = activeDeal.buyerAddress;
                 lots[_lotId[i]].productState = State.Sold;
             }
+            users[msg.sender].currentQuantity-=_lotId.length;
+            users[activeDeal.buyerAddress].currentQuantity+=_quantity;
             emit Sold();
         }
     }
@@ -438,7 +438,7 @@ contract SupplyChain{
         emit Received();
     }
 
-    function forSaleLotByY(string[] memory _lotId, uint _price) public received(_lotId){
+    function forSaleLotByY(string[] memory _lotId, uint _unitPrice) public received(_lotId){
                 
         require(users[msg.sender].currentQuantity>=_lotId.length);
         for(uint i = 0;i<_lotId.length;i++){

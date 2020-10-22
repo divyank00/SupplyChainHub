@@ -100,6 +100,7 @@ public class MapActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         taskRunner = new TaskRunner();
         Intent intent = getIntent();
         contractAddress = intent.getStringExtra("contractAddress");
@@ -882,4 +883,9 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        this.onBackPressed();
+        return true;
+    }
 }

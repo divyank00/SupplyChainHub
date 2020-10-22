@@ -76,6 +76,7 @@ public class callFunction extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call_function);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         input = findViewById(R.id.input);
         outputResult = findViewById(R.id.output);
         call = findViewById(R.id.call);
@@ -459,4 +460,9 @@ public class callFunction extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        this.onBackPressed();
+        return true;
+    }
 }

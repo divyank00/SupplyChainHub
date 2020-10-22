@@ -287,6 +287,16 @@ public class Dashboard extends AppCompatActivity {
                         } else {
                             userParent.setText("Your " + userRoles.get(userRoleInt - 1) + ":\n" + result.getData().get(4).getValue().toString());
                             parentClick.setVisibility(View.VISIBLE);
+                            parentClick.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                    ClipData clip = ClipData.newPlainText("PublicAddress", result.getData().get(4).getValue().toString());
+                                    clipboard.setPrimaryClip(clip);
+                                    Toast.makeText(Dashboard.this, userRoles.get(userRoleInt - 1) + " Address copied to clipboard!", Toast.LENGTH_SHORT).show();
+
+                                }
+                            });
                             parentClick.setOnLongClickListener(new View.OnLongClickListener() {
                                 @Override
                                 public boolean onLongClick(View v) {

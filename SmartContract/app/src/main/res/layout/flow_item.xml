@@ -27,9 +27,9 @@
     <ImageView
         android:id="@+id/downwArrow"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="-18dp"
+        android:layout_marginTop="0dp"
         android:layout_below="@id/card"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:src="@drawable/ic_baseline_arrow_downward_24" />
 </RelativeLayout>
