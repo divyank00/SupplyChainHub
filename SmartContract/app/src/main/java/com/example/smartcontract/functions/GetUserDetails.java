@@ -111,7 +111,13 @@ public class GetUserDetails extends AppCompatActivity {
                     currentQuantity.setVisibility(View.GONE);
                 } else {
                     error.setVisibility(View.GONE);
-                    userRole.setText("Role: " + userRoles.get(userRoleInt));
+                    if (address.equals(ownerAddress)) {
+                        if (userRoleInt == 0)
+                            userRole.setText("Role: " + userRoles.get(userRoleInt));
+                        else
+                            userRole.setText("Role: " + userRoles.get(0)+ "/" +userRoles.get(userRoleInt));
+                    } else
+                        userRole.setText("Role: " + userRoles.get(userRoleInt));
                     userRole.setVisibility(View.VISIBLE);
                     if (result.getData().get(1).getValue().toString().isEmpty()) {
                         name.setVisibility(View.GONE);
@@ -139,7 +145,14 @@ public class GetUserDetails extends AppCompatActivity {
                         if (childAdd.isEmpty()) {
                             childAddresses.setVisibility(View.GONE);
                         } else {
-                            String text = userRoles.get(userRoleInt + 1) + "s:\n";
+                            String text = "";
+                            if (address.equals(ownerAddress)) {
+                                if (userRoleInt == 0)
+                                    text = userRoles.get(userRoleInt + 1) + "s:\n";
+                                else
+                                    text = userRoles.get(userRoleInt )+"s/"+ userRoles.get(userRoleInt + 1) + "s:\n";
+                            } else
+                                text = userRoles.get(userRoleInt + 1) + "s:\n";
                             String[] arr = childAdd.split(",");
                             for (int i = 0; i < arr.length - 1; i++) {
                                 text += arr[i].trim() + ",\n";
@@ -240,7 +253,7 @@ public class GetUserDetails extends AppCompatActivity {
                     result = new Object(false, null, ethCall.getRevertReason() != null ? ethCall.getRevertReason() : "Something went wrong!");
                 }
             } catch (Exception e) {
-                result = new Object(false,null,e.toString());
+                result = new Object(false, null, e.toString());
                 Log.d("Address Error: ", e.toString());
                 e.printStackTrace();
             }

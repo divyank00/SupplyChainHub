@@ -356,7 +356,7 @@ public class Dashboard extends AppCompatActivity {
                         }
                     }));
                     if (userRoleInt == 1) {
-                        listenerModelList.add(new ListenerModel("Add & Pack Lots", "You have to add the lots which have just been made and update once they are packed!", new View.OnClickListener() {
+                        listenerModelList.add(new ListenerModel("Add & Pack Lots", "You have to add the lots which have been made, update them once they are packed & put on sale for your " + userRoles.get(2) + "!", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), MakePackLot.class);

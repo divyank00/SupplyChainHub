@@ -41,6 +41,7 @@ import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -69,10 +70,10 @@ public class MakePackLot extends AppCompatActivity {
 
     String contractAddress;
     TaskRunner taskRunner;
-    EditText lotIdMade, productIds, lotIdPack;
-    Button made, pack;
-    ImageView lotIdIV, productIdsIV, lotIdPackIV;
-    private IntentIntegrator qrScanLotId, qrScanProductIds, qrScanLotIdPack;
+    EditText lotIdMade, productIds, lotIdPack, lotIdsSale, unitPrice;
+    Button made, pack, sale;
+    ImageView lotIdIV, productIdsIV, lotIdPackIV, lotIdsSaleIV;
+    private IntentIntegrator qrScanLotId, qrScanProductIds, qrScanLotIdPack, qrScanLotIdsSale;
     boolean trackByProductId, trackByLotId;
 
     @Override
@@ -91,12 +92,17 @@ public class MakePackLot extends AppCompatActivity {
         lotIdPack = findViewById(R.id.lotIdPack);
         made = findViewById(R.id.button);
         pack = findViewById(R.id.packBtn);
+        sale = findViewById(R.id.putBtn);
         lotIdIV = findViewById(R.id.scanLotId);
+        lotIdsSale = findViewById(R.id.lotIdsSale);
+        unitPrice = findViewById(R.id.unitPrice);
         productIdsIV = findViewById(R.id.scanProductIds);
         lotIdPackIV = findViewById(R.id.scanLotIdPack);
+        lotIdsSaleIV = findViewById(R.id.lotIdsSaleIV);
         qrScanLotId = new IntentIntegrator(this).setRequestCode(1);
         qrScanProductIds = new IntentIntegrator(this).setRequestCode(2);
         qrScanLotIdPack = new IntentIntegrator(this).setRequestCode(3);
+        qrScanLotIdsSale = new IntentIntegrator(this).setRequestCode(4);
         lotIdIV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,6 +119,12 @@ public class MakePackLot extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 qrScanLotIdPack.initiateScan();
+            }
+        });
+        lotIdsSaleIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                qrScanLotIdsSale.initiateScan();
             }
         });
         made.setOnClickListener(new View.OnClickListener() {
@@ -137,6 +149,20 @@ public class MakePackLot extends AppCompatActivity {
                     lotIdPack.setError("Mandatory Field");
                 } else {
                     executePackLotGas(lotIdPack.getText().toString().trim());
+                }
+            }
+        });
+        sale.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                lotIdsSale.setError(null);
+                unitPrice.setError(null);
+                if (lotIdsSale.getText().toString().trim().isEmpty()) {
+                    lotIdsSale.setError("Mandatory Field");
+                } else if(unitPrice.getText().toString().trim().isEmpty()){
+                    unitPrice.setError("Mandatory Field");
+                }else {
+                    executeForSaleLotByManufacturerGas(lotIdsSale.getText().toString().trim(),unitPrice.getText().toString());
                 }
             }
         });
@@ -177,6 +203,25 @@ public class MakePackLot extends AppCompatActivity {
                 String contents = data.getStringExtra("SCAN_RESULT");
                 lotIdPack.setText(contents);
                 lotIdPack.setSelection(lotIdPack.getText().length());
+            } else {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            }
+        }
+        if (requestCode == 4) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                String lotIdsET = lotIdsSale.getText().toString();
+                if (lotIdsET.trim().isEmpty()) {
+                    lotIdsET += contents;
+                } else {
+                    if (lotIdsET.trim().charAt(lotIdsET.trim().length() - 1) == ',') {
+                        lotIdsET += contents;
+                    } else {
+                        lotIdsET += ", " + contents;
+                    }
+                }
+                lotIdsSale.setText(lotIdsET);
+                lotIdsSale.setSelection(productIds.getText().length());
             } else {
                 Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
             }
@@ -283,6 +328,60 @@ public class MakePackLot extends AppCompatActivity {
                 .setDimAmount(0.5f)
                 .show();
         taskRunner.executeAsync(new packLot(lotId), (result) -> {
+            progressHUD.dismiss();
+            if (result.isStatus()) {
+                showTransactionDialog(true, result.getData(), null);
+            } else {
+                showTransactionDialog(false, result.getData(), result.getErrorMsg());
+            }
+        });
+    }
+
+    private void executeForSaleLotByManufacturerGas(String lotIds, String price) {
+        final KProgressHUD progressHUD = KProgressHUD.create(this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
+        taskRunner.executeAsync(new forSaleLotByManufacturerGas(lotIds, price), (result) -> {
+            progressHUD.dismiss();
+            if (result.isStatus() && !result.getData().isEmpty()) {
+                MaterialDialog mDialog = new MaterialDialog.Builder(this)
+                        .setTitle("Confirm Transaction?")
+                        .setMessage(result.getData() + " will be deducted!")
+                        .setCancelable(false)
+                        .setPositiveButton("Confirm", new MaterialDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                dialogInterface.dismiss();
+                                executeForSaleLotByManufacturer(lotIds, price);
+                            }
+                        })
+                        .setNegativeButton("Cancel", new MaterialDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                dialogInterface.dismiss();
+                            }
+                        })
+                        .build();
+                mDialog.show();
+            } else {
+                Toast.makeText(this, result.getErrorMsg(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void executeForSaleLotByManufacturer(String lotIds, String price) {
+        final KProgressHUD progressHUD = KProgressHUD.create(this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
+        taskRunner.executeAsync(new forSaleLotByManufacturer(lotIds, price), (result) -> {
             progressHUD.dismiss();
             if (result.isStatus()) {
                 showTransactionDialog(true, result.getData(), null);
@@ -557,6 +656,128 @@ public class MakePackLot extends AppCompatActivity {
                     result = new WriteObject(true, txHash, null);
                 } else {
                     Log.d("Address Revert: ", txReceipt.getRevertReason());
+                    result = new WriteObject(false, txHash, txReceipt.getRevertReason());
+                }
+            } catch (Exception e) {
+                result = new WriteObject(false, null, e.getMessage());
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class forSaleLotByManufacturerGas implements Callable<WriteObject> {
+
+        String lotIds, price;
+
+        public forSaleLotByManufacturerGas(String lotIds, String price) {
+            this.lotIds = lotIds;
+            this.price = price;
+        }
+
+        @Override
+        public WriteObject call() {
+            WriteObject result = new WriteObject();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
+
+                // Load an account
+                String pk = Data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                List<Utf8String> list = new ArrayList<>();
+                String[] arr = lotIds.split(",");
+                for (int j = 0; j < arr.length; j++) {
+                    if (!arr[j].trim().isEmpty())
+                        list.add(new Utf8String(arr[j].trim()));
+                }
+                inputAsync.add(new DynamicArray(Utf8String.class, list));
+                inputAsync.add(new Uint256(Long.parseLong(price)));
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+
+                Function function = new Function("forSaleLotByManufacturer", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String txData = FunctionEncoder.encode(function);
+
+                Transaction t = Transaction.createEthCallTransaction(credentials.getAddress(), contractAddress, txData);
+                BigInteger val = web3j.ethEstimateGas(t).send().getAmountUsed();
+                Log.d("Address Gas Used: ", val + "");
+                Log.d("Address Gas Price: ", "" + 4.1 * 1e-9 + " Ether");
+                Double txnFee = val.intValue() * 4.1 * 1e-9;
+                DecimalFormat df = new DecimalFormat("#.##########");
+                df.setRoundingMode(RoundingMode.CEILING);
+                result = new WriteObject(true, df.format(txnFee) + " Ether", null);
+            } catch (Exception e) {
+                result = new WriteObject(false, null, "You don't have required permissions!");
+                Log.d("Address Error: ", e.toString());
+                e.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    class forSaleLotByManufacturer implements Callable<WriteObject> {
+
+        String lotIds, price;
+
+        public forSaleLotByManufacturer(String lotIds, String price) {
+            this.lotIds = lotIds;
+            this.price = price;
+        }
+
+        @Override
+        public WriteObject call() {
+            WriteObject result = new WriteObject();
+            try {
+                // Connect to the node
+                System.out.println("Connecting to Ethereum ...");
+                Web3j web3j = Web3j.build(new HttpService(getString(R.string.endpoint)));
+
+                // Load an account
+                String pk = Data.privateKey;
+                Credentials credentials = Credentials.create(pk);
+
+                // Contract and functions
+                List<Type> inputAsync = new ArrayList<>();
+                List<Utf8String> list = new ArrayList<>();
+                String[] arr = lotIds.split(",");
+                for (int j = 0; j < arr.length; j++) {
+                    if (!arr[j].trim().isEmpty())
+                        list.add(new Utf8String(arr[j].trim()));
+                }
+                inputAsync.add(new DynamicArray(Utf8String.class, list));
+                inputAsync.add(new Uint256(Long.parseLong(price)));
+                List<TypeReference<?>> outputAsync = new ArrayList<>();
+
+                Function function = new Function("forSaleLotByManufacturer", // Function name
+                        inputAsync,  // Function input parameters
+                        outputAsync); // Function returned parameters
+
+                Log.d("Address Output: ", outputAsync.size() + "");
+                String txData = FunctionEncoder.encode(function);
+                TransactionManager txManager = new FastRawTransactionManager(web3j, credentials);
+                String txHash = txManager.sendTransaction(
+                        DefaultGasProvider.GAS_PRICE,
+                        DefaultGasProvider.GAS_LIMIT,
+                        contractAddress,
+                        txData,
+                        BigInteger.ZERO).getTransactionHash();
+
+                TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
+                        web3j,
+                        TransactionManager.DEFAULT_POLLING_FREQUENCY,
+                        TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH);
+                TransactionReceipt txReceipt = receiptProcessor.waitForTransactionReceipt(txHash);
+                if (txReceipt.isStatusOK()) {
+                    result = new WriteObject(true, txHash, null);
+                } else {
                     result = new WriteObject(false, txHash, txReceipt.getRevertReason());
                 }
             } catch (Exception e) {
