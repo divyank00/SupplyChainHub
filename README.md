@@ -16,6 +16,7 @@ This is built on Matic Network for faster, scalable transactions.
 
 This brings 100% transparency on trading of goods by broadcasting the quantity with every entity in the supply chain and the transactions they have made for trading. Even the end user, i.e the customer, can get all information for that product with just scanning the product.
 
-![Logo](/Images/logo.png)
-![Website](/Images/web.png)
+<p align="center">
+  <img src="/Images/logo.png" />
+</p>![Website](/Images/web.png)
 ![Android App](/Images/android.jpg)
