@@ -1,3 +1,7 @@
+<p align="left">
+  <img src="/Images/logo.png" alt="Logo" width="200" height="200"/>
+</p>
+
 ## SupplyChainHub
 
 This is a system which automates building of smart contract for any type of product, at minimal cost.
@@ -16,9 +20,6 @@ This is built on Matic Network for faster, scalable transactions.
 
 This brings 100% transparency on trading of goods by broadcasting the quantity with every entity in the supply chain and the transactions they have made for trading. Even the end user, i.e the customer, can get all information for that product with just scanning the product.
 
-<p align="center">
-  <img src="/Images/logo.png" alt="Logo" width="200" height="200"/>
-</p>
 <p align="center">
   <img src="/Images/web.png" alt="Website" />
 </p>
