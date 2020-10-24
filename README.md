@@ -1,6 +1,4 @@
-<p align="left">
-  <img src="/Images/logo.png" alt="Logo" width="200" height="200"/>
-</p>
+<img align='left' src="/Images/logo.png" alt="Logo" width="50" height="50"/>
 
 ## SupplyChainHub
 
