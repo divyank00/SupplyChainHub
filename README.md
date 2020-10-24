@@ -1,8 +1,5 @@
-<h1> <img src="/Images/logo.png"
-  width="50"
-  height="50"
-  style="float:left;">
-  
+<img align="left" width="50" height="50" src="/Images/logo.png" alt="Logo">
+
 ## SupplyChainHub
 
 A system which automates building of smart contract for any type of product, at minimal cost.
