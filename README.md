@@ -18,5 +18,6 @@ This brings 100% transparency on trading of goods by broadcasting the quantity w
 
 <p align="center">
   <img src="/Images/logo.png" />
-</p>![Website](/Images/web.png)
+</p>
+![Website](/Images/web.png)
 ![Android App](/Images/android.jpg)
