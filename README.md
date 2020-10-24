@@ -1,4 +1,4 @@
-<img align='left' src="/Images/logo.png" alt="Logo" width="50" height="50"/>
+<img align='left' src="/Images/logo.png" alt="Logo" width="25" height="25"/>
 
 ## SupplyChainHub
 
@@ -18,7 +18,7 @@ The project is built on Matic Network for faster, scalable transactions.
 
 This brings 100% transparency on trading of goods by broadcasting the quantity with every entity in the supply chain and the transactions they have made for trading. Even the end user, i.e the customer, can get all information for that product with just scanning the product.
 
-The apk to the mobile application can be found [here](/SupplyChainHub.apk)
+The apk to the mobile application can be found [here](/SupplyChainHub.apk)!
 
 <p align="center">
   <img src="/Images/web.png" alt="Website" />
