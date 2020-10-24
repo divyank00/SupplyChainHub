@@ -1,5 +1,7 @@
-<img align='left' src="/Images/logo.png" alt="Logo" width="25" height="25"/>
-
+<h1> <img src="/Images/logo.png"
+  width="50"
+  height="50"
+  style="float:left;">
 ## SupplyChainHub
 
 A system which automates building of smart contract for any type of product, at minimal cost.
@@ -22,6 +24,12 @@ The apk to the mobile application can be found [here](/SupplyChainHub.apk)!
 
 <p align="center">
   <img src="/Images/web.png" alt="Website" />
+</p>
+<p align="center">
+  <img src="/Images/supplyChain.png" alt="Supply Chain" />
+</p>
+<p align="center">
+  <img src="/Images/chat.jpg" alt="Chat" />
 </p>
 <p align="center">
   <img src="/Images/android.jpg" alt="Android App" />
