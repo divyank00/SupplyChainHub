@@ -10,8 +10,9 @@ import InfoBar from "../InfoBar/InfoBar";
 import Input from "../Input/Input";
 import Messages from "../Messages/Messages";
 import "./Chat.css";
-
-const ceramic = new CeramicClient();
+import firebase from "../../../firebase";
+import { defaultseed } from "../../../constants/keys/IdentityWalletSeed";
+export const ceramic = new CeramicClient();
 
 let socket;
 
@@ -22,27 +23,73 @@ const Chat = (props) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+
   let location = useLocation();
 
   const createDoc = async (msg) => {
-    const seed = u8a.fromString(
-      "8e641c0dc77f6916cc7f743dad774cdf9f6f7bcb880b11395149dd878377cd398650bbfd4607962b49953c87da4d7f3ff247ed734b06f96bdd69479377bc612b",
-      "base16"
-    );
     try {
-      const idw = await IdentityWallet.create({
-        getPermission: async () => [],
-        seed: seed,
+      const newMessage = await ceramic.createDocument("tile", {
+        content: {
+          title: "Message",
+          desc: msg,
+          user: localStorage.getItem("owner_name").trim().toLowerCase(),
+        },
       });
-      await ceramic.setDIDProvider(idw.getDidProvider());
-      const doc1 = await ceramic.createDocument("tile", {
-        content: { title: "Client Document", desc: msg },
-      });
+      const docRef = firebase
+        .firestore()
+        .collection("Chat")
+        .doc(room.replace(/ /g, ""));
 
-      return doc1.id;
+      const doc = await docRef.get();
+
+      let docData = newMessage._state.content;
+      docData.text = newMessage.id;
+
+      if (!doc.data()) {
+        const data = { msg: [JSON.stringify(docData)] };
+        await firebase
+          .firestore()
+          .collection("Chat")
+          .doc(room.replace(/ /g, ""))
+          .set(data);
+      } else {
+        let newMsg = [...doc.data().msg, JSON.stringify(docData)];
+        await docRef.update({
+          msg: newMsg,
+        });
+      }
+      return newMessage.id;
     } catch (err) {
       alert(err);
     }
+  };
+
+  const initCeramic = async () => {
+    const seed = u8a.fromString(defaultseed, "base16");
+    const idw = await IdentityWallet.create({
+      getPermission: async () => [],
+      seed: seed,
+    });
+    setLoading(true);
+    await ceramic.setDIDProvider(idw.getDidProvider());
+    setLoading(false);
+  };
+
+  const getMessages = async () => {
+    const { room } = queryString.parse(location.search);
+    const docRef = firebase
+      .firestore()
+      .collection("Chat")
+      .doc(room.replace(/ /g, ""));
+
+    const doc = await docRef.get();
+    if (!doc.data()) {
+      setMessages([]);
+      return;
+    }
+    doc.data().msg.forEach((item) => {
+      setMessages((messages) => [...messages, JSON.parse(item)]);
+    });
   };
 
   useEffect(() => {
@@ -52,10 +99,12 @@ const Chat = (props) => {
     setName(name);
     socket.emit("join", { name, room }, (error) => {
       if (error) {
+        if (error === "Username is taken.") return;
         alert(error);
       }
     });
-  }, [location]);
+    initCeramic();
+  }, [location.search]);
 
   useEffect(() => {
     socket.on("message", (message) => {
@@ -65,6 +114,7 @@ const Chat = (props) => {
     socket.on("roomData", ({ users }) => {
       setUsers(users);
     });
+    getMessages();
   }, []);
 
   const docId = async (msg) => {
@@ -99,7 +149,6 @@ const Chat = (props) => {
           loading={loading}
         />
       </motion.div>
-      {/* <TextContainer users={users} /> */}
     </div>
   );
 };

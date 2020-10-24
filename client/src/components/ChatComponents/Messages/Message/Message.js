@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import CeramicClient from "@ceramicnetwork/ceramic-http-client";
 import "./Message.css";
 import { motion } from "framer-motion";
-
-const ceramic = new CeramicClient();
+import { ceramic } from "../../Chat/Chat";
 
 const Message = ({ message: { text, user }, name }) => {
   const [textContent, setTextContent] = useState("Loading..");
