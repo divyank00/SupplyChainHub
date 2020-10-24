@@ -2,6 +2,7 @@
   width="50"
   height="50"
   style="float:left;">
+  
 ## SupplyChainHub
 
 A system which automates building of smart contract for any type of product, at minimal cost.
