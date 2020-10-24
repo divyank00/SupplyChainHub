@@ -18,6 +18,6 @@ This brings 100% transparency on trading of goods by broadcasting the quantity w
 
 ![Logo](/Images/logo.png)
 ![Website](/Images/web.png)
-![Tracking](/Images/track_1.png)
-![Tracking](/Images/track_2.png)
-![User Details](/Images/user_detail.png)
+![Tracking](/Images/track_1.jpg)
+![Tracking](/Images/track_2.jpg)
+![User Details](/Images/user_detail.jpg)
