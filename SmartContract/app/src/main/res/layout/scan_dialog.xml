@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/profile_dialog">
 
     <LinearLayout
@@ -38,7 +39,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:padding="5dp"
-                    android:src="@drawable/barcode"
+                    android:src="@drawable/barcode_black"
                     android:tooltipText="Scan QR" />
 
                 <EditText
@@ -116,7 +117,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:padding="5dp"
-                    android:src="@drawable/barcode"
+                    android:src="@drawable/barcode_black"
                     android:tooltipText="Scan QR" />
 
                 <EditText
@@ -131,6 +132,36 @@
             </RelativeLayout>
 
         </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:id="@+id/productNames">
+
+        <TextView
+            android:id="@+id/tV"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Product Name?"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:overScrollMode="never"
+            app:layout_constraintTop_toBottomOf="@id/tV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:maxHeight="150dp"
+            android:id="@+id/productNamesRV"
+            tools:listitem="@layout/item_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <Button
             android:id="@+id/button"

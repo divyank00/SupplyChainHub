@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MakePackLot extends AppCompatActivity {
 
-    String contractAddress;
+    String contractAddress, productName;
     TaskRunner taskRunner;
     EditText lotIdMade, productIds, lotIdPack, lotIdsSale, unitPrice;
     Button made, pack, sale;
@@ -84,6 +84,7 @@ public class MakePackLot extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
         contractAddress = intent.getStringExtra("contractAddress");
+        productName = intent.getStringExtra("productName");
         trackByProductId = intent.getBooleanExtra("trackByProductId", true);
         trackByLotId = intent.getBooleanExtra("trackByLotId", true);
         taskRunner = new TaskRunner();
@@ -508,12 +509,14 @@ public class MakePackLot extends AppCompatActivity {
                 inputAsync.add(new DynamicArray(Utf8String.class, list));
                 List<TypeReference<?>> outputAsync = new ArrayList<>();
 
-                Map<String, String> map = new HashMap<>();
+                Map<String, Map<String,String>> map = new HashMap<>();
+                Map<String, String> map1 = new HashMap<>();
+                map1.put(productName, contractAddress);
                 if (trackByLotId)
-                    map.put(lotId, contractAddress);
+                    map.put(lotId, map1);
                 if (trackByProductId) {
                     for (String prodId : firebaseList) {
-                        map.put(prodId, contractAddress);
+                        map.put(prodId, map1);
                     }
                 }
 

@@ -11,17 +11,8 @@ contract SupplyChain{
     mapping(string => deal) deals;          //mapping of txnHash with struct of deal
     address[] allUserAddress;
 
-    enum State{
-        Assembling,
-        Made,
-        Packed,
-        ForSale,
-        Sold,
-        Shipped,
-        Received
-    }
     
-    State constant defaultState = State.Assembling;
+    string[] State = ["Assembling","Made","Packed","ForSale","Sold","Shipped","Received"];
     
     string[] UserRoles = ["Owner", "Manufacturer", "Distributor", "Retailer", "Customer"];
     
@@ -53,7 +44,7 @@ contract SupplyChain{
         string lotId;
         address currentOwner;
         string[] productIds;
-        State productState;
+        uint productState;
         address[] trackUser;
         uint[] buyingPrices;
         uint[] sellingPrices;
@@ -71,12 +62,8 @@ contract SupplyChain{
         uint finalSellingPrice;
     }
     
-    event Made(string lotId);
-    event Packed();
-    event ForSale();
-    event Sold();
-    event Shipped();
-    event Received();
+    event StateModified(string[] lotId);
+
     event TxAdded();
     
     event OwnerGivenNextRole();
@@ -88,7 +75,7 @@ contract SupplyChain{
     event PaymentSuccessful();
     event DealFailed(address buyerAddress);
     
-    constructor(string memory _companyName, string memory _productName, string memory _productCategory, string memory _name, string memory _latitude, string memory _longitude) public {
+    constructor(string memory _companyName, string memory _productName, string memory _productCategory, string memory _name, string memory _latitude, string memory _longitude, string[] memory _UserRoles, string[] memory _State) public {
         require(bytes(_companyName).length!=0 && bytes(_productName).length!=0 && bytes(_name).length!=0 && bytes(_latitude).length!=0 && bytes(_longitude).length!=0,"All parameters are compulsory!");
         companyName = _companyName;
         productName = _productName;
@@ -107,6 +94,8 @@ contract SupplyChain{
         });
         setUser(msg.sender);
         users[msg.sender] = owner;
+        UserRoles = _UserRoles;
+        State = _State;
     }
     
     modifier onlyContractOwner{
@@ -121,62 +110,12 @@ contract SupplyChain{
         _;
     }
     
-    modifier onlyDistributor{
-       
-       require(users[msg.sender].role == 2);
-       _;
-    }
-
-    modifier onlyRetailer{
-       
-       require(users[msg.sender].role == 3);
-       _;
-    }
     
-    // Define a modifier that checks if the state of a lot is Made
-    modifier made(string memory _lotId) {
-        
-        require(lots[_lotId].productState == State.Made);
-        _;
-    }
-  
-    // Define a modifier that checks if the state of multiple lots is Packed
-    modifier packed(string[] memory _lotId) {
+    // Define a modifier that checks if the state of a lot is previous state
+    modifier validState(string[] memory _lotId, uint index) {
         
         for(uint i=0; i<_lotId.length;i++)
-            require(lots[_lotId[i]].productState == State.Packed);
-        _;
-    }
-
-    // Define a modifier that checks if the state of multiple lots is ForSale
-    modifier forSale(string[] memory _lotId) {
-
-        for(uint i=0; i<_lotId.length;i++)
-            require(lots[_lotId[i]].productState == State.ForSale);
-        _;
-    }
-
-    // Define a modifier that checks if the state of multiple lots is Sold
-    modifier sold(string[] memory _lotId) {
-
-        for(uint i=0; i<_lotId.length;i++)
-            require(lots[_lotId[i]].productState == State.Sold);
-        _;
-    }
-  
-    // Define a modifier that checks if the state of multiple lots is Shipped
-    modifier shipped(string[] memory _lotId) {
-
-        for(uint i=0; i<_lotId.length;i++)
-            require(lots[_lotId[i]].productState == State.Shipped);
-        _;
-    }
-
-    // Define a modifier that checks if the state of multiple lots is Received
-    modifier received(string[] memory _lotId) {
-
-        for(uint i=0; i<_lotId.length;i++)
-            require(lots[_lotId[i]].productState == State.Received);
+            require(lots[_lotId[i]].productState == index);
         _;
     }
 
@@ -190,6 +129,10 @@ contract SupplyChain{
     
     function getUserRolesArray() public view returns(string[] memory){
         return UserRoles;
+    }
+    
+    function getStateArray() public view returns(string[] memory){
+        return State;
     }
 
     function getOwner() public view returns(address){
@@ -345,7 +288,7 @@ contract SupplyChain{
             lotId : _lotId,
             currentOwner : msg.sender,
             productIds : _productIds,
-            productState : State.Made,
+            productState : 1,
             trackUser : _trackUser,
             buyingPrices: _buyingPrices,
             sellingPrices: _sellingPrices,
@@ -363,20 +306,22 @@ contract SupplyChain{
         emit LotMade(_lotId);
     }
     
-    function packLot(string memory _lotId) public onlyManufacturer made(_lotId){
+    function packLot(string[] memory _lotId) public onlyManufacturer validState(_lotId,1){
         
-        lots[_lotId].productState = State.Packed;
-        emit Packed();
+        for(uint i = 0;i<_lotId.length;i++){
+            lots[_lotId[i]].productState = 2;
+        }
+        emit StateModified(_lotId);
     }
     
-    function forSaleLotByManufacturer(string[] memory _lotId, uint _unitPrice) public onlyManufacturer packed(_lotId){
+    function forSaleLotByManufacturer(string[] memory _lotId, uint _unitPrice) public onlyManufacturer validState(_lotId,2){
         
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices.push(_unitPrice);
-            lots[_lotId[i]].productState = State.ForSale;
+            lots[_lotId[i]].productState = 3;
         }
         users[msg.sender].currentQuantity+=_lotId.length;
-        emit ForSale();
+        emit StateModified(_lotId);
     }
     
     function payFromYToX( string memory _txnHash, uint _quantity, uint _totalBuyingPrice, address _X_Address) public{
@@ -395,7 +340,7 @@ contract SupplyChain{
         emit PaymentSuccessful();
     }
 
-    function sellLotToY(string memory _txnHash, uint _totalSellingPrice, string[] memory _lotId) public forSale(_lotId){
+    function sellLotToY(string memory _txnHash, uint _totalSellingPrice, string[] memory _lotId) public validState(_lotId,3){
         
         deal storage activeDeal = deals[_txnHash];
         require(msg.sender==activeDeal.sellerAddress,"You don't have required permission!");
@@ -409,43 +354,43 @@ contract SupplyChain{
             deals[_txnHash] = activeDeal;
             for(uint i = 0;i<_lotId.length;i++){
                 lots[_lotId[i]].buyingPrices.push(activeDeal.buyingPrice/activeDeal.capacity);
+                lots[_lotId[i]].trackTxn.push(_txnHash);
                 lots[_lotId[i]].currentOwner = activeDeal.buyerAddress;
-                lots[_lotId[i]].productState = State.Sold;
+                lots[_lotId[i]].productState = 4;
             }
             users[msg.sender].currentQuantity-=activeDeal.capacity;
             users[activeDeal.buyerAddress].currentQuantity+=activeDeal.capacity;
-            emit Sold();
         }
+        emit StateModified(_lotId);
     }
     
-    function shipLotFromXToY(string memory _txnHash, string[] memory _lotId) public validDeal(_txnHash) sold(_lotId){
+    function shipLotFromXToY(string memory _txnHash, string[] memory _lotId) public validDeal(_txnHash) validState(_lotId,4){
          
         require(msg.sender==deals[_txnHash].sellerAddress);
         for(uint i = 0;i<_lotId.length;i++){
-            lots[_lotId[i]].trackUser.push(deals[_txnHash].buyerAddress);
-            lots[_lotId[i]].trackTxn.push(_txnHash);
-            lots[_lotId[i]].productState = State.Shipped;
+            lots[_lotId[i]].productState = 5;
         }
-        emit Shipped();
+        emit StateModified(_lotId);
     }
 
-    function receivedLotByY(string memory _txnHash, string[] memory _lotId) public validDeal(_txnHash) shipped(_lotId){
+    function receivedLotByY(string memory _txnHash, string[] memory _lotId) public validDeal(_txnHash) validState(_lotId,5){
 
         require(msg.sender==deals[_txnHash].buyerAddress);
         for(uint i = 0;i<_lotId.length;i++){
-            lots[_lotId[i]].productState = State.Received;
+            lots[_lotId[i]].trackUser.push(deals[_txnHash].buyerAddress);
+            lots[_lotId[i]].productState = 6;
         }
-        emit Received();
+        emit StateModified(_lotId);
     }
 
-    function forSaleLotByY(string[] memory _lotId, uint _unitPrice) public received(_lotId){
+    function forSaleLotByY(string[] memory _lotId, uint _unitPrice) public validState(_lotId,6){
                 
         require(users[msg.sender].currentQuantity>=_lotId.length);
         for(uint i = 0;i<_lotId.length;i++){
             lots[_lotId[i]].sellingPrices.push(_unitPrice);
-            lots[_lotId[i]].productState = State.ForSale;
+            lots[_lotId[i]].productState = 3;
         }
-        emit ForSale();
+        emit StateModified(_lotId);
     }
 
     function setProductFinalSellingPrice(string memory _productId, uint sellingPrice) public {

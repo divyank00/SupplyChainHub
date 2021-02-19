@@ -22,12 +22,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ContractModel;
 import com.example.smartcontract.models.ObjectModel;
+import com.example.smartcontract.models.SingleProductModel;
 import com.example.smartcontract.viewModel.AllContractsViewModel;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -60,13 +64,14 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class AllContracts extends AppCompatActivity {
+public class AllContracts extends AppCompatActivity implements AllProductsAdapter.OnClick {
 
     RecyclerView rV;
     AllContractsAdapter adapter;
@@ -295,6 +300,9 @@ public class AllContracts extends AppCompatActivity {
             ImageView scanLotId = dialog.findViewById(R.id.scanLotId);
             productId = dialog.findViewById(R.id.productId);
             lotId = dialog.findViewById(R.id.lotId);
+            ConstraintLayout productNames = dialog.findViewById(R.id.productNames);
+            RecyclerView productNamesRV = dialog.findViewById(R.id.productNamesRV);
+            productNamesRV.setLayoutManager(new LinearLayoutManager(this));
             Button track = dialog.findViewById(R.id.button);
             ProgressBar trackLoader = dialog.findViewById(R.id.trackLoader);
             qrScanProductId = new IntentIntegrator(this).setRequestCode(8);
@@ -322,17 +330,24 @@ public class AllContracts extends AppCompatActivity {
                     } else if (!productId.getText().toString().trim().isEmpty()) {
                         track.setVisibility(View.GONE);
                         trackLoader.setVisibility(View.VISIBLE);
-                        productLotViewModel.getAddress(productId.getText().toString().trim()).observe(AllContracts.this, new Observer<ObjectModel>() {
+                        String _productId = productId.getText().toString().trim();
+                        productLotViewModel.getAddress(_productId).observe(AllContracts.this, new Observer<ObjectModel>() {
                             @Override
                             public void onChanged(ObjectModel objectModel) {
                                 if (objectModel.isStatus()) {
-                                    String contractAddress = (String) objectModel.getObj();
-                                    Intent intent = new Intent(AllContracts.this, MapActivity.class);
-                                    intent.putExtra("contractAddress", contractAddress);
-                                    intent.putExtra("productId", productId.getText().toString().trim());
-                                    intent.putExtra("isPermitted", true);
-                                    startActivity(intent);
+                                    Map<String, String> contractAddress = (Map<String, String>) objectModel.getObj();
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    for (Map.Entry<String, String> entry : contractAddress.entrySet()) {
+                                        products.add(new SingleProductModel(entry.getKey(), entry.getValue()));
+                                    }
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(AllContracts.this, products, AllContracts.this, null, _productId);
+                                    productNamesRV.setAdapter(productsAdapter);
+                                    productNames.setVisibility(View.VISIBLE);
                                 } else {
+                                    productNames.setVisibility(View.GONE);
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(AllContracts.this, products, AllContracts.this, null, _productId);
+                                    productNamesRV.setAdapter(productsAdapter);
                                     Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                                 trackLoader.setVisibility(View.GONE);
@@ -342,18 +357,24 @@ public class AllContracts extends AppCompatActivity {
                     } else if (!lotId.getText().toString().trim().isEmpty()) {
                         track.setVisibility(View.GONE);
                         trackLoader.setVisibility(View.VISIBLE);
-                        productLotViewModel.getAddress(lotId.getText().toString().trim()).observe(AllContracts.this, new Observer<ObjectModel>() {
+                        String _lotId = lotId.getText().toString().trim();
+                        productLotViewModel.getAddress(_lotId).observe(AllContracts.this, new Observer<ObjectModel>() {
                             @Override
                             public void onChanged(ObjectModel objectModel) {
                                 if (objectModel.isStatus()) {
-                                    String contractAddress = (String) objectModel.getObj();
-                                    Intent intent = new Intent(AllContracts.this, MapActivity.class);
-                                    intent.putExtra("contractAddress", contractAddress);
-                                    intent.putExtra("lotId", lotId.getText().toString().trim());
-                                    intent.putExtra("isPermitted", true);
-                                    startActivity(intent);
-
+                                    Map<String, String> contractAddress = (Map<String, String>) objectModel.getObj();
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    for (Map.Entry<String, String> entry : contractAddress.entrySet()) {
+                                        products.add(new SingleProductModel(entry.getKey(), entry.getValue()));
+                                    }
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(AllContracts.this, products, AllContracts.this, _lotId, null);
+                                    productNamesRV.setAdapter(productsAdapter);
+                                    productNames.setVisibility(View.VISIBLE);
                                 } else {
+                                    productNames.setVisibility(View.GONE);
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(AllContracts.this, products, AllContracts.this, _lotId, null);
+                                    productNamesRV.setAdapter(productsAdapter);
                                     Toast.makeText(AllContracts.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                                 trackLoader.setVisibility(View.GONE);
@@ -373,6 +394,18 @@ public class AllContracts extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void click(String contractAddress, String lotId, String productId) {
+        Intent intent = new Intent(AllContracts.this, MapActivity.class);
+        intent.putExtra("contractAddress", contractAddress);
+        if (productId != null)
+            intent.putExtra("productId", productId);
+        else
+            intent.putExtra("lotId", lotId);
+        intent.putExtra("isPermitted", true);
+        startActivity(intent);
     }
 
     public static class TaskRunner {

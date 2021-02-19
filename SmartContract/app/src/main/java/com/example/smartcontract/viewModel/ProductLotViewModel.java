@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ProductLotViewModel extends ViewModel {
@@ -23,7 +24,7 @@ public class ProductLotViewModel extends ViewModel {
 
     }
 
-    public LiveData<ObjectModel> addMap(Map<String,String> newMap) {
+    public LiveData<ObjectModel> getMap() {
         userLiveData = new MutableLiveData<>();
         firebaseFirestore.collection("Products").document("AllProducts").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -31,6 +32,24 @@ public class ProductLotViewModel extends ViewModel {
                 if (task.isSuccessful() && task.getResult() != null) {
                     DocumentSnapshot ds = task.getResult();
                     Map<String,String> map = (Map<String, String>) ds.get("productIds");
+                    if (map != null) userLiveData.postValue(new ObjectModel(true,map,null));
+                    else userLiveData.postValue(new ObjectModel(true, new HashMap<String,String>(),null));
+                } else {
+                    userLiveData.postValue(new ObjectModel(false, null, task.getException().getMessage()));
+                }
+            }
+        });
+        return userLiveData;
+    }
+
+    public LiveData<ObjectModel> addMap(Map<String,Map<String,String>> newMap) {
+        userLiveData = new MutableLiveData<>();
+        firebaseFirestore.collection("Products").document("AllProducts").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    DocumentSnapshot ds = task.getResult();
+                    Map<String,Map<String,String>> map = (Map<String, Map<String,String>>) ds.get("productIds");
                     if (map != null) {
                         map.putAll(newMap);
                         ProductModel model = new ProductModel(map);
@@ -64,10 +83,10 @@ public class ProductLotViewModel extends ViewModel {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful() && task.getResult() != null) {
                     DocumentSnapshot ds = task.getResult();
-                    Map<String,String> map = (Map<String, String>) ds.get("productIds");
+                    Map<String,Map<String,String>> map = (Map<String, Map<String,String>>) ds.get("productIds");
                     if(map!=null && map.containsKey(productId)) {
-                        String contractAddress = map.get(productId);
-                        userLiveData.postValue(new ObjectModel(true, contractAddress, null));
+                        Map<String,String> contracts = map.get(productId);
+                        userLiveData.postValue(new ObjectModel(true, contracts, null));
                     }else{
                         userLiveData.postValue(new ObjectModel(false, null, "No entry found in database!"));
                     }

@@ -31,7 +31,10 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -43,6 +46,7 @@ import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ListenerModel;
 import com.example.smartcontract.models.ObjectModel;
 import com.example.smartcontract.models.SingleContractModel;
+import com.example.smartcontract.models.SingleProductModel;
 import com.example.smartcontract.oldCode.AllFunctions;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
 import com.example.smartcontract.viewModel.SingleContractViewModel;
@@ -82,13 +86,14 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class Dashboard extends AppCompatActivity {
+public class Dashboard extends AppCompatActivity implements AllProductsAdapter.OnClick{
 
     ProgressBar productDetailsLoader, userDetailsLoader;
     LinearLayout productDetails, ownerClick, userDetails, parentClick, ownerRoleLinearLayout;
@@ -361,6 +366,7 @@ public class Dashboard extends AppCompatActivity {
                             public void onClick(View v) {
                                 Intent intent = new Intent(v.getContext(), MakePackLot.class);
                                 intent.putExtra("contractAddress", contractAddress);
+                                intent.putExtra("productName", productName.getText().toString());
                                 intent.putExtra("trackByProductId", trackByProductId);
                                 intent.putExtra("trackByLotId", trackByLotId);
                                 startActivity(intent);
@@ -438,6 +444,9 @@ public class Dashboard extends AppCompatActivity {
                     public void onClick(View v) {
                         Intent intent = new Intent(v.getContext(), MakePackLot.class);
                         intent.putExtra("contractAddress", contractAddress);
+                        intent.putExtra("productName", productName.getText().toString());
+                        intent.putExtra("trackByProductId", trackByProductId);
+                        intent.putExtra("trackByLotId", trackByLotId);
                         startActivity(intent);
                     }
                 }));
@@ -1109,6 +1118,9 @@ public class Dashboard extends AppCompatActivity {
             ImageView scanLotId = dialog.findViewById(R.id.scanLotId);
             productId = dialog.findViewById(R.id.productId);
             lotId = dialog.findViewById(R.id.lotId);
+            ConstraintLayout productNames = dialog.findViewById(R.id.productNames);
+            RecyclerView productNamesRV = dialog.findViewById(R.id.productNamesRV);
+            productNamesRV.setLayoutManager(new LinearLayoutManager(this));
             LinearLayout productTrack = dialog.findViewById(R.id.productTrack);
             LinearLayout lotTrack = dialog.findViewById(R.id.lotTrack);
             ProgressBar mainLoader = dialog.findViewById(R.id.mainLoader);
@@ -1162,49 +1174,54 @@ public class Dashboard extends AppCompatActivity {
                     lotId.setError(null);
                     if (productId.getText().toString().trim().isEmpty() && lotId.getText().toString().trim().isEmpty()) {
                         productId.setError("Mandatory Field!");
-                        lotId.setError("Mandatory Field!");
                     } else if (!productId.getText().toString().trim().isEmpty()) {
                         track.setVisibility(View.GONE);
                         trackLoader.setVisibility(View.VISIBLE);
-                        productLotViewModel.getAddress(productId.getText().toString().trim()).observe(Dashboard.this, new Observer<ObjectModel>() {
+                        String _productId = productId.getText().toString().trim();
+                        productLotViewModel.getAddress(_productId).observe(Dashboard.this, new Observer<ObjectModel>() {
                             @Override
                             public void onChanged(ObjectModel objectModel) {
                                 if (objectModel.isStatus()) {
-                                    String _contractAddress = (String) objectModel.getObj();
-                                    if (_contractAddress.equals(contractAddress)) {
-                                        Intent intent = new Intent(Dashboard.this, MapActivity.class);
-                                        intent.putExtra("contractAddress", contractAddress);
-                                        intent.putExtra("productId", productId.getText().toString().trim());
-                                        intent.putExtra("isPermitted", true);
-                                        startActivity(intent);
-                                    } else {
-                                        Toast.makeText(Dashboard.this, "Product doesn't belong to this Supply Chain!", Toast.LENGTH_SHORT).show();
+                                    Map<String, String> contractAddress = (Map<String, String>) objectModel.getObj();
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    for (Map.Entry<String, String> entry : contractAddress.entrySet()) {
+                                        products.add(new SingleProductModel(entry.getKey(), entry.getValue()));
                                     }
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(Dashboard.this, products, Dashboard.this, null, _productId);
+                                    productNamesRV.setAdapter(productsAdapter);
+                                    productNames.setVisibility(View.VISIBLE);
                                 } else {
+                                    productNames.setVisibility(View.GONE);
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(Dashboard.this, products, Dashboard.this, null, _productId);
+                                    productNamesRV.setAdapter(productsAdapter);
                                     Toast.makeText(Dashboard.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                                 trackLoader.setVisibility(View.GONE);
                                 track.setVisibility(View.VISIBLE);
                             }
                         });
-                    } else {
+                    } else if (!lotId.getText().toString().trim().isEmpty()) {
                         track.setVisibility(View.GONE);
                         trackLoader.setVisibility(View.VISIBLE);
-                        productLotViewModel.getAddress(lotId.getText().toString().trim()).observe(Dashboard.this, new Observer<ObjectModel>() {
+                        String _lotId = lotId.getText().toString().trim();
+                        productLotViewModel.getAddress(_lotId).observe(Dashboard.this, new Observer<ObjectModel>() {
                             @Override
                             public void onChanged(ObjectModel objectModel) {
                                 if (objectModel.isStatus()) {
-                                    String _contractAddress = (String) objectModel.getObj();
-                                    if (_contractAddress.equals(contractAddress)) {
-                                        Intent intent = new Intent(Dashboard.this, MapActivity.class);
-                                        intent.putExtra("contractAddress", contractAddress);
-                                        intent.putExtra("lotId", lotId.getText().toString().trim());
-                                        intent.putExtra("isPermitted", true);
-                                        startActivity(intent);
-                                    } else {
-                                        Toast.makeText(Dashboard.this, "Lot doesn't belong to this Supply Chain!", Toast.LENGTH_SHORT).show();
+                                    Map<String, String> contractAddress = (Map<String, String>) objectModel.getObj();
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    for (Map.Entry<String, String> entry : contractAddress.entrySet()) {
+                                        products.add(new SingleProductModel(entry.getKey(), entry.getValue()));
                                     }
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(Dashboard.this, products, Dashboard.this, _lotId, null);
+                                    productNamesRV.setAdapter(productsAdapter);
+                                    productNames.setVisibility(View.VISIBLE);
                                 } else {
+                                    productNames.setVisibility(View.GONE);
+                                    List<SingleProductModel> products = new ArrayList<>();
+                                    AllProductsAdapter productsAdapter = new AllProductsAdapter(Dashboard.this, products, Dashboard.this, _lotId, null);
+                                    productNamesRV.setAdapter(productsAdapter);
                                     Toast.makeText(Dashboard.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                                 trackLoader.setVisibility(View.GONE);
@@ -1224,6 +1241,18 @@ public class Dashboard extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void click(String contractAddress, String lotId, String productId) {
+        Intent intent = new Intent(Dashboard.this, MapActivity.class);
+        intent.putExtra("contractAddress", contractAddress);
+        if (productId != null)
+            intent.putExtra("productId", productId);
+        else
+            intent.putExtra("lotId", lotId);
+        intent.putExtra("isPermitted", true);
+        startActivity(intent);
     }
 
     void showProfileDialog() {

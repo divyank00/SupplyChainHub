@@ -10,14 +10,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.smartcontract.mapUsers.MapActivity;
 import com.example.smartcontract.models.ObjectModel;
+import com.example.smartcontract.models.SingleProductModel;
 import com.example.smartcontract.viewModel.ProductLotViewModel;
 import com.google.zxing.integration.android.IntentIntegrator;
 
@@ -28,7 +33,10 @@ import org.web3j.crypto.MnemonicUtils;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -37,7 +45,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AllProductsAdapter.OnClick{
 
     EditText pk, seed;
     Button btn;
@@ -47,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private IntentIntegrator qrScan, qrScanLot;
     ProductLotViewModel productLotViewModel;
     ProgressBar loader;
+    ConstraintLayout productNames;
+    RecyclerView productNamesRV;
 
     public static final String KEY = "privateKey";
     public static final String PUBLIC_KEY = "publicKey";
@@ -84,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
         track = findViewById(R.id.track);
         barcode = findViewById(R.id.barcode);
         loader = findViewById(R.id.loader);
+        productNames = findViewById(R.id.productNames);
+        productNamesRV  = findViewById(R.id.productNamesRV);
+        productNamesRV.setLayoutManager(new LinearLayoutManager(this));
         productLotViewModel = new ProductLotViewModel();
         qrScan = new IntentIntegrator(this).setRequestCode(1);
         scanLot = findViewById(R.id.scanLot);
@@ -172,17 +185,24 @@ public class MainActivity extends AppCompatActivity {
                 } else if (!barcode.getText().toString().trim().isEmpty()) {
                     track.setVisibility(View.GONE);
                     loader.setVisibility(View.VISIBLE);
-                    productLotViewModel.getAddress(barcode.getText().toString().trim()).observe(MainActivity.this, new Observer<ObjectModel>() {
+                    String _productId = barcode.getText().toString().trim();
+                    productLotViewModel.getAddress(_productId).observe(MainActivity.this, new Observer<ObjectModel>() {
                         @Override
                         public void onChanged(ObjectModel objectModel) {
                             if (objectModel.isStatus()) {
-                                String contractAddress = (String) objectModel.getObj();
-                                Intent intent = new Intent(MainActivity.this, MapActivity.class);
-                                intent.putExtra("contractAddress", contractAddress);
-                                intent.putExtra("productId", barcode.getText().toString().trim());
-                                intent.putExtra("isPermitted", false);
-                                startActivity(intent);
+                                Map<String, String> contractAddress = (Map<String, String>) objectModel.getObj();
+                                List<SingleProductModel> products = new ArrayList<>();
+                                for (Map.Entry<String, String> entry : contractAddress.entrySet()) {
+                                    products.add(new SingleProductModel(entry.getKey(), entry.getValue()));
+                                }
+                                AllProductsAdapter2 productsAdapter = new AllProductsAdapter2(MainActivity.this, products, MainActivity.this, null, _productId);
+                                productNamesRV.setAdapter(productsAdapter);
+                                productNames.setVisibility(View.VISIBLE);
                             } else {
+                                productNames.setVisibility(View.GONE);
+                                List<SingleProductModel> products = new ArrayList<>();
+                                AllProductsAdapter2 productsAdapter = new AllProductsAdapter2(MainActivity.this, products, MainActivity.this, null, _productId);
+                                productNamesRV.setAdapter(productsAdapter);
                                 Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                             loader.setVisibility(View.GONE);
@@ -192,17 +212,24 @@ public class MainActivity extends AppCompatActivity {
                 } else if (!barcodeLot.getText().toString().trim().isEmpty()) {
                     track.setVisibility(View.GONE);
                     loader.setVisibility(View.VISIBLE);
-                    productLotViewModel.getAddress(barcodeLot.getText().toString().trim()).observe(MainActivity.this, new Observer<ObjectModel>() {
+                    String _lotId = barcodeLot.getText().toString().trim();
+                    productLotViewModel.getAddress(_lotId).observe(MainActivity.this, new Observer<ObjectModel>() {
                         @Override
                         public void onChanged(ObjectModel objectModel) {
                             if (objectModel.isStatus()) {
-                                String contractAddress = (String) objectModel.getObj();
-                                Intent intent = new Intent(MainActivity.this, MapActivity.class);
-                                intent.putExtra("contractAddress", contractAddress);
-                                intent.putExtra("lotId", barcodeLot.getText().toString().trim());
-                                intent.putExtra("isPermitted", false);
-                                startActivity(intent);
+                                Map<String, String> contractAddress = (Map<String, String>) objectModel.getObj();
+                                List<SingleProductModel> products = new ArrayList<>();
+                                for (Map.Entry<String, String> entry : contractAddress.entrySet()) {
+                                    products.add(new SingleProductModel(entry.getKey(), entry.getValue()));
+                                }
+                                AllProductsAdapter2 productsAdapter = new AllProductsAdapter2(MainActivity.this, products, MainActivity.this, _lotId, null);
+                                productNamesRV.setAdapter(productsAdapter);
+                                productNames.setVisibility(View.VISIBLE);
                             } else {
+                                productNames.setVisibility(View.GONE);
+                                List<SingleProductModel> products = new ArrayList<>();
+                                AllProductsAdapter2 productsAdapter = new AllProductsAdapter2(MainActivity.this, products, MainActivity.this, _lotId, null);
+                                productNamesRV.setAdapter(productsAdapter);
                                 Toast.makeText(MainActivity.this, objectModel.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                             loader.setVisibility(View.GONE);
@@ -212,6 +239,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void click(String contractAddress, String lotId, String productId) {
+        Intent intent = new Intent(MainActivity.this, MapActivity.class);
+        intent.putExtra("contractAddress", contractAddress);
+        if (productId != null)
+            intent.putExtra("productId", productId);
+        else
+            intent.putExtra("lotId", lotId);
+        intent.putExtra("isPermitted", false);
+        startActivity(intent);
     }
 
     @Override
