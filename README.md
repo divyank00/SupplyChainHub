@@ -20,6 +20,8 @@ This brings 100% transparency on trading of goods by broadcasting the quantity w
 
 The apk to the mobile application can be found [here](/SupplyChainHub.apk)!
 
+Link to youtube Video of the demonstration of the platform: <a href="https://www.youtube.com/watch?v=3Hdr5FqRYNk">Click Here!<\a>
+
 <p align="center">
   <img src="/Images/web.png" alt="Website" />
 </p>
